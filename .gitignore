@@ -1,0 +1,7 @@
+build/
+external/
+*~
+aplicacao
+.vscode/
+Testing/
+.cache/

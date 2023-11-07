@@ -1,0 +1,16 @@
+# format is: package_name version_handler (quotes if needed for "git" tag), then...
+# then LINK mode (name inside list)... e.g. [Catch2::Catch2WithMain], then...
+# then package repository (git, conan, vcpkg, system, path, etc), then...
+# then DEPENDENCY MODE ("all", "*", "test", "dev", etc), then extra field, such as URL.
+# If MODE not given, assuming "*" or "all"... must check "dev" for useful logic.
+# The "path" mode will add -Lpath... 
+# the "system" will not do anything, as it's already included.
+# For existing static-link system libraries, such as -lm with any version, just use prefix "lib:"
+# TODO: on windows, we could personalize "lib" to differentiate MD and MT, if necessary...
+# TODO: maybe, just "lib:m" is enough to catch ANY version, on system, and link it!
+# MEANING THAT: "lib:m" => "lib:m == * [m] system *"
+# FINALLY: a "special" part allows specific behaviors to happen, 
+# due to the classic "workarounds" maybe required by some projects to work properly :/
+fmt == "9.1.0"     [ fmt ]                    git *    https://github.com/fmtlib/fmt.git
+Catch2 == "v3.3.1" [ Catch2::Catch2WithMain ] git test https://github.com/catchorg/Catch2.git
+m
