@@ -88,8 +88,8 @@ Hopefully, when this project is finished, C++ will be a better place for all of 
 
 ## Related Works
 
-- See ccbuild from debian
-- See mantle project (experimental but with similar ideas)
+- See [ccbuild from debian](https://packages.debian.org/pt-br/sid/devel/ccbuild)
+- See [Mantle project](https://github.com/jpxor/Mantle) (experimental but with similar ideas)
 
 None of them support dependencies, such as `cxxdeps.txt`, or even build systems such as cmake and bazel.
 
