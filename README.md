@@ -6,6 +6,8 @@ We know it is very hard to start a C++ project and learn basics of build systems
 The strongest point of this project is the `cxxdeps.txt` format, 
 that allow easy specification of dependencies from different package managers.
 
+To use it locally, just copy [cxxbuild.py](cxxbuild.py) file to your project and execute it: `python3 cxxbuild.py`
+
 ## Basic commands
 
 `cxxbuild` has three modes:
