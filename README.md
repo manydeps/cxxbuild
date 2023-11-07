@@ -34,6 +34,34 @@ Generated binaries will be on `demo/project1/build/`
 
 To clean it (since `clean` command is still unimplemented), just delete `build/` folder.
 
+### Expected project organization
+
+The tool cxxbuild assumes that:
+
+- source code (.cpp, .cc, .c, etc) is located on a `src/` folder
+- test code is located on a `tests/` folder
+- header only libraries are located on a `include/` folder
+
+The reason for `src/` folder is:
+
+1. enforces some "basic" project organization (I know many people don't like a `src/` folder...)
+2. recursively searching on local folder yields some issues,
+as `build/` folder becomes contaminated with .cpp dependencies, so some exclusion algorithm would be necessary
+
+The reason for `tests/` folder is:
+
+1. enforces some "basic" project organization (I know many people don't like a `tests/` folder...)
+2. it is hard to distinguish between binary `.cpp` files and unit test files, 
+unless  some other "standard" is imposed, such as naming `tests.cpp` (but what about multiple tests then?)
+
+The reason for `include/` folder is:
+
+1. this is classic organization, c'mon!!!
+2. this is necessary to isolate header only library and make it easier for other to include them... if you don't want to offer a header only library, ok then, just put everything on `src/` folder and that is fine!
+
+These things can be easily changed, either manually on cxxbuild.py script, or by opening an issue and we discuss if some other option is really necessary... 
+Note that this project does not aims to have many personalizations and complications, let's use KISS method!
+
 ## Advantages and Drawbacks
 
 Greatest advantage of this project is to easily describe dependencies on a `cxxdeps.txt` file.
