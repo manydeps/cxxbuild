@@ -25,8 +25,8 @@ To use it locally, just copy [cxxbuild.py](cxxbuild.py) file to your project and
 
 It will:
 
-- read dependencies from cxxdeps.txt file (if exists)
-- generate a CMakeLists.txt on project
+- read dependencies from cxxdeps.txt file, if available
+- generate a CMakeLists.txt on project (backup your file if you already have one!)
 - build with cmake+ninja (default) or any other provided build system
 
 Generated binaries will be on `demo/project1/build/`
