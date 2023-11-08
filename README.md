@@ -47,8 +47,8 @@ The tool cxxbuild assumes that:
 The reason for `src/` folder is:
 
 1. enforces some "basic" project organization (I know many people don't like a `src/` folder...)
-2. recursively searching on local folder yields some issues,
-as `build/` folder becomes contaminated with .cpp dependencies, so some exclusion algorithm would be necessary
+2. recursively searching source files on root folder yields some issues,
+as `build/` folder in same directory level becomes contaminated with external .cpp dependencies, thus requiring some clever exclusion algorithm
 
 The reason for `tests/` folder is:
 
