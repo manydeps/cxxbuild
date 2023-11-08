@@ -1,6 +1,8 @@
 # cxxbuild
 cxxbuild is a python script to easily build C++ programs: just invoke 'cxxbuild' and it works!
 
+For basic introduction, read the post: [Using cxxbuild to easily build C++ project with tests and dependencies](https://igormcoelho.medium.com/using-cxxbuild-to-easily-build-c-project-with-tests-and-dependencies-a3726b453f75)
+
 We know it is very hard to start a C++ project and learn basics of build systems such as CMake and Bazel, and package managers like conan and vcpkg... so just type "cxxbuild" and be happy!
 
 The strongest point of this project is the `cxxdeps.txt` format, 
