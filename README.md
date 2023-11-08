@@ -84,7 +84,11 @@ The `git` part could be any package manager, such as conan and vcpkg, although n
 
 - In fact, this was the most motivating part of this project, so feel free to check more painful experiences directly on [manydeps-gmp](https://github.com/manydeps/manydeps-gmp) project!
 
-Hopefully, when this project is finished, C++ will be a better place for all of us :)
+### Drawbacks
+
+None that I know, yet :)
+
+Some people may dislike the imposed organization, like `src/` and `tests/`, but it can be changed manually on script. The idea here is to really make a simplistic script, that really works with highly complex setups (such as taking dependencies from remote and dealing with build systems like cmake and bazel). These things are hard to do even for some experienced c++ programmers... so, as long as it is simple and it works, that is fine! If it doesn't work, file an issue!
 
 ## Related Works
 
@@ -92,6 +96,9 @@ Hopefully, when this project is finished, C++ will be a better place for all of 
 - See [Mantle project](https://github.com/jpxor/Mantle) (experimental but with similar ideas)
 
 None of them support dependencies, such as `cxxdeps.txt`, or even build systems such as cmake and bazel.
+
+Hopefully, when this project is fully finished, C++ will be a better place for all of us :)
+
 
 ## License
 
