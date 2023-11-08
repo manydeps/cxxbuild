@@ -57,10 +57,10 @@ unless  some other "standard" is imposed, such as naming `tests.cpp` (but what a
 The reason for `include/` folder is:
 
 1. this is classic organization, c'mon!!!
-2. this is necessary to isolate header only library and make it easier for other to include them... if you don't want to offer a header only library, ok then, just put everything on `src/` folder and that is fine!
+2. this is necessary to isolate header only library and make it easier for others to include them... if you don't want to offer a header only library, ok then, just put everything on `src/` folder and that is fine!
 
-These things can be easily changed, either manually on cxxbuild.py script, or by opening an issue and we discuss if some other option is really necessary... 
-Note that this project does not aims to have many personalizations and complications, let's use KISS method!
+These things can be easily changed, either manually on [cxxbuild.py](cxxbuild.py) script, or by opening an issue and we discuss if some other option is really necessary... 
+Note that this project does not aim to have many personalizations and complications, let's use KISS method!
 
 ## Advantages and Drawbacks
 
