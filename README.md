@@ -84,6 +84,21 @@ This is quite simple and powerful, with few lines describing the following:
 
 The `git` part could be any package manager, such as conan and vcpkg, although not implemented yet!
 
+### Ongoing extensions for cxxdeps
+Some ongoing extensions are to manage dev dependencies, such as cmake, automatically on `cxxdeps.txt` (or exclusively on `cxxdeps.dev.txt`):
+```
+cmake == *          [ ] pip dev cmake [ ninja ]
+ninja:windows == *  [ ] choco dev ninja
+ninja:linux == *    [ ] apt dev ninja-build
+```
+
+Note that we can support triplet package notation on project name, 
+so as different system package managers (such as apt on ubuntu/debian).
+Some package dependency notation can be useful as well to orchestrate installation
+flow, when necessary (in this case, ninja is not dependency of cmake, but it's useful as example).
+Package names may be different than project-name, so they are repeated here in some cases (to allow compatibility between different package managers).
+
+cxxdeps is a cool thing!
 - In fact, this was the most motivating part of this project, so feel free to check more painful experiences directly on [manydeps-gmp](https://github.com/manydeps/manydeps-gmp) project!
 
 ### Drawbacks
