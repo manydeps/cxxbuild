@@ -85,13 +85,15 @@ This is quite simple and powerful, with few lines describing the following:
 The `git` part could be any package manager, such as conan and vcpkg, although not implemented yet!
 
 ### Ongoing extensions for cxxdeps
-Some ongoing extensions will allow managing dev dependencies, such as cmake and bazel, automatically on `cxxdeps.txt` (or exclusively on `cxxdeps.dev.txt`):
+Some ongoing extensions will allow managing dev dependencies, 
+such as build systems (cmake, bazel, etc) and C/C++ package managers (conan, etc), all automatically on `cxxdeps.txt` (or exclusively on `cxxdeps.dev.txt`):
 ```
 cmake == *          [ cmake ]       pip dev [ ninja ]
 ninja:windows == *  [ ninja ]       choco dev
 ninja:linux == *    [ ninja-build ] apt dev
 bazel:windows == *  [ bazelisk ]    choco dev 
 bazel:linux == *    [ bazelisk ]    npm dev 
+conan == *          [ conan ]       pip dev
 ```
 
 Note that we can support triplet package notation on project name, 
