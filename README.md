@@ -19,7 +19,16 @@ To use it locally, just copy [cxxbuild.py](cxxbuild.py) file to your project and
 - lint mode (unimplemented): will lint project files
 - test mode (unimplemented): will run project tests
 
-## Running demo
+## Running demos 
+
+```
+python3 cxxbuild.py demo/project1
+python3 cxxbuild.py demo/project2
+```
+
+Each of them should build some specific demo project, without any issues.
+
+## Running demo 1 (explained)
 
 `python3 cxxbuild.py demo/project1`
 

@@ -25,6 +25,132 @@ import sys
 import json
 import subprocess
 
+
+
+
+def get_cmakelists_from_cxxdeps(root_path, cmakelists):
+    try:
+        with open(root_path+'/cxxdeps.txt', 'r') as fd:
+            x=fd.readlines()
+            #print(x)
+            cmakelists.append("# begin dependencies from cxxdeps.txt")
+            for l in x:
+                if (len(l) >= 1) and (l[0] != '#'):
+                    # good line!
+                    print(l)
+                    fields = l.split()
+                    print(fields)
+                    # assume all spacing is correct, for now!
+                    if len(fields) == 0:
+                        # IGNORE (EMPTY LINE!)
+                        continue
+                    project_name = fields[0]
+                    cmakelists.append("# cxxdeps dependency "+project_name)
+                    if len(fields) == 1:
+                        # SYSTEM STATIC LIBRARY! example: -lm
+                        # MANUALLY PUSH STANDARD PARAMETERS: m == * [ m ] system *
+                        fields.append('==')
+                        fields.append('*')
+                        fields.append('[')
+                        fields.append(project_name)
+                        fields.append(']')
+                        fields.append('system')
+                        fields.append('*')
+                    # expects '==' now!
+                    assert(fields[1] == "==")
+                    version_number = fields[2].strip('"')
+                    if len(fields) == 3:
+                        # SYSTEM STATIC LIBRARY WITH VERSION! example: -lm=0.0.0
+                        # DON'T DOING THIS NOW...
+                        print("WARNING: ignoring system library WITH VERSION: "+project_name)
+                        assert(False)
+                        continue
+                    # begin reading library list
+                    assert fields[3] == '['
+                    libs = []
+                    k = 4
+                    next_lib = fields[k]
+                    while next_lib != ']':
+                        libs.append(next_lib)
+                        k = k + 1
+                        next_lib = fields[k]
+                    # finished parsing libs list
+                    assert fields[k] == ']'
+                    k = k+1
+                    # MUST HAVE A pkg_manager and mode (simplifying this for now...)
+                    pkg_manager = fields[k]
+                    mode = fields[k+1]
+                    k = k+2
+                    if pkg_manager == 'system':
+                        # AT THIS POINT, SYSTEM LIBRARY MUST HAVE ITS LIB INSIDE, example: ['m']
+                        cmakelists.append('# system dependency: -l'+project_name)
+                        if mode == '*':
+                            for i in range(len(INCLUDE_DIRS)):
+                                for l in libs:
+                                    cmakelists.append("target_link_libraries(my_headers"+str(i)+" INTERFACE "+project_name+")")
+                            for filepath, app_name in src_main.items():
+                                for l in libs:
+                                    cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+project_name+")")    
+                            for filepath, app_name in src_test_main.items():
+                                for l in libs:
+                                    cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+project_name+")")    
+                        # end-if *
+                        # attach it to test binaries, if mode is 'test'
+                        if mode == 'test':
+                            for filepath, app_name in src_test_main.items():
+                                for l in libs:
+                                    cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+project_name+")")    
+                        # end-if test
+                        continue
+                    #end-if system
+                    if pkg_manager == 'git':
+                        git_url = fields[k]
+                        k=k+1
+                    cmakelists.append("FetchContent_Declare("+project_name+" GIT_REPOSITORY "+git_url+" GIT_TAG "+version_number+")")
+                    cmakelists.append("FetchContent_MakeAvailable("+project_name+")")
+                    # attach it to libraries, binaries and test binaries, if mode is *
+                    if mode == '*':
+                        for i in range(len(INCLUDE_DIRS)):
+                            for l in libs:
+                                cmakelists.append("target_link_libraries(my_headers"+str(i)+" INTERFACE "+l+")")
+                        for filepath, app_name in src_main.items():
+                            for l in libs:
+                                cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+l+")")    
+                        for filepath, app_name in src_test_main.items():
+                            for l in libs:
+                                cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+l+")")    
+                    # attach it to test binaries, if mode is 'test'
+                    if mode == 'test':
+                        for filepath, app_name in src_test_main.items():
+                            for l in libs:
+                                cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+l+")")    
+                    # read special, if exists
+                    print("k=",k)
+                    if k < len(fields):
+                        special = fields[k]
+                        k = k+1
+                        print("special=",special)
+                        # IGNORING THE special part for now... or forever, I hope!!!
+                        if special == '_special_catch_cmake_extras':
+                            cmakelists.append("list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)")    
+                            cmakelists.append("include(CTest)")
+                            cmakelists.append("include(Catch)")
+                            for filepath, app_name in src_test_main.items():
+                                cmakelists.append("catch_discover_tests("+app_name[1]+")")    
+                    # end special
+                # end if not comment
+            # end for line
+        # end cxxdeps
+
+    except FileNotFoundError:
+        print("File cxxdeps.txt does not exist... ignoring it!")
+
+    return cmakelists
+
+
+
+
+
 print("======================================")
 print("         welcome to cxxbuild          ")
 print("======================================")
@@ -167,117 +293,8 @@ for i in range(len(INCLUDE_DIRS)):
 #
 #print(cmakelists)
 
-with open(root_path+'/cxxdeps.txt', 'r') as fd:
-    x=fd.readlines()
-    #print(x)
-    cmakelists.append("# begin dependencies from cxxdeps.txt")
-    for l in x:
-        if (len(l) >= 1) and (l[0] != '#'):
-            # good line!
-            print(l)
-            fields = l.split()
-            print(fields)
-            # assume all spacing is correct, for now!
-            if len(fields) == 0:
-                # IGNORE (EMPTY LINE!)
-                continue
-            project_name = fields[0]
-            cmakelists.append("# cxxdeps dependency "+project_name)
-            if len(fields) == 1:
-                # SYSTEM STATIC LIBRARY! example: -lm
-                # MANUALLY PUSH STANDARD PARAMETERS: m == * [ m ] system *
-                fields.append('==')
-                fields.append('*')
-                fields.append('[')
-                fields.append(project_name)
-                fields.append(']')
-                fields.append('system')
-                fields.append('*')
-            # expects '==' now!
-            assert(fields[1] == "==")
-            version_number = fields[2].strip('"')
-            if len(fields) == 3:
-                # SYSTEM STATIC LIBRARY WITH VERSION! example: -lm=0.0.0
-                # DON'T DOING THIS NOW...
-                print("WARNING: ignoring system library WITH VERSION: "+project_name)
-                assert(False)
-                continue
-            # begin reading library list
-            assert fields[3] == '['
-            libs = []
-            k = 4
-            next_lib = fields[k]
-            while next_lib != ']':
-                libs.append(next_lib)
-                k = k + 1
-                next_lib = fields[k]
-            # finished parsing libs list
-            assert fields[k] == ']'
-            k = k+1
-            # MUST HAVE A pkg_manager and mode (simplifying this for now...)
-            pkg_manager = fields[k]
-            mode = fields[k+1]
-            k = k+2
-            if pkg_manager == 'system':
-                # AT THIS POINT, SYSTEM LIBRARY MUST HAVE ITS LIB INSIDE, example: ['m']
-                cmakelists.append('# system dependency: -l'+project_name)
-                if mode == '*':
-                    for i in range(len(INCLUDE_DIRS)):
-                        for l in libs:
-                            cmakelists.append("target_link_libraries(my_headers"+str(i)+" INTERFACE "+project_name+")")
-                    for filepath, app_name in src_main.items():
-                        for l in libs:
-                            cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+project_name+")")    
-                    for filepath, app_name in src_test_main.items():
-                        for l in libs:
-                            cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+project_name+")")    
-                # end-if *
-                # attach it to test binaries, if mode is 'test'
-                if mode == 'test':
-                    for filepath, app_name in src_test_main.items():
-                        for l in libs:
-                            cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+project_name+")")    
-                # end-if test
-                continue
-            #end-if system
-            if pkg_manager == 'git':
-                git_url = fields[k]
-                k=k+1
-            cmakelists.append("FetchContent_Declare("+project_name+" GIT_REPOSITORY "+git_url+" GIT_TAG "+version_number+")")
-            cmakelists.append("FetchContent_MakeAvailable("+project_name+")")
-            # attach it to libraries, binaries and test binaries, if mode is *
-            if mode == '*':
-                for i in range(len(INCLUDE_DIRS)):
-                    for l in libs:
-                        cmakelists.append("target_link_libraries(my_headers"+str(i)+" INTERFACE "+l+")")
-                for filepath, app_name in src_main.items():
-                    for l in libs:
-                        cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+l+")")    
-                for filepath, app_name in src_test_main.items():
-                    for l in libs:
-                        cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+l+")")    
-            # attach it to test binaries, if mode is 'test'
-            if mode == 'test':
-                for filepath, app_name in src_test_main.items():
-                    for l in libs:
-                        cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+l+")")    
-            # read special, if exists
-            print("k=",k)
-            if k < len(fields):
-                special = fields[k]
-                k = k+1
-                print("special=",special)
-                # IGNORING THE special part for now... or forever, I hope!!!
-                if special == '_special_catch_cmake_extras':
-                    cmakelists.append("list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)")    
-                    cmakelists.append("include(CTest)")
-                    cmakelists.append("include(Catch)")
-                    for filepath, app_name in src_test_main.items():
-                        cmakelists.append("catch_discover_tests("+app_name[1]+")")    
-            # end special
-        # end if not comment
-    # end for line
-# end cxxdeps
+cmakelists = get_cmakelists_from_cxxdeps(root_path, cmakelists)
+
 
 # Generate CMakeLists.txt (or look for other option, such as 'bazel')
 # Assuming CMake and Ninja for now (TODO: must detect and warn to install!)
