@@ -1,0 +1,15 @@
+[all]
+fmt={ git="https://github.com/fmtlib/fmt.git", tag="9.1.0", links=["fmt"] }
+m={ links=["m"] }
+pthread={}
+
+[test]
+catch2={ git="https://github.com/catchorg/Catch2.git", tag="v3.3.1", links=[
+    "Catch2::Catch2WithMain"
+] }
+
+[dev]
+bazel=[{ choco=["bazelisk"], triplet="windows" }, { npm=["bazelisk"], triplet="linux" }]
+ninja=[{ choco=["ninja"], triplet="windows" }, { apt=["ninja-build"], triplet="linux" }]
+cmake={ pip=["cmake"], deps=["ninja"] }
+conan={ pip=["conan"] }

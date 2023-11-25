@@ -23,13 +23,19 @@ target_link_libraries(my_headers0 INTERFACE fmt)
 target_link_libraries(my_headers1 INTERFACE fmt)
 target_link_libraries(demo1 PRIVATE fmt)
 target_link_libraries(my_test PRIVATE fmt)
-# cxxdeps dependency Catch2
-FetchContent_Declare(Catch2 GIT_REPOSITORY https://github.com/catchorg/Catch2.git GIT_TAG v3.3.1)
-FetchContent_MakeAvailable(Catch2)
-target_link_libraries(my_test PRIVATE Catch2::Catch2WithMain)
 # cxxdeps dependency m
 # system dependency: -lm
 target_link_libraries(my_headers0 INTERFACE m)
 target_link_libraries(my_headers1 INTERFACE m)
 target_link_libraries(demo1 PRIVATE m)
 target_link_libraries(my_test PRIVATE m)
+# cxxdeps dependency pthread
+# system dependency: -lpthread
+target_link_libraries(my_headers0 INTERFACE pthread)
+target_link_libraries(my_headers1 INTERFACE pthread)
+target_link_libraries(demo1 PRIVATE pthread)
+target_link_libraries(my_test PRIVATE pthread)
+# cxxdeps dependency catch2
+FetchContent_Declare(catch2 GIT_REPOSITORY https://github.com/catchorg/Catch2.git GIT_TAG v3.3.1)
+FetchContent_MakeAvailable(catch2)
+target_link_libraries(my_test PRIVATE Catch2::Catch2WithMain)

@@ -147,7 +147,54 @@ def get_cmakelists_from_cxxdeps(root_path, cmakelists):
 
     return cmakelists
 
+def get_toml_dep(dep_name, section_name, dep_object):
+    print("get_toml_dep(...) dep_name: ", dep_name, " section:", section_name, " dep_object:", dep_object)
+    local_dep = []
+    local_dep.append(dep_name)
+    version = "*"
+    for x1, y1 in dep_object.items():
+        if x1 == "version":
+            version = "\""+y1+"\""
+    # read links and packages part
+    list_part = []
+    list_part.append("[")
+    dep_type = ""
+    for x1, y1 in dep_object.items():
+        if x1 == "links" or x1 == "pip" or x1 == "choco" or x1 == "apt" or x1 == "npm":
+            if x1 != "links":
+                dep_type = x1 
+            for d in y1:
+                list_part.append(d)
+    list_part.append("]")
+    # check dep type and complement part
+    complement = ""
+    if dep_type == "":
+        for x1, y1 in dep_object.items():
+            if x1 == "git":
+                dep_type = "git"
+                complement = y1
+                for x2, y2 in dep_object.items():
+                    if x2 == "tag":
+                        version = "\""+y2+"\""
+    if dep_type == "":
+        dep_type = "system" # assuming 'system' as default
+    #
+    if dep_type == "system" and len(list_part) == 2 and section_name == "all":
+        # do nothing... list is '[ ]'
+        return local_dep
+    # fill general data
+    local_dep.append("==")
+    local_dep.append(version)
+    local_dep += list_part
+    local_dep.append(dep_type)
+    if section_name != "all":
+        local_dep.append(section_name)
+    else:
+        local_dep.append("*")
+    if complement != "":
+        local_dep.append(complement)
 
+    return local_dep
 
 
 
@@ -293,7 +340,73 @@ for i in range(len(INCLUDE_DIRS)):
 #
 #print(cmakelists)
 
+try:
+    cxxdeps_all = []
+    cxxdeps_test = []
+    cxxdeps_dev = []
+    with open(root_path+'/cxxdeps.toml', 'r') as toml_file:
+        import toml
+        data = toml.load(toml_file)
+        #
+        for section_name, section_data in data.items():
+            print(f"SECTION=[{section_name}]")
+            # Iterate over dependencies within each section
+            for dependency_name, dependency_info in section_data.items():
+                print("processing dependency: ", dependency_name)
+                #print(f"BEGIN {dependency_name}={dependency_info} END")
+                if isinstance(dependency_info, list):
+                    #print("Dependency LIST... checking triplets!")
+                    for d in dependency_info:
+                        #print("d:",d)
+                        for x1, y1 in d.items():
+                            #print("x1-y1:",x1,y1)
+                            if x1 == "triplet":
+                                #print("found triplet=",y1)
+                                depname = dependency_name+":"+y1
+                                x = get_toml_dep(depname, section_name, d)
+                                if section_name == "test":
+                                    cxxdeps_test.append(x)
+                                elif section_name == "dev":
+                                    cxxdeps_dev.append(x)
+                                else:
+                                    cxxdeps_all.append(x)
+                    #print("END Dependency LIST")
+                elif isinstance(dependency_info, dict):
+                    #print("Dependency DICT")
+                    x = get_toml_dep(dependency_name, section_name, dependency_info)
+                    if section_name == "test":
+                        cxxdeps_test.append(x)
+                    elif section_name == "dev":
+                        cxxdeps_dev.append(x)
+                    else:
+                        cxxdeps_all.append(x)
+                else:
+                    print("Dependency info is neither a list nor an object.")
+                    assert(False)
+            print("\n")
+    # end with
+    # finishing .toml file
+    print("cxxdeps_all:", cxxdeps_all)
+    print("cxxdeps_test:", cxxdeps_test)
+    print("cxxdeps_dev:", cxxdeps_dev)
+    # writing cxxdeps.txt and cxxdeps.dev.txt
+    if len(cxxdeps_dev) > 0:
+        with open(root_path+"/cxxdeps.dev.txt", "w") as output_file:
+            for dep in cxxdeps_dev:
+                output_file.write(" ".join(dep) + "\n")
+    if len(cxxdeps_all) > 0 or len(cxxdeps_test) > 0:
+        with open(root_path+"/cxxdeps.txt", "w") as output_file:
+            for dep in cxxdeps_all:
+                output_file.write(" ".join(dep) + "\n")
+            for dep in cxxdeps_test:
+                output_file.write(" ".join(dep) + "\n")
+        
+except FileNotFoundError:
+    print("File cxxdeps.toml does not exist... ignoring it!")
+
+# cxxdeps.txt
 cmakelists = get_cmakelists_from_cxxdeps(root_path, cmakelists)
+
 
 
 # Generate CMakeLists.txt (or look for other option, such as 'bazel')

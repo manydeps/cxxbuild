@@ -1,0 +1,6 @@
+bazel:windows == * [ bazelisk ] choco dev
+bazel:linux == * [ bazelisk ] npm dev
+ninja:windows == * [ ninja ] choco dev
+ninja:linux == * [ ninja-build ] apt dev
+cmake == * [ cmake ] pip dev
+conan == * [ conan ] pip dev

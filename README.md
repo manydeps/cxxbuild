@@ -110,8 +110,39 @@ so as different system package managers (such as apt on ubuntu/debian).
 Some package dependency notation can be useful as well to orchestrate installation
 flow, when necessary (as an example, ninja could be forcefully installed before cmake).
 
+Other extension is some `build` section... similar to `dev`, but it installs automatically
+before build process. The `build` can be seen as a *mandatory* `dev` dependency.
+Some *configure* actions and *patches* could also happen in `build` phase 
+(which are in fact some *pre-build* actions).
+
 cxxdeps is a cool thing!
 - In fact, this was the most motivating part of this project, so feel free to check more painful experiences directly on [manydeps-gmp](https://github.com/manydeps/manydeps-gmp) project!
+
+### Writing cxxdeps in `.toml` format
+
+It is currently possible to write `cxxdeps.toml` file, that automatically generates `cxxdeps.txt` and `cxxdeps.dev.txt` files. Some users may find this easier to understand:
+
+```
+[all]
+fmt={ git="https://github.com/fmtlib/fmt.git", tag="9.1.0", links=["fmt"] }
+m={ links=["m"] }
+pthread={}
+
+[test]
+catch2={ git="https://github.com/catchorg/Catch2.git", tag="v3.3.1", links=[
+    "Catch2::Catch2WithMain"
+] }
+
+[dev]
+bazel=[{ choco=["bazelisk"], triplet="windows" }, { npm=["bazelisk"], triplet="linux" }]
+ninja=[{ choco=["ninja"], triplet="windows" }, { apt=["ninja-build"], triplet="linux" }]
+cmake={ pip=["cmake"], deps=["ninja"] }
+conan={ pip=["conan"] }
+```
+
+Here one can find sections `all` (equivalent to `*`), `test` and `dev`.
+
+Check an example in project3 with: `python3 cxxbuild.py demo/project3`
 
 ### Drawbacks
 
