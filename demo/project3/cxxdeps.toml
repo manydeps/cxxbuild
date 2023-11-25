@@ -1,7 +1,6 @@
 [all]
 fmt={ git="https://github.com/fmtlib/fmt.git", tag="9.1.0", links=["fmt"] }
-m={ links=["m"], triplet="linux" }
-pthread={ triplet="linux" }
+pthread={ triplet="!windows" }
 
 [test]
 catch2={ git="https://github.com/catchorg/Catch2.git", tag="v3.3.1", links=[

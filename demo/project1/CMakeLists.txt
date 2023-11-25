@@ -27,15 +27,15 @@ target_link_libraries(my_test PRIVATE fmt)
 FetchContent_Declare(Catch2 GIT_REPOSITORY https://github.com/catchorg/Catch2.git GIT_TAG v3.3.1)
 FetchContent_MakeAvailable(Catch2)
 target_link_libraries(my_test PRIVATE Catch2::Catch2WithMain)
-# cxxdeps dependency m
-# system dependency: -lm
-target_link_libraries(my_headers0 INTERFACE m)
-target_link_libraries(my_headers1 INTERFACE m)
+# cxxdeps dependency pthread
+# system dependency: -lpthread
+target_link_libraries(my_headers0 INTERFACE pthread)
+target_link_libraries(my_headers1 INTERFACE pthread)
 IF (NOT WIN32)
-target_link_libraries(demo1 PRIVATE m)
+target_link_libraries(demo1 PRIVATE pthread)
 ENDIF()
 IF (NOT WIN32)
-target_link_libraries(my_test PRIVATE m)
+target_link_libraries(my_test PRIVATE pthread)
 ENDIF()
 # cxxdeps dependency crypto
 # system dependency: -lcrypto

@@ -1,5 +1,4 @@
 # DO NOT EDIT! file 'cxxdeps.txt' generated automatically from 'cxxdeps.toml'
 fmt == "9.1.0" [ fmt ] git * https://github.com/fmtlib/fmt.git
-m == * [ m ] system *
 pthread
 catch2 == "v3.3.1" [ Catch2::Catch2WithMain ] git test https://github.com/catchorg/Catch2.git

@@ -23,12 +23,6 @@ target_link_libraries(my_headers0 INTERFACE fmt)
 target_link_libraries(my_headers1 INTERFACE fmt)
 target_link_libraries(demo3 PRIVATE fmt)
 target_link_libraries(my_test PRIVATE fmt)
-# cxxdeps dependency m
-# system dependency: -lm
-target_link_libraries(my_headers0 INTERFACE m)
-target_link_libraries(my_headers1 INTERFACE m)
-target_link_libraries(demo3 PRIVATE m)
-target_link_libraries(my_test PRIVATE m)
 # cxxdeps dependency pthread
 # system dependency: -lpthread
 target_link_libraries(my_headers0 INTERFACE pthread)
