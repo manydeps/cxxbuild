@@ -249,6 +249,9 @@ def make_if_triplet(triplet, not_triplet, my_system):
     assert(False)
     return ""
 
+# detect if it's 'cmd' for windows, but not 'bash'
+def is_cmd():
+    return os.name == 'nt' and 'WSL_DISTRO_NAME' not in os.environ
 
 
 print("======================================")
@@ -270,11 +273,8 @@ if "lint" in sys.argv:
 root_path = sys.argv[1]
 
 #
-import platform
-my_system = platform.system()
-import os
-if os.name == 'nt':
-    print("CANNOT RUN IN 'CMD'... USE POWERSHELL INSTEAD!")
+if is_cmd():
+    print("WINDOWS: CANNOT RUN IN 'CMD'... USE POWERSHELL INSTEAD!")
     assert(False)
 
 print("begin build on root_path=",root_path)
