@@ -160,6 +160,11 @@ None of them support dependencies, such as `cxxdeps.txt`, or even build systems 
 Hopefully, when this project is fully finished, C++ will be a better place for all of us :)
 
 
+## Acknowledgements
+
+Thanks for those trying to use and improve this software.
+Specially, thanks Fellipe Pessanha for early suggesting integrating toml support for cxxdeps.
+
 ## License
 
 MIT License
