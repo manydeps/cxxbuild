@@ -44,7 +44,22 @@ def get_cmakelists_from_cxxdeps(root_path, cmakelists):
                     if len(fields) == 0:
                         # IGNORE (EMPTY LINE!)
                         continue
-                    project_name = fields[0]
+                    project_name_full = fields[0]
+                    lproj = project_name_full.split(":")
+                    project_name = project_name_full.split(":")[0]
+                    triplet = ""
+                    not_triplet = False
+                    if len(lproj) > 1:
+                        triplet = project_name_full.split(":")[1]
+                        if triplet.startswith("!"):
+                            not_triplet = True
+                            triplet = triplet[1:]  # remove "!"
+                    #
+                    import platform
+                    my_system = platform.system()
+                    #
+                    print("PROJECT:", project_name, " TRIPLET:", triplet, "SYSTEM:", my_system)
+                    #
                     cmakelists.append("# cxxdeps dependency "+project_name)
                     if len(fields) == 1:
                         # SYSTEM STATIC LIBRARY! example: -lm
@@ -90,10 +105,18 @@ def get_cmakelists_from_cxxdeps(root_path, cmakelists):
                                     cmakelists.append("target_link_libraries(my_headers"+str(i)+" INTERFACE "+project_name+")")
                             for filepath, app_name in src_main.items():
                                 for l in libs:
-                                    cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+project_name+")")    
+                                    if triplet != "":
+                                        cmakelists.append(make_if_triplet(triplet, not_triplet, my_system))
+                                    cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+project_name+")")
+                                    if triplet != "":
+                                        cmakelists.append("ENDIF()")
                             for filepath, app_name in src_test_main.items():
                                 for l in libs:
+                                    if triplet != "":
+                                        cmakelists.append(make_if_triplet(triplet, not_triplet, my_system))
                                     cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+project_name+")")    
+                                    if triplet != "":
+                                        cmakelists.append("ENDIF()")
                         # end-if *
                         # attach it to test binaries, if mode is 'test'
                         if mode == 'test':
@@ -195,6 +218,32 @@ def get_toml_dep(dep_name, section_name, dep_object):
         local_dep.append(complement)
 
     return local_dep
+
+# triplet can be "linux", "windows", "osx"
+# not_triplet can be False of True (if negated).. e.g., "!windows"
+def make_if_triplet(triplet, not_triplet, my_system):
+    assert(triplet != "")
+    striplet = "IF ("
+    if triplet == "windows":
+        if not_triplet:
+            striplet += "NOT WIN32)"
+        else:
+            striplet += "WIN32)"
+        return striplet
+    if triplet == "linux":
+        if not_triplet:
+            striplet += "NOT UNIX OR APPLE)"
+        else:
+            striplet += "UNIX AND NOT APPLE)"
+        return striplet
+    if triplet == "osx":
+        if not_triplet:
+            striplet += "NOT APPLE OR NOT CMAKE_SYSTEM_NAME STREQUAL \"Darwin\")"
+        else:
+            striplet += "APPLE AND CMAKE_SYSTEM_NAME STREQUAL \"Darwin\")"
+        return striplet
+    assert(False)
+    return ""
 
 
 
