@@ -25,6 +25,10 @@ jobs:
       if: contains(matrix.os, 'ubuntu')
       run: |
         sudo apt-get install ninja-build -y
+    - name: Install ninja-build (macos)
+      if: contains(matrix.os, 'macos')
+      run: |
+        brew install ninja
     - name: Install cmake with pip
       run: |
         python3 -m pip install cmake --upgrade
