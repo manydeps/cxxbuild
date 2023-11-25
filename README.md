@@ -141,6 +141,8 @@ conan={ pip=["conan"] }
 ```
 
 Here one can find sections `all` (equivalent to `*`), `test` and `dev`.
+This example install system libraries `-lm` and `-lpthread` for runtime dependencies (`all`),
+`catch2` test library linked with cmake `Catch2::Catch2WithMain`, and defines several dev packages.
 
 Check an example in project3 with: `python3 cxxbuild.py demo/project3`
 
