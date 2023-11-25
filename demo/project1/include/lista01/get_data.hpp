@@ -4,16 +4,16 @@
 #ifndef LISTA01_GET_DATA_HPP_
 #define LISTA01_GET_DATA_HPP_
 
-#include <format>
+// #include <format>
 #include <fstream>
 #include <iostream>
 #include <string>
 //
-// #include <fmt/core.h>
-// using fmt::format;
+#include <fmt/core.h>
+using fmt::format;
 
 std::string get_ij() {
-  std::string s = std::format("i={} j={}", 10, 20.5);
+  std::string s = fmt::format("i={} j={}", 10, 20.5);
   return s;
 }
 

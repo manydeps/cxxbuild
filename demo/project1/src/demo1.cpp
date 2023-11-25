@@ -3,18 +3,18 @@
 //
 // Online test: https://godbolt.org/z/dGfMGzGeW
 //
-#include <format>
+// #include <format>
 //
-// #include <fmt/core.h>
-// using fmt::print;
+#include <fmt/core.h>
+using fmt::print;
 //
 #include <lista01/get_data.hpp>
 
 #include "something.h"
 
 // Solution using __VA_ARGS__ and VA_OPT (## from c++20)
-#define print(fmt, ...) \
-  printf("%s", std::format(fmt, ##__VA_ARGS__).c_str())
+#define print(fmt1, ...) \
+  printf("%s", fmt::format(fmt1, ##__VA_ARGS__).c_str())
 
 int main() {
   print("{} {}! Curso em C/C++\n", "Olá", "Mundo");
