@@ -1,0 +1,49 @@
+name: Demo on windows, linux and macos
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        build_type: [Release]
+      
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: ilammy/msvc-dev-cmd@v1
+    - name: Install ninja-build (Ubuntu)
+      if: contains(matrix.os, 'ubuntu')
+      run: |
+        sudo apt-get install ninja-build -y
+    - name: Install cmake with pip
+      run: |
+        python3 -m pip install cmake --upgrade
+    - name: Git Submodules
+      run: |
+        git submodule update --init --recursive
+        git pull --recurse-submodules
+    - name: demo-project1
+      shell: bash
+      run: |
+        python3 cxxbuild.py demo/project1
+    - name: demo-project2
+      shell: bash
+      run: |
+        python3 cxxbuild.py demo/project2
+    - name: demo-project3
+      shell: bash
+      run: |
+        python3 cxxbuild.py demo/project3
+
+
+
