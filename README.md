@@ -122,7 +122,7 @@ cxxdeps is a cool thing!
 
 It is currently possible to write `cxxdeps.toml` file, that automatically generates `cxxdeps.txt` and `cxxdeps.dev.txt` files. Some users may find this easier to understand:
 
-```
+```toml
 [all]
 fmt={ git="https://github.com/fmtlib/fmt.git", tag="9.1.0", links=["fmt"] }
 m={ links=["m"] }
