@@ -5,15 +5,15 @@ set (CMAKE_CXX_STANDARD_REQUIRED ON)
 set (CMAKE_CXX_EXTENSIONS OFF)
 set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 Include(FetchContent)
-add_executable(demo1 src/demo1.cpp)
+add_executable(demo3 src/demo3.cpp)
 add_executable(my_test tests/my_test.cpp)
 add_library(my_headers0 INTERFACE)
 target_include_directories(my_headers0 INTERFACE include/)
-target_link_libraries(demo1 PRIVATE my_headers0)
+target_link_libraries(demo3 PRIVATE my_headers0)
 target_link_libraries(my_test PRIVATE my_headers0)
 add_library(my_headers1 INTERFACE)
 target_include_directories(my_headers1 INTERFACE build/_deps/fmt-src/include/)
-target_link_libraries(demo1 PRIVATE my_headers1)
+target_link_libraries(demo3 PRIVATE my_headers1)
 target_link_libraries(my_test PRIVATE my_headers1)
 # begin dependencies from cxxdeps.txt
 # cxxdeps dependency fmt
@@ -21,19 +21,19 @@ FetchContent_Declare(fmt GIT_REPOSITORY https://github.com/fmtlib/fmt.git GIT_TA
 FetchContent_MakeAvailable(fmt)
 target_link_libraries(my_headers0 INTERFACE fmt)
 target_link_libraries(my_headers1 INTERFACE fmt)
-target_link_libraries(demo1 PRIVATE fmt)
+target_link_libraries(demo3 PRIVATE fmt)
 target_link_libraries(my_test PRIVATE fmt)
 # cxxdeps dependency m
 # system dependency: -lm
 target_link_libraries(my_headers0 INTERFACE m)
 target_link_libraries(my_headers1 INTERFACE m)
-target_link_libraries(demo1 PRIVATE m)
+target_link_libraries(demo3 PRIVATE m)
 target_link_libraries(my_test PRIVATE m)
 # cxxdeps dependency pthread
 # system dependency: -lpthread
 target_link_libraries(my_headers0 INTERFACE pthread)
 target_link_libraries(my_headers1 INTERFACE pthread)
-target_link_libraries(demo1 PRIVATE pthread)
+target_link_libraries(demo3 PRIVATE pthread)
 target_link_libraries(my_test PRIVATE pthread)
 # cxxdeps dependency catch2
 FetchContent_Declare(catch2 GIT_REPOSITORY https://github.com/catchorg/Catch2.git GIT_TAG v3.3.1)

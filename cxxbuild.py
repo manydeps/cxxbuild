@@ -392,10 +392,12 @@ try:
     # writing cxxdeps.txt and cxxdeps.dev.txt
     if len(cxxdeps_dev) > 0:
         with open(root_path+"/cxxdeps.dev.txt", "w") as output_file:
+            output_file.write("# DO NOT EDIT! file 'cxxdeps.dev.txt' generated automatically from 'cxxdeps.toml'" + "\n")
             for dep in cxxdeps_dev:
                 output_file.write(" ".join(dep) + "\n")
     if len(cxxdeps_all) > 0 or len(cxxdeps_test) > 0:
         with open(root_path+"/cxxdeps.txt", "w") as output_file:
+            output_file.write("# DO NOT EDIT! file 'cxxdeps.txt' generated automatically from 'cxxdeps.toml'" + "\n")
             for dep in cxxdeps_all:
                 output_file.write(" ".join(dep) + "\n")
             for dep in cxxdeps_test:
@@ -443,6 +445,13 @@ print("or visit ninja website: https://ninja-build.org/")
 print("checking ninja command now...")
 x=subprocess.call(list(filter(None, CHECK_NINJA_CMD.split(' '))))
 print('check result:', x)
+assert(x == 0)
+#
+# STEP 1.5: debug only (TODO: create flag --verbose!)
+CMAKE_CMD="cat "+root_path+"/CMakeLists.txt"
+print("showing CMakeLists.txt... "+CMAKE_CMD)
+x=subprocess.call(list(filter(None, CMAKE_CMD.split(' '))))
+print('cmake result:', x)
 assert(x == 0)
 #
 # STEP 2: build with cmake+ninja

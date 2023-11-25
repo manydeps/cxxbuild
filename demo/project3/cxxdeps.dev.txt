@@ -1,3 +1,4 @@
+# DO NOT EDIT! file 'cxxdeps.dev.txt' generated automatically from 'cxxdeps.toml'
 bazel:windows == * [ bazelisk ] choco dev
 bazel:linux == * [ bazelisk ] npm dev
 ninja:windows == * [ ninja ] choco dev
