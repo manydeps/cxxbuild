@@ -13,4 +13,4 @@
 # due to the classic "workarounds" maybe required by some projects to work properly :/
 fmt == "9.1.0"     [ fmt ]                    git *    https://github.com/fmtlib/fmt.git
 Catch2 == "v3.3.1" [ Catch2::Catch2WithMain ] git test https://github.com/catchorg/Catch2.git
-m
+ssl
