@@ -317,7 +317,7 @@ cmakelists.append("set (CMAKE_EXPORT_COMPILE_COMMANDS ON)")
 cmakelists.append("Include(FetchContent)")
 # add_executable for binaries
 for filepath, app_name in src_main.items():
-    cmakelists.append("add_executable("+app_name[1]+" "+filepath+")")
+    cmakelists.append("add_executable("+app_name[1]+" "+filepath.replace("\\", "/")+")")
 # add_executable for test binaries
 print("finding test executables!")
 # if no main is found, then each test is assumed to be independent!
@@ -325,14 +325,14 @@ if len(src_test_main.items()) == 0:
     print("WARNING: no main() is found for tests... using main-less strategy!")
     src_test_main = src_test_nomain
 for filepath, app_name in src_test_main.items():
-    cmakelists.append("add_executable("+app_name[1]+" "+filepath+")")
+    cmakelists.append("add_executable("+app_name[1]+" "+filepath.replace("\\", "/")+")")
 
 
 # INCLUDE_DIRS will act as header-only libraries
 #  => DO NOT ADD SOURCE FILES INTO include FOLDERS!!!
 for i in range(len(INCLUDE_DIRS)):
     cmakelists.append("add_library(my_headers"+str(i)+" INTERFACE)")
-    cmakelists.append("target_include_directories(my_headers"+str(i)+" INTERFACE "+INCLUDE_DIRS[i]+"/)")
+    cmakelists.append("target_include_directories(my_headers"+str(i)+" INTERFACE "+INCLUDE_DIRS[i]+")")
     for filepath, app_name in src_main.items():
         cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE my_headers"+str(i)+")")    
     for filepath, app_name in src_test_main.items():

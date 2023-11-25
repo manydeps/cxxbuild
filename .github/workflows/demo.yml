@@ -37,6 +37,11 @@ jobs:
         ls -la
         pwd
         python3 cxxbuild.py demo/project1
+    - name: demo-project1 (windows cmd)
+      if: contains(matrix.os, 'windows')
+      shell: cmd
+      run: |
+        python3 cxxbuild.py demo/project1
     - name: demo-project2
       shell: bash
       run: |
