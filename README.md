@@ -1,4 +1,4 @@
-# cxxbuild
+# cxxbuild / cxxdeps
 cxxbuild is a python script to easily build C++ programs: just invoke 'cxxbuild' and it works!
 
 For basic introduction, read the post: [Using cxxbuild to easily build C++ project with tests and dependencies](https://igormcoelho.medium.com/using-cxxbuild-to-easily-build-c-project-with-tests-and-dependencies-a3726b453f75)
