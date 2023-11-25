@@ -177,6 +177,12 @@ def get_cmakelists_from_cxxdeps(root_path, cmakelists):
 def get_toml_dep(dep_name, section_name, dep_object):
     print("get_toml_dep(...) dep_name: ", dep_name, " section:", section_name, " dep_object:", dep_object)
     local_dep = []
+    triplet=""
+    for x1, y1 in dep_object.items():
+        if x1 == "triplet":
+            triplet = y1
+    if triplet != "":
+        dep_name = dep_name + ":" + triplet
     local_dep.append(dep_name)
     version = "*"
     for x1, y1 in dep_object.items():
@@ -415,18 +421,13 @@ try:
                     #print("Dependency LIST... checking triplets!")
                     for d in dependency_info:
                         #print("d:",d)
-                        for x1, y1 in d.items():
-                            #print("x1-y1:",x1,y1)
-                            if x1 == "triplet":
-                                #print("found triplet=",y1)
-                                depname = dependency_name+":"+y1
-                                x = get_toml_dep(depname, section_name, d)
-                                if section_name == "test":
-                                    cxxdeps_test.append(x)
-                                elif section_name == "dev":
-                                    cxxdeps_dev.append(x)
-                                else:
-                                    cxxdeps_all.append(x)
+                        x = get_toml_dep(dependency_name, section_name, d)
+                        if section_name == "test":
+                            cxxdeps_test.append(x)
+                        elif section_name == "dev":
+                            cxxdeps_dev.append(x)
+                        else:
+                            cxxdeps_all.append(x)
                     #print("END Dependency LIST")
                 elif isinstance(dependency_info, dict):
                     #print("Dependency DICT")

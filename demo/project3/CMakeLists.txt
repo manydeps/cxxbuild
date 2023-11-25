@@ -25,10 +25,18 @@ target_link_libraries(demo3 PRIVATE fmt)
 target_link_libraries(my_test PRIVATE fmt)
 # cxxdeps dependency pthread
 # system dependency: -lpthread
+IF (NOT WIN32)
 target_link_libraries(my_headers0 INTERFACE pthread)
+ENDIF()
+IF (NOT WIN32)
 target_link_libraries(my_headers1 INTERFACE pthread)
+ENDIF()
+IF (NOT WIN32)
 target_link_libraries(demo3 PRIVATE pthread)
+ENDIF()
+IF (NOT WIN32)
 target_link_libraries(my_test PRIVATE pthread)
+ENDIF()
 # cxxdeps dependency catch2
 FetchContent_Declare(catch2 GIT_REPOSITORY https://github.com/catchorg/Catch2.git GIT_TAG v3.3.1)
 FetchContent_MakeAvailable(catch2)
