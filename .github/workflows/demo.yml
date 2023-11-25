@@ -28,10 +28,9 @@ jobs:
     - name: Install cmake with pip
       run: |
         python3 -m pip install cmake --upgrade
-    - name: Git Submodules
+    - name: Install cxxbuild dependencies
       run: |
-        git submodule update --init --recursive
-        git pull --recurse-submodules
+        python3 -m pip install -r requirements.txt
     - name: demo-project1
       shell: bash
       run: |
