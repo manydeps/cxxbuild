@@ -35,6 +35,8 @@ jobs:
     - name: demo-project1
       shell: bash
       run: |
+        ls -la
+        pwd
         python3 cxxbuild.py demo/project1
     - name: demo-project2
       shell: bash
