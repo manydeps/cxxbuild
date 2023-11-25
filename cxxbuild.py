@@ -102,7 +102,11 @@ def get_cmakelists_from_cxxdeps(root_path, cmakelists):
                         if mode == '*':
                             for i in range(len(INCLUDE_DIRS)):
                                 for l in libs:
+                                    if triplet != "":
+                                        cmakelists.append(make_if_triplet(triplet, not_triplet, my_system))
                                     cmakelists.append("target_link_libraries(my_headers"+str(i)+" INTERFACE "+project_name+")")
+                                    if triplet != "":
+                                        cmakelists.append("ENDIF()")
                             for filepath, app_name in src_main.items():
                                 for l in libs:
                                     if triplet != "":
