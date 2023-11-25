@@ -34,6 +34,14 @@ python3 cxxbuild.py demo/project2
 
 Each of them should build some specific demo project, without any issues.
 
+## Test summary for demos
+
+- demo/project1: runs on linux, osx and windows* (bash only)
+- demo/project2: runs on linux, osx and windows (bash and cmd)
+- demo/project3: runs on linux, osx and windows* (bash only)
+
+(*) Some limitations on windows/cmd are related to fmt dependency on cmake, not cxxbuild.
+
 ## Running demo 1 (explained)
 
 `python3 cxxbuild.py demo/project1`
