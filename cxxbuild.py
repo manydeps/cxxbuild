@@ -273,10 +273,6 @@ if "lint" in sys.argv:
 root_path = sys.argv[1]
 
 #
-if is_cmd():
-    print("WINDOWS: CANNOT RUN IN 'CMD'... USE POWERSHELL INSTEAD!")
-    assert(False)
-
 print("begin build on root_path=",root_path)
 # find all source files,
 # find all files with an entry point,
