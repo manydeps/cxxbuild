@@ -99,28 +99,18 @@ def get_cmakelists_from_cxxdeps(root_path, cmakelists):
                     if pkg_manager == 'system':
                         # AT THIS POINT, SYSTEM LIBRARY MUST HAVE ITS LIB INSIDE, example: ['m']
                         cmakelists.append('# system dependency: -l'+project_name)
-                        if mode == '*':
+                        if triplet != "":
+                            cmakelists.append(make_if_triplet(triplet, not_triplet, my_system))        
+                        if mode == '*':        
                             for i in range(len(INCLUDE_DIRS)):
                                 for l in libs:
-                                    if triplet != "":
-                                        cmakelists.append(make_if_triplet(triplet, not_triplet, my_system))
                                     cmakelists.append("target_link_libraries(my_headers"+str(i)+" INTERFACE "+project_name+")")
-                                    if triplet != "":
-                                        cmakelists.append("ENDIF()")
                             for filepath, app_name in src_main.items():
                                 for l in libs:
-                                    if triplet != "":
-                                        cmakelists.append(make_if_triplet(triplet, not_triplet, my_system))
                                     cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+project_name+")")
-                                    if triplet != "":
-                                        cmakelists.append("ENDIF()")
                             for filepath, app_name in src_test_main.items():
                                 for l in libs:
-                                    if triplet != "":
-                                        cmakelists.append(make_if_triplet(triplet, not_triplet, my_system))
                                     cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+project_name+")")    
-                                    if triplet != "":
-                                        cmakelists.append("ENDIF()")
                         # end-if *
                         # attach it to test binaries, if mode is 'test'
                         if mode == 'test':
@@ -128,6 +118,8 @@ def get_cmakelists_from_cxxdeps(root_path, cmakelists):
                                 for l in libs:
                                     cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+project_name+")")    
                         # end-if test
+                        if triplet != "":
+                            cmakelists.append("ENDIF()")
                         continue
                     #end-if system
                     if pkg_manager == 'git':
@@ -236,21 +228,21 @@ def make_if_triplet(triplet, not_triplet, my_system):
     striplet = "IF ("
     if triplet == "windows":
         if not_triplet:
-            striplet += "NOT WIN32)"
+            striplet += "NOT WIN32) # !windows"
         else:
-            striplet += "WIN32)"
+            striplet += "WIN32) # windows"
         return striplet
     if triplet == "linux":
         if not_triplet:
-            striplet += "NOT UNIX OR APPLE)"
+            striplet += "NOT UNIX OR APPLE) # !linux"
         else:
-            striplet += "UNIX AND NOT APPLE)"
+            striplet += "UNIX AND NOT APPLE) # linux"
         return striplet
     if triplet == "osx":
         if not_triplet:
-            striplet += "NOT APPLE OR NOT CMAKE_SYSTEM_NAME STREQUAL \"Darwin\")"
+            striplet += "NOT APPLE OR NOT CMAKE_SYSTEM_NAME STREQUAL \"Darwin\") # !osx"
         else:
-            striplet += "APPLE AND CMAKE_SYSTEM_NAME STREQUAL \"Darwin\")"
+            striplet += "APPLE AND CMAKE_SYSTEM_NAME STREQUAL \"Darwin\") # osx"
         return striplet
     assert(False)
     return ""

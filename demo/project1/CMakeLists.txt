@@ -29,29 +29,17 @@ FetchContent_MakeAvailable(Catch2)
 target_link_libraries(my_test PRIVATE Catch2::Catch2WithMain)
 # cxxdeps dependency pthread
 # system dependency: -lpthread
-IF (NOT WIN32)
+IF (NOT WIN32) # !windows
 target_link_libraries(my_headers0 INTERFACE pthread)
-ENDIF()
-IF (NOT WIN32)
 target_link_libraries(my_headers1 INTERFACE pthread)
-ENDIF()
-IF (NOT WIN32)
 target_link_libraries(demo1 PRIVATE pthread)
-ENDIF()
-IF (NOT WIN32)
 target_link_libraries(my_test PRIVATE pthread)
 ENDIF()
 # cxxdeps dependency crypto
 # system dependency: -lcrypto
-IF (UNIX AND NOT APPLE)
+IF (UNIX AND NOT APPLE) # linux
 target_link_libraries(my_headers0 INTERFACE crypto)
-ENDIF()
-IF (UNIX AND NOT APPLE)
 target_link_libraries(my_headers1 INTERFACE crypto)
-ENDIF()
-IF (UNIX AND NOT APPLE)
 target_link_libraries(demo1 PRIVATE crypto)
-ENDIF()
-IF (UNIX AND NOT APPLE)
 target_link_libraries(my_test PRIVATE crypto)
 ENDIF()

@@ -25,16 +25,10 @@ target_link_libraries(demo3 PRIVATE fmt)
 target_link_libraries(my_test PRIVATE fmt)
 # cxxdeps dependency pthread
 # system dependency: -lpthread
-IF (NOT WIN32)
+IF (NOT WIN32) # !windows
 target_link_libraries(my_headers0 INTERFACE pthread)
-ENDIF()
-IF (NOT WIN32)
 target_link_libraries(my_headers1 INTERFACE pthread)
-ENDIF()
-IF (NOT WIN32)
 target_link_libraries(demo3 PRIVATE pthread)
-ENDIF()
-IF (NOT WIN32)
 target_link_libraries(my_test PRIVATE pthread)
 ENDIF()
 # cxxdeps dependency catch2
