@@ -5,5 +5,7 @@ This project demonstrates how a very simple project, with a main() on `demo2.cpp
 Just type: `python3 cxxbuild.py`
 
 Output will be built on `build/demo2`
+
+The file `CMakeLists.txt` will be generated automatically.
  
 No more extra dependencies are provided in this example.

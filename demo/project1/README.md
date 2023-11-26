@@ -11,5 +11,7 @@ There is also some `lista01` header-only library hosted on `include/` folder, an
 
 Just type: `python3 cxxbuild.py`
 
+The file `CMakeLists.txt` will be generated automatically.
+
 Output will be built on `build/demo1` and tests on `build/my_test`
 
