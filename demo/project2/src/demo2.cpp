@@ -3,12 +3,11 @@
 //
 #include <iostream>
 //
-#include <lista01/get_data.hpp>
 
 #include "something.h"
 
 int main() {
-  std::cout << get_data_02() << std::endl;
+  // std::cout << func1() << std::endl;
   //
   return 0;
 }
