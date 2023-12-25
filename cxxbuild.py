@@ -27,6 +27,8 @@ Usage:
             * sets source folder (default: src) 
        --tests TESTS_PATH 
             * sets tests folder (default: tests) 
+       --include INCLUDE_PATH 
+            * sets include folder (default: include) 
     MORE BUILD OPTIONS:
        * c++11 => TODO: use c++11 standard
        * bazel => TODO: use bazel build system (instead of cmake)
