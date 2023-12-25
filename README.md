@@ -64,8 +64,11 @@ To clean it (since `clean` command is still unimplemented), just delete `build/`
 The tool cxxbuild assumes that:
 
 - source code (.cpp, .cc, .c, etc) is located on a `src/` folder
+    * this can be changed with `--src SRC_PATH` option
 - test code is located on a `tests/` folder
+    * this can be changed with `--tests TEST_PATH` option
 - header only libraries are located on a `include/` folder
+    * this can be changed with `--include INCLUDE_PATH` option
 
 The reason for `src/` folder is:
 
