@@ -370,9 +370,16 @@ cmakelists.append("set (CMAKE_CXX_STANDARD_REQUIRED ON)")
 cmakelists.append("set (CMAKE_CXX_EXTENSIONS OFF)")
 cmakelists.append("set (CMAKE_EXPORT_COMPILE_COMMANDS ON)")
 cmakelists.append("Include(FetchContent)")
+# add sources!
+cmakelists.append("set(SOURCES")
+for f in src_list:
+    for filepath, app_name in src_main.items():
+        if filepath != f:
+            cmakelists.append("\t"+f)
+cmakelists.append(")")
 # add_executable for binaries
 for filepath, app_name in src_main.items():
-    cmakelists.append("add_executable("+app_name[1]+" "+filepath.replace("\\", "/")+")")
+    cmakelists.append("add_executable("+app_name[1]+" "+filepath.replace("\\", "/")+" ${SOURCES})")
 # add_executable for test binaries
 print("finding test executables!")
 # if no main is found, then each test is assumed to be independent!
@@ -380,7 +387,7 @@ if len(src_test_main.items()) == 0:
     print("WARNING: no main() is found for tests... using main-less strategy!")
     src_test_main = src_test_nomain
 for filepath, app_name in src_test_main.items():
-    cmakelists.append("add_executable("+app_name[1]+" "+filepath.replace("\\", "/")+")")
+    cmakelists.append("add_executable("+app_name[1]+" "+filepath.replace("\\", "/")+" ${SOURCES})")
 
 
 # INCLUDE_DIRS will act as header-only libraries

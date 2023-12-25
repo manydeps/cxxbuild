@@ -18,6 +18,7 @@ using fmt::print;
 
 int main() {
   print("{} {}! Curso em C/C++\n", "Olá", "Mundo");
+  print("{}", func1());
   //
   return 0;
 }

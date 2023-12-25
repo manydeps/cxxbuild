@@ -5,8 +5,11 @@ set (CMAKE_CXX_STANDARD_REQUIRED ON)
 set (CMAKE_CXX_EXTENSIONS OFF)
 set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 Include(FetchContent)
-add_executable(demo1 src/demo1.cpp)
-add_executable(my_test tests/my_test.cpp)
+set(SOURCES
+	src/something.cpp
+)
+add_executable(demo1 src/demo1.cpp ${SOURCES})
+add_executable(my_test tests/my_test.cpp ${SOURCES})
 add_library(my_headers0 INTERFACE)
 target_include_directories(my_headers0 INTERFACE include)
 target_link_libraries(demo1 PRIVATE my_headers0)
