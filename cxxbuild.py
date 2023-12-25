@@ -3,30 +3,38 @@
 # MIT License
 # Copyleft 2023 Igor Machado Coelho
 
-"""
-	Usage:
-       cxxbuild [ROOT_FOLDER] => example: cxxbuild .
-       cxxbuild lint => TODO: will invoke linter
-       cxxbuild clean => TODO: will clean
-       cxxbuild test => TODO: will invoke tests
-       MORE BUILD OPTIONS:
-       * c++11 => TODO: use c++11 standard
-       * bazel => TODO: use bazel build system (instead of cmake)
-
-       SEE ALSO cxxdeps.txt FILE:
-       fmt == "9.1.0"     [ fmt ]                    git *    https://github.com/fmtlib/fmt.git
-       Catch2 == "v3.3.1" [ Catch2::Catch2WithMain ] git test https://github.com/catchorg/Catch2.git  special_catch_cmake_extras
-       m
-
-"""
-
 import os
 import sys
 import json
 import subprocess
 
 
+def usage():
+    u="""
+Usage:
+    cxxbuild [build] [ROOT_PATH] 
+    examples: 
+        cxxbuild
+        cxxbuild .
+        cxxbuild build .
+    cxxbuild lint => TODO: will invoke linter
+    cxxbuild clean => TODO: will clean
+    cxxbuild test => TODO: will invoke tests
+    FLAGS:
+       --src SRC_PATH 
+            * sets source folder (default: src) 
+       --tests TESTS_PATH 
+            * sets tests folder (default: tests) 
+    MORE BUILD OPTIONS:
+       * c++11 => TODO: use c++11 standard
+       * bazel => TODO: use bazel build system (instead of cmake)
 
+    SEE ALSO cxxdeps.txt FILE:
+       fmt == "9.1.0"     [ fmt ]                    git *    https://github.com/fmtlib/fmt.git
+       Catch2 == "v3.3.1" [ Catch2::Catch2WithMain ] git test https://github.com/catchorg/Catch2.git  special_catch_cmake_extras
+       m
+    """
+    print(u)
 
 def get_cmakelists_from_cxxdeps(root_path, cmakelists):
     try:
@@ -267,8 +275,26 @@ if "clean" in sys.argv:
 if "lint" in sys.argv:
     print("'lint' not implemented, yet!")
     exit()
- 
 root_path = sys.argv[1]
+if "build" in sys.argv:
+    # must take path explicitly from third argument!
+    # example: cxxbuild build .
+    if len(sys.argv) > 2:
+        root_path = sys.argv[2]
+    else:
+        usage()
+        exit()
+
+search_src="src"
+search_tests="tests"
+search_include="include"
+for i in range(len(sys.argv)):
+    if (sys.argv[i] == "--src"):
+        search_src = str(sys.argv[i + 1])
+    if (sys.argv[i] == "--tests"):
+        search_tests = str(sys.argv[i + 1])
+    if (sys.argv[i] == "--include"):
+        search_include = str(sys.argv[i + 1])
 
 #
 print("begin build on root_path=",root_path)
@@ -278,7 +304,7 @@ src_list = []
 src_main = {}
 # ENFORCING THIS PATH... MUST ADD MULTIPLE PATH OPTION!
 # src_paths = [root_path, root_path+"/src"] 
-src_paths = [root_path+"/src"] 
+src_paths = [root_path+"/"+search_src] 
 print("src_paths=", src_paths)
 entrypoint = "main("  # Pattern to find main(), or main(int argc, ...), etc
 #
@@ -317,7 +343,7 @@ src_test_main = {}
 src_test_nomain = {}
 #
 print(src_ext)
-for root, subdirs, files in os.walk(root_path+"/tests"):
+for root, subdirs, files in os.walk(root_path+"/"+search_tests):
     root = root.removeprefix(root_path).removeprefix("/")
     print("TEST root: ", root)
     print("TEST subdirs: ", subdirs)
@@ -351,12 +377,13 @@ for root, subdirs, files in os.walk(root_path):
     #print("subdirs: ", subdirs)
     #print("files: ", files)
     if "include" in subdirs:
-        incdir = root+"/include"
+        incdir = root+"/"+search_include
         incdir = incdir.removeprefix(root_path).removeprefix("/")
         INCLUDE_DIRS.append(incdir)
     # TODO: search in other places too... maybe inside src?
 
 print("INCLUDE_DIRS=",INCLUDE_DIRS)
+
 
 # READ cxxdeps.txt file, if available...
 # AT THIS POINT, ASSUMING 'cmake' OPTION (NO 'bazel' FOR NOW!)
@@ -523,3 +550,9 @@ assert(x == 0)
 x=subprocess.call(list(filter(None, NINJA_CMD.split(' '))))
 print('ninja result:', x)
 assert(x == 0)
+
+if len(src_main.items()) > 0:
+    print("OK: at least one main() has been found!")
+else:
+    print("WARNING: no main() has been found!")
+
