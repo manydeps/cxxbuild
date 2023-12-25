@@ -13,10 +13,12 @@ def usage():
     u="""
 Usage:
     cxxbuild [build] [ROOT_PATH] 
-    examples: 
+      builds with cxxbuild, examples: 
         cxxbuild
         cxxbuild .
         cxxbuild build .
+    cxxbuild help
+      displays usage()
     cxxbuild lint => TODO: will invoke linter
     cxxbuild clean => TODO: will clean
     cxxbuild test => TODO: will invoke tests
@@ -268,6 +270,9 @@ print("======================================")
 if len(sys.argv) == 1:
     sys.argv.append(".")
 
+if "help" in sys.argv:
+    usage()
+    exit()
 # clean deletes all files matching CLEAN_EXT
 if "clean" in sys.argv:
     print("'clean' not implemented, yet!")
