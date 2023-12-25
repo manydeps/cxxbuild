@@ -374,8 +374,10 @@ cmakelists.append("Include(FetchContent)")
 cmakelists.append("set(SOURCES")
 for f in src_list:
     for filepath, app_name in src_main.items():
-        if filepath != f:
-            cmakelists.append("\t"+f)
+        filepath2 = filepath.replace("\\", "/")
+        f2 = f.replace("\\", "/")
+        if filepath2 != f2:
+            cmakelists.append("\t"+f2)
 cmakelists.append(")")
 # add_executable for binaries
 for filepath, app_name in src_main.items():
