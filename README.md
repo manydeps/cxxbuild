@@ -194,7 +194,7 @@ Specially, thanks Fellipe Pessanha for early suggesting integrating toml support
 ### Citation
 
 ```
-Igor Machado Coelho. (2023). cxxbuild project. Zenodo. https://doi.org/10.5281/zenodo.10447209
+Igor Machado Coelho. (2023). cxxbuild project. Zenodo. https://doi.org/10.5281/zenodo.10447208
 ```
 
 ## License
