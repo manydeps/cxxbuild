@@ -4,3 +4,5 @@
 #
 #    pip-compile pyproject.toml
 #
+toml==0.10.2
+    # via cxxbuild (pyproject.toml)

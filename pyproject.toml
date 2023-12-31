@@ -18,9 +18,7 @@ classifiers=[
     "Programming Language :: Python :: 3"
 ]
 keywords=["build", "cplusplus", "dependencies", "cxxdeps", "cmake", "bazel"]
-dependencies=[
-    #    "ctypes"
-]
+dependencies=["toml"]
 requires-python=">=3.9"
 
 [project.optional-dependencies]
