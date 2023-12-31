@@ -6,3 +6,4 @@ aplicacao
 Testing/
 .cache/
 *.egg*
+__pycache__
