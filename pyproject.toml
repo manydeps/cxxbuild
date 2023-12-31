@@ -28,3 +28,6 @@ dev=["black", "bumpver", "isort", "pip-tools", "pytest"]
 
 [project.urls]
 Homepage="https://github.com/manydeps/cxxbuild"
+
+[project.scripts]
+cxxbuild="cxxbuild:main"
