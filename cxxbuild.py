@@ -11,7 +11,7 @@ import subprocess
 
 def usage():
     u="""
-cxxbuild=1.3.6
+cxxbuild=1.3.7
 Usage:
     cxxbuild [build] [ROOT_PATH] 
       builds with cxxbuild, examples: 
