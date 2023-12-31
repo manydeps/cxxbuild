@@ -191,9 +191,15 @@ Hopefully, when this project is fully finished, C++ will be a better place for a
 Thanks for those trying to use and improve this software.
 Specially, thanks Fellipe Pessanha for early suggesting integrating toml support for cxxdeps.
 
+### Citation
+
+```
+Igor Machado Coelho. (2023). manydeps/cxxbuild: v1.4.1 (1.4.1). Zenodo. https://doi.org/10.5281/zenodo.10447209
+```
+
 ## License
 
-MIT License
+Dual licensed: Creative Commons Attribution 4.0 International OR MIT License
 
 Copyleft 2023 
 
