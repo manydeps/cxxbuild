@@ -10,5 +10,6 @@ push=false
 "README.md"=["{version}"]
 "bumpver.toml"=['current_version="{version}"']
 "pyproject.toml"=['version="{version}"']
-"cxxbuild.py"=["{version}"]
+"cxxbuild.py"=["version={version}"]
+"setup.py"=["{version}"]
 "docs/source/conf.py"=["{version}"]
