@@ -4,7 +4,7 @@
 
 ![C++17](https://img.shields.io/badge/std-c%2B%2B17-blue)
 
-Version: `cxxbuild version=1.4.0`
+Version: `cxxbuild version=1.4.0`  Installation: `pip install cxxbuild`
 
 cxxbuild is a python script to easily build C++ programs: just invoke 'cxxbuild' and it works!
 
@@ -15,7 +15,11 @@ We know it is very hard to start a C++ project and learn basics of build systems
 The strongest point of this project is the `cxxdeps.txt` format, 
 that allow easy specification of dependencies from different package managers (in similar style of python `requirements.txt` format)
 
-To use it locally, just copy [cxxbuild.py](cxxbuild.py) file to your project and execute it: `python3 cxxbuild.py`
+To use it locally, just copy [cxxbuild/cxxbuild.py](cxxbuild/cxxbuild.py) file to your project and execute it: `python3 cxxbuild.py help`
+
+Or, just install it from pip: `pip install cxxbuild`
+
+Then, just run: `cxxbuild help`
 
 ## Basic commands
 

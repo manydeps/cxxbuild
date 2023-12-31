@@ -7,3 +7,4 @@ Testing/
 .cache/
 *.egg*
 __pycache__
+dist/
