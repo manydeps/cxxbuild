@@ -7,7 +7,7 @@ tag=true
 push=false
 
 [bumpver.file_patterns]
-"README.md"=["cxxbuild {version}"]
+"README.md"=["cxxbuild version={version}"]
 "bumpver.toml"=['current_version="{version}"']
 "pyproject.toml"=['version="{version}"']
 "cxxbuild.py"=["version={version}"]
