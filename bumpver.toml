@@ -1,5 +1,5 @@
 [bumpver]
-current_version="1.3"
+current_version="1.3.0"
 version_pattern="MAJOR.MINOR.PATCH[PYTAGNUM]"
 commit_message="bump version {old_version} -> {new_version}"
 commit=true
@@ -7,9 +7,8 @@ tag=true
 push=false
 
 [bumpver.file_patterns]
-"setup.py"=['version="{version}"']
 "README.md"=["{version}"]
 "bumpver.toml"=['current_version = "{version}"']
 "pyproject.toml"=['version = "{version}"']
-"optframe/__init__.py"=["{version}"]
+"cxxbuild.py"=["{version}"]
 "docs/source/conf.py"=["{version}"]

@@ -4,7 +4,7 @@
 
 ![C++17](https://img.shields.io/badge/std-c%2B%2B17-blue)
 
-Version: `cxxbuild v1.3`
+Version: `cxxbuild v1.3.0`
 
 cxxbuild is a python script to easily build C++ programs: just invoke 'cxxbuild' and it works!
 
