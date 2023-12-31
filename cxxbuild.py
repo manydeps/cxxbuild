@@ -11,7 +11,7 @@ import subprocess
 
 def usage():
     u="""
-cxxbuild v1.3.3
+cxxbuild 1.3.3
 Usage:
     cxxbuild [build] [ROOT_PATH] 
       builds with cxxbuild, examples: 
@@ -35,9 +35,9 @@ Usage:
        * bazel => TODO: use bazel build system (instead of cmake)
 
     SEE ALSO cxxdeps.txt FILE:
-       fmt == "1.3.3"     [ fmt ]                    git *    https://github.com/fmtlib/fmt.git
-       Catch2 == "v1.3.3" [ Catch2::Catch2WithMain ] git test https://github.com/catchorg/Catch2.git  special_catch_cmake_extras
-       m
+        fmt == "9.1.0"     [ fmt ]                    git *    https://github.com/fmtlib/fmt.git
+        Catch2 == "v3.3.1" [ Catch2::Catch2WithMain ] git test https://github.com/catchorg/Catch2.git
+        m
     """
     print(u)
 
@@ -88,7 +88,7 @@ def get_cmakelists_from_cxxdeps(root_path, cmakelists, INCLUDE_DIRS, src_main, s
                     assert(fields[1] == "==")
                     version_number = fields[2].strip('"')
                     if len(fields) == 3:
-                        # SYSTEM STATIC LIBRARY WITH VERSION! example: -lm=1.3.3
+                        # SYSTEM STATIC LIBRARY WITH VERSION! example: -lm=0.0.1
                         # DON'T DOING THIS NOW...
                         print("WARNING: ignoring system library WITH VERSION: "+project_name)
                         assert(False)
@@ -398,7 +398,7 @@ def main():
     # AT THIS POINT, ASSUMING 'cmake' OPTION (NO 'bazel' FOR NOW!)
     cmakelists = []
     cmakelists.append("cmake_minimum_required(VERSION 3.27)")
-    cmakelists.append("project(my-project LANGUAGES CXX VERSION 1.3.3)")
+    cmakelists.append("project(my-project LANGUAGES CXX VERSION 0.0.1)")
     # TODO: get 'c++20' parameter and use it, if necessary.
     # Standard C++ is c++17, for now! Always adopt ONE LESS the current one (c++20)!
     cmakelists.append("set (CMAKE_CXX_STANDARD 20)") # TODO: make it 17

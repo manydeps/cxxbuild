@@ -98,8 +98,8 @@ Greatest advantage of this project is to easily describe dependencies on a `cxxd
 An example is:
 
 ```
-fmt == "1.3.3"     [ fmt ]                    git *    https://github.com/fmtlib/fmt.git
-Catch2 == "v1.3.3" [ Catch2::Catch2WithMain ] git test https://github.com/catchorg/Catch2.git
+fmt == "9.1.0"     [ fmt ]                    git *    https://github.com/fmtlib/fmt.git
+Catch2 == "v3.3.1" [ Catch2::Catch2WithMain ] git test https://github.com/catchorg/Catch2.git
 m
 ```
 
@@ -142,12 +142,12 @@ It is currently possible to write `cxxdeps.toml` file, that automatically genera
 
 ```toml
 [all]
-fmt={ git="https://github.com/fmtlib/fmt.git", tag="1.3.3", links=["fmt"] }
+fmt={ git="https://github.com/fmtlib/fmt.git", tag="9.1.0", links=["fmt"] }
 m={ links=["m"] }
 pthread={}
 
 [test]
-catch2={ git="https://github.com/catchorg/Catch2.git", tag="v1.3.3", links=[
+catch2={ git="https://github.com/catchorg/Catch2.git", tag="v3.3.1", links=[
     "Catch2::Catch2WithMain"
 ] }
 
