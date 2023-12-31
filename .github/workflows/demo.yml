@@ -44,7 +44,7 @@ jobs:
     - name: demo-project2
       shell: bash
       run: |
-        python3 cxxbuild.py demo/project2
+        python3 cxxbuild/cxxbuild.py demo/project2
     - name: demo-project2 (windows cmd)
       if: contains(matrix.os, 'windows')
       shell: cmd
