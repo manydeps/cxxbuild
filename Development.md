@@ -19,11 +19,13 @@ Adapted from OptFrame python project.
 
 Edit `pyproject.toml`.
 
+`# apt install python3.10-venv`
+`
 `virtualenv venv`
 
 `source venv/bin/activate`
 
-`python -m pip install pip-tools`
+`python3 -m pip install pip-tools`
 
 `pip-compile pyproject.toml`
 

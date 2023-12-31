@@ -5,3 +5,4 @@ aplicacao
 .vscode/
 Testing/
 .cache/
+*.egg*

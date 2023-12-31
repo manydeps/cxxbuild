@@ -41,7 +41,7 @@ Usage:
     """
     print(u)
 
-def get_cmakelists_from_cxxdeps(root_path, cmakelists):
+def get_cmakelists_from_cxxdeps(root_path, cmakelists, INCLUDE_DIRS, src_main, src_test_main):
     try:
         with open(root_path+'/cxxdeps.txt', 'r') as fd:
             x=fd.readlines()
@@ -265,70 +265,104 @@ def is_cmd():
     return os.name == 'nt' and 'WSL_DISTRO_NAME' not in os.environ
 
 
-print("======================================")
-print("         welcome to cxxbuild          ")
-print("======================================")
+def main():
+    print("======================================")
+    print("         welcome to cxxbuild          ")
+    print("======================================")
 
-# ASSUME '.' as root_path if nothing is passed
-if len(sys.argv) == 1:
-    sys.argv.append(".")
+    # ASSUME '.' as root_path if nothing is passed
+    if len(sys.argv) == 1:
+        sys.argv.append(".")
 
-if "help" in sys.argv:
-    usage()
-    exit()
-# clean deletes all files matching CLEAN_EXT
-if "clean" in sys.argv:
-    print("'clean' not implemented, yet!")
-    exit()
-if "lint" in sys.argv:
-    print("'lint' not implemented, yet!")
-    exit()
-root_path = sys.argv[1]
-if "build" in sys.argv:
-    # must take path explicitly from third argument!
-    # example: cxxbuild build .
-    if len(sys.argv) > 2:
-        root_path = sys.argv[2]
-    else:
+    if "help" in sys.argv:
         usage()
         exit()
+    # clean deletes all files matching CLEAN_EXT
+    if "clean" in sys.argv:
+        print("'clean' not implemented, yet!")
+        exit()
+    if "lint" in sys.argv:
+        print("'lint' not implemented, yet!")
+        exit()
+    root_path = sys.argv[1]
+    if "build" in sys.argv:
+        # must take path explicitly from third argument!
+        # example: cxxbuild build .
+        if len(sys.argv) > 2:
+            root_path = sys.argv[2]
+        else:
+            usage()
+            exit()
 
-search_src="src"
-search_tests="tests"
-search_include="include"
-for i in range(len(sys.argv)):
-    if (sys.argv[i] == "--src"):
-        search_src = str(sys.argv[i + 1])
-    if (sys.argv[i] == "--tests"):
-        search_tests = str(sys.argv[i + 1])
-    if (sys.argv[i] == "--include"):
-        search_include = str(sys.argv[i + 1])
+    search_src="src"
+    search_tests="tests"
+    search_include="include"
+    for i in range(len(sys.argv)):
+        if (sys.argv[i] == "--src"):
+            search_src = str(sys.argv[i + 1])
+        if (sys.argv[i] == "--tests"):
+            search_tests = str(sys.argv[i + 1])
+        if (sys.argv[i] == "--include"):
+            search_include = str(sys.argv[i + 1])
 
-#
-print("begin build on root_path=",root_path)
-# find all source files,
-# find all files with an entry point,
-src_list = []
-src_main = {}
-# ENFORCING THIS PATH... MUST ADD MULTIPLE PATH OPTION!
-# src_paths = [root_path, root_path+"/src"] 
-src_paths = [root_path+"/"+search_src] 
-print("src_paths=", src_paths)
-entrypoint = "main("  # Pattern to find main(), or main(int argc, ...), etc
-#
-src_ext = ['.c', '.cc', '.cpp', '.cxx', '.c++']
-print(src_ext)
-for src_path in src_paths:
-    for root, subdirs, files in os.walk(src_path):
+    #
+    print("begin build on root_path=",root_path)
+    # find all source files,
+    # find all files with an entry point,
+    src_list = []
+    src_main = {}
+    # ENFORCING THIS PATH... MUST ADD MULTIPLE PATH OPTION!
+    # src_paths = [root_path, root_path+"/src"] 
+    src_paths = [root_path+"/"+search_src] 
+    print("src_paths=", src_paths)
+    entrypoint = "main("  # Pattern to find main(), or main(int argc, ...), etc
+    #
+    src_ext = ['.c', '.cc', '.cpp', '.cxx', '.c++']
+    print(src_ext)
+    for src_path in src_paths:
+        for root, subdirs, files in os.walk(src_path):
+            root = root.removeprefix(root_path).removeprefix("/")
+            print("root_SRC: ", root)
+            print("subdirs_SRC: ", subdirs)
+            print("files_SRC: ", files)
+            for file in files:
+                file_name, ext = os.path.splitext(file)
+                if ext in src_ext:
+                    file_path = os.path.join(root, file)
+                    src_list.append(file_path)
+                    with open(root_path+"/"+file_path, 'r') as fd:
+                        # TODO: add other formats for main... such as "int main()", etc...
+                        # ANYWAY, these limitations are acceptable! 
+                        # other options are: " main(" and "\nmain("
+                        # If someone has a function "xxxmain(" it can currently break.
+                        entrypoint = "main("
+                        print("checking entrypoint:", entrypoint)
+                        if entrypoint in fd.read():
+                            src_main[file_path] = (root, file_name)
+        # end-for src_path
+    # end-for src_paths
+
+    print("src_main:", src_main)
+    print("src_list:", src_list)
+
+    # finding tests...
+
+    src_test_list = []
+    src_test_main = {}
+    src_test_nomain = {}
+    #
+    print(src_ext)
+    for root, subdirs, files in os.walk(root_path+"/"+search_tests):
         root = root.removeprefix(root_path).removeprefix("/")
-        print("root_SRC: ", root)
-        print("subdirs_SRC: ", subdirs)
-        print("files_SRC: ", files)
+        print("TEST root: ", root)
+        print("TEST subdirs: ", subdirs)
+        print("TEST files: ", files)
         for file in files:
             file_name, ext = os.path.splitext(file)
             if ext in src_ext:
                 file_path = os.path.join(root, file)
-                src_list.append(file_path)
+                src_test_list.append(file_path)
+                src_test_nomain[file_path] = (root, file_name)
                 with open(root_path+"/"+file_path, 'r') as fd:
                     # TODO: add other formats for main... such as "int main()", etc...
                     # ANYWAY, these limitations are acceptable! 
@@ -337,230 +371,199 @@ for src_path in src_paths:
                     entrypoint = "main("
                     print("checking entrypoint:", entrypoint)
                     if entrypoint in fd.read():
-                        src_main[file_path] = (root, file_name)
-    # end-for src_path
-# end-for src_paths
+                        src_test_main[file_path] = (root, file_name+"_test")
 
-print("src_main:", src_main)
-print("src_list:", src_list)
+    print("src_test_main:", src_test_main)
+    print("src_test_nomain:", src_test_nomain)
+    print("src_test_list:", src_test_list)
 
-# finding tests...
+    # SO... TIME TO FIND INCLUDE FOLDERS
 
-src_test_list = []
-src_test_main = {}
-src_test_nomain = {}
-#
-print(src_ext)
-for root, subdirs, files in os.walk(root_path+"/"+search_tests):
-    root = root.removeprefix(root_path).removeprefix("/")
-    print("TEST root: ", root)
-    print("TEST subdirs: ", subdirs)
-    print("TEST files: ", files)
-    for file in files:
-        file_name, ext = os.path.splitext(file)
-        if ext in src_ext:
-            file_path = os.path.join(root, file)
-            src_test_list.append(file_path)
-            src_test_nomain[file_path] = (root, file_name)
-            with open(root_path+"/"+file_path, 'r') as fd:
-                # TODO: add other formats for main... such as "int main()", etc...
-                # ANYWAY, these limitations are acceptable! 
-                # other options are: " main(" and "\nmain("
-                # If someone has a function "xxxmain(" it can currently break.
-                entrypoint = "main("
-                print("checking entrypoint:", entrypoint)
-                if entrypoint in fd.read():
-                    src_test_main[file_path] = (root, file_name+"_test")
+    INCLUDE_DIRS = []
+    for root, subdirs, files in os.walk(root_path):
+        root = root.removeprefix(root_path).removeprefix("/")
+        #print("root: ", root)
+        #print("subdirs: ", subdirs)
+        #print("files: ", files)
+        if "include" in subdirs:
+            incdir = root+"/"+search_include
+            incdir = incdir.removeprefix(root_path).removeprefix("/")
+            INCLUDE_DIRS.append(incdir)
+        # TODO: search in other places too... maybe inside src?
 
-print("src_test_main:", src_test_main)
-print("src_test_nomain:", src_test_nomain)
-print("src_test_list:", src_test_list)
-
-# SO... TIME TO FIND INCLUDE FOLDERS
-
-INCLUDE_DIRS = []
-for root, subdirs, files in os.walk(root_path):
-    root = root.removeprefix(root_path).removeprefix("/")
-    #print("root: ", root)
-    #print("subdirs: ", subdirs)
-    #print("files: ", files)
-    if "include" in subdirs:
-        incdir = root+"/"+search_include
-        incdir = incdir.removeprefix(root_path).removeprefix("/")
-        INCLUDE_DIRS.append(incdir)
-    # TODO: search in other places too... maybe inside src?
-
-print("INCLUDE_DIRS=",INCLUDE_DIRS)
+    print("INCLUDE_DIRS=",INCLUDE_DIRS)
 
 
-# READ cxxdeps.txt file, if available...
-# AT THIS POINT, ASSUMING 'cmake' OPTION (NO 'bazel' FOR NOW!)
-cmakelists = []
-cmakelists.append("cmake_minimum_required(VERSION 3.27)")
-cmakelists.append("project(my-project LANGUAGES CXX VERSION 1.3.1)")
-# TODO: get 'c++20' parameter and use it, if necessary.
-# Standard C++ is c++17, for now! Always adopt ONE LESS the current one (c++20)!
-cmakelists.append("set (CMAKE_CXX_STANDARD 20)") # TODO: make it 17
-cmakelists.append("set (CMAKE_CXX_STANDARD_REQUIRED ON)")
-cmakelists.append("set (CMAKE_CXX_EXTENSIONS OFF)")
-cmakelists.append("set (CMAKE_EXPORT_COMPILE_COMMANDS ON)")
-cmakelists.append("Include(FetchContent)")
-# add sources!
-cmakelists.append("set(SOURCES")
-for f in src_list:
+    # READ cxxdeps.txt file, if available...
+    # AT THIS POINT, ASSUMING 'cmake' OPTION (NO 'bazel' FOR NOW!)
+    cmakelists = []
+    cmakelists.append("cmake_minimum_required(VERSION 3.27)")
+    cmakelists.append("project(my-project LANGUAGES CXX VERSION 1.3.1)")
+    # TODO: get 'c++20' parameter and use it, if necessary.
+    # Standard C++ is c++17, for now! Always adopt ONE LESS the current one (c++20)!
+    cmakelists.append("set (CMAKE_CXX_STANDARD 20)") # TODO: make it 17
+    cmakelists.append("set (CMAKE_CXX_STANDARD_REQUIRED ON)")
+    cmakelists.append("set (CMAKE_CXX_EXTENSIONS OFF)")
+    cmakelists.append("set (CMAKE_EXPORT_COMPILE_COMMANDS ON)")
+    cmakelists.append("Include(FetchContent)")
+    # add sources!
+    cmakelists.append("set(SOURCES")
+    for f in src_list:
+        for filepath, app_name in src_main.items():
+            filepath2 = filepath.replace("\\", "/")
+            f2 = f.replace("\\", "/")
+            if filepath2 != f2:
+                cmakelists.append("\t"+f2)
+    cmakelists.append(")")
+    # add_executable for binaries
     for filepath, app_name in src_main.items():
-        filepath2 = filepath.replace("\\", "/")
-        f2 = f.replace("\\", "/")
-        if filepath2 != f2:
-            cmakelists.append("\t"+f2)
-cmakelists.append(")")
-# add_executable for binaries
-for filepath, app_name in src_main.items():
-    cmakelists.append("add_executable("+app_name[1]+" "+filepath.replace("\\", "/")+" ${SOURCES})")
-# add_executable for test binaries
-print("finding test executables!")
-# if no main is found, then each test is assumed to be independent!
-if len(src_test_main.items()) == 0:
-    print("WARNING: no main() is found for tests... using main-less strategy!")
-    src_test_main = src_test_nomain
-for filepath, app_name in src_test_main.items():
-    cmakelists.append("add_executable("+app_name[1]+" "+filepath.replace("\\", "/")+" ${SOURCES})")
-
-
-# INCLUDE_DIRS will act as header-only libraries
-#  => DO NOT ADD SOURCE FILES INTO include FOLDERS!!!
-for i in range(len(INCLUDE_DIRS)):
-    cmakelists.append("add_library(my_headers"+str(i)+" INTERFACE)")
-    cmakelists.append("target_include_directories(my_headers"+str(i)+" INTERFACE "+INCLUDE_DIRS[i]+")")
-    for filepath, app_name in src_main.items():
-        cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE my_headers"+str(i)+")")    
+        cmakelists.append("add_executable("+app_name[1]+" "+filepath.replace("\\", "/")+" ${SOURCES})")
+    # add_executable for test binaries
+    print("finding test executables!")
+    # if no main is found, then each test is assumed to be independent!
+    if len(src_test_main.items()) == 0:
+        print("WARNING: no main() is found for tests... using main-less strategy!")
+        src_test_main = src_test_nomain
     for filepath, app_name in src_test_main.items():
-        cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE my_headers"+str(i)+")")    
-#
-#print(cmakelists)
+        cmakelists.append("add_executable("+app_name[1]+" "+filepath.replace("\\", "/")+" ${SOURCES})")
 
-try:
-    cxxdeps_all = []
-    cxxdeps_test = []
-    cxxdeps_dev = []
-    with open(root_path+'/cxxdeps.toml', 'r') as toml_file:
-        import toml
-        data = toml.load(toml_file)
-        #
-        for section_name, section_data in data.items():
-            print(f"SECTION=[{section_name}]")
-            # Iterate over dependencies within each section
-            for dependency_name, dependency_info in section_data.items():
-                print("processing dependency: ", dependency_name)
-                #print(f"BEGIN {dependency_name}={dependency_info} END")
-                if isinstance(dependency_info, list):
-                    #print("Dependency LIST... checking triplets!")
-                    for d in dependency_info:
-                        #print("d:",d)
-                        x = get_toml_dep(dependency_name, section_name, d)
+
+    # INCLUDE_DIRS will act as header-only libraries
+    #  => DO NOT ADD SOURCE FILES INTO include FOLDERS!!!
+    for i in range(len(INCLUDE_DIRS)):
+        cmakelists.append("add_library(my_headers"+str(i)+" INTERFACE)")
+        cmakelists.append("target_include_directories(my_headers"+str(i)+" INTERFACE "+INCLUDE_DIRS[i]+")")
+        for filepath, app_name in src_main.items():
+            cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE my_headers"+str(i)+")")    
+        for filepath, app_name in src_test_main.items():
+            cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE my_headers"+str(i)+")")    
+    #
+    #print(cmakelists)
+
+    try:
+        cxxdeps_all = []
+        cxxdeps_test = []
+        cxxdeps_dev = []
+        with open(root_path+'/cxxdeps.toml', 'r') as toml_file:
+            import toml
+            data = toml.load(toml_file)
+            #
+            for section_name, section_data in data.items():
+                print(f"SECTION=[{section_name}]")
+                # Iterate over dependencies within each section
+                for dependency_name, dependency_info in section_data.items():
+                    print("processing dependency: ", dependency_name)
+                    #print(f"BEGIN {dependency_name}={dependency_info} END")
+                    if isinstance(dependency_info, list):
+                        #print("Dependency LIST... checking triplets!")
+                        for d in dependency_info:
+                            #print("d:",d)
+                            x = get_toml_dep(dependency_name, section_name, d)
+                            if section_name == "test":
+                                cxxdeps_test.append(x)
+                            elif section_name == "dev":
+                                cxxdeps_dev.append(x)
+                            else:
+                                cxxdeps_all.append(x)
+                        #print("END Dependency LIST")
+                    elif isinstance(dependency_info, dict):
+                        #print("Dependency DICT")
+                        x = get_toml_dep(dependency_name, section_name, dependency_info)
                         if section_name == "test":
                             cxxdeps_test.append(x)
                         elif section_name == "dev":
                             cxxdeps_dev.append(x)
                         else:
                             cxxdeps_all.append(x)
-                    #print("END Dependency LIST")
-                elif isinstance(dependency_info, dict):
-                    #print("Dependency DICT")
-                    x = get_toml_dep(dependency_name, section_name, dependency_info)
-                    if section_name == "test":
-                        cxxdeps_test.append(x)
-                    elif section_name == "dev":
-                        cxxdeps_dev.append(x)
                     else:
-                        cxxdeps_all.append(x)
-                else:
-                    print("Dependency info is neither a list nor an object.")
-                    assert(False)
-            print("\n")
-    # end with
-    # finishing .toml file
-    print("cxxdeps_all:", cxxdeps_all)
-    print("cxxdeps_test:", cxxdeps_test)
-    print("cxxdeps_dev:", cxxdeps_dev)
-    # writing cxxdeps.txt and cxxdeps.dev.txt
-    if len(cxxdeps_dev) > 0:
-        with open(root_path+"/cxxdeps.dev.txt", "w") as output_file:
-            output_file.write("# DO NOT EDIT! file 'cxxdeps.dev.txt' generated automatically from 'cxxdeps.toml'" + "\n")
-            for dep in cxxdeps_dev:
-                output_file.write(" ".join(dep) + "\n")
-    if len(cxxdeps_all) > 0 or len(cxxdeps_test) > 0:
-        with open(root_path+"/cxxdeps.txt", "w") as output_file:
-            output_file.write("# DO NOT EDIT! file 'cxxdeps.txt' generated automatically from 'cxxdeps.toml'" + "\n")
-            for dep in cxxdeps_all:
-                output_file.write(" ".join(dep) + "\n")
-            for dep in cxxdeps_test:
-                output_file.write(" ".join(dep) + "\n")
-        
-except FileNotFoundError:
-    print("File cxxdeps.toml does not exist... ignoring it!")
+                        print("Dependency info is neither a list nor an object.")
+                        assert(False)
+                print("\n")
+        # end with
+        # finishing .toml file
+        print("cxxdeps_all:", cxxdeps_all)
+        print("cxxdeps_test:", cxxdeps_test)
+        print("cxxdeps_dev:", cxxdeps_dev)
+        # writing cxxdeps.txt and cxxdeps.dev.txt
+        if len(cxxdeps_dev) > 0:
+            with open(root_path+"/cxxdeps.dev.txt", "w") as output_file:
+                output_file.write("# DO NOT EDIT! file 'cxxdeps.dev.txt' generated automatically from 'cxxdeps.toml'" + "\n")
+                for dep in cxxdeps_dev:
+                    output_file.write(" ".join(dep) + "\n")
+        if len(cxxdeps_all) > 0 or len(cxxdeps_test) > 0:
+            with open(root_path+"/cxxdeps.txt", "w") as output_file:
+                output_file.write("# DO NOT EDIT! file 'cxxdeps.txt' generated automatically from 'cxxdeps.toml'" + "\n")
+                for dep in cxxdeps_all:
+                    output_file.write(" ".join(dep) + "\n")
+                for dep in cxxdeps_test:
+                    output_file.write(" ".join(dep) + "\n")
+            
+    except FileNotFoundError:
+        print("File cxxdeps.toml does not exist... ignoring it!")
 
-# cxxdeps.txt
-cmakelists = get_cmakelists_from_cxxdeps(root_path, cmakelists)
+    # cxxdeps.txt
+    cmakelists = get_cmakelists_from_cxxdeps(root_path, cmakelists, INCLUDE_DIRS, src_main, src_test_main)
 
 
 
-# Generate CMakeLists.txt (or look for other option, such as 'bazel')
-# Assuming CMake and Ninja for now (TODO: must detect and warn to install!)
+    # Generate CMakeLists.txt (or look for other option, such as 'bazel')
+    # Assuming CMake and Ninja for now (TODO: must detect and warn to install!)
 
-# TODO: check if some CMakeLists.txt exists before overwriting it!
-# TODO: make backup of CMakeLists.txt only if content is different...
+    # TODO: check if some CMakeLists.txt exists before overwriting it!
+    # TODO: make backup of CMakeLists.txt only if content is different...
 
-# ============ create CMakeLists.txt ===========
-with open(root_path+'/CMakeLists.txt', 'w') as file:
-    file.write('\n'.join(cmakelists))
+    # ============ create CMakeLists.txt ===========
+    with open(root_path+'/CMakeLists.txt', 'w') as file:
+        file.write('\n'.join(cmakelists))
 
-print("-----------------------------------")
-print("CMakeLists.txt generated on folder:")
-print(" => "+root_path+'/CMakeLists.txt')
-print("-----------------------------------")
+    print("-----------------------------------")
+    print("CMakeLists.txt generated on folder:")
+    print(" => "+root_path+'/CMakeLists.txt')
+    print("-----------------------------------")
 
-# ============ build with cmake+ninja ===========
-# STEP 1: check that 'cmake' and 'ninja' command exists
-CHECK_CMAKE_CMD="cmake --version"
-print("Please install latest cmake with: python3 -m pip install cmake --upgrade")
-print("or visit cmake website: https://cmake.org/download/")
-print("checking cmake command now...")
-x=subprocess.call(list(filter(None, CHECK_CMAKE_CMD.split(' '))))
-print('check result:', x)
-assert(x == 0)
-#
-CHECK_NINJA_CMD="ninja --version"
-print("Please install latest ninja:")
-print(" * on linux/ubuntu with apt: apt-get install ninja-build")
-print(" * on mac with homebrew: brew install ninja")
-print(" * on windows with chocolatey: choco install ninja")
-print("or visit ninja website: https://ninja-build.org/")
-print("checking ninja command now...")
-x=subprocess.call(list(filter(None, CHECK_NINJA_CMD.split(' '))))
-print('check result:', x)
-assert(x == 0)
-#
-# STEP 1.5: debug only (TODO: create flag --verbose!)
-CMAKE_CMD="cat "+root_path+"/CMakeLists.txt"
-print("showing CMakeLists.txt... "+CMAKE_CMD)
-x=subprocess.call(list(filter(None, CMAKE_CMD.split(' '))))
-print('cmake result:', x)
-assert(x == 0)
-#
-# STEP 2: build with cmake+ninja
-CMAKE_CMD="cmake -B"+root_path+"/build -S"+root_path+" -GNinja"
-NINJA_CMD="ninja -C "+root_path+"/build"
-print("building... "+CMAKE_CMD)
-x=subprocess.call(list(filter(None, CMAKE_CMD.split(' '))))
-print('cmake result:', x)
-assert(x == 0)
-x=subprocess.call(list(filter(None, NINJA_CMD.split(' '))))
-print('ninja result:', x)
-assert(x == 0)
+    # ============ build with cmake+ninja ===========
+    # STEP 1: check that 'cmake' and 'ninja' command exists
+    CHECK_CMAKE_CMD="cmake --version"
+    print("Please install latest cmake with: python3 -m pip install cmake --upgrade")
+    print("or visit cmake website: https://cmake.org/download/")
+    print("checking cmake command now...")
+    x=subprocess.call(list(filter(None, CHECK_CMAKE_CMD.split(' '))))
+    print('check result:', x)
+    assert(x == 0)
+    #
+    CHECK_NINJA_CMD="ninja --version"
+    print("Please install latest ninja:")
+    print(" * on linux/ubuntu with apt: apt-get install ninja-build")
+    print(" * on mac with homebrew: brew install ninja")
+    print(" * on windows with chocolatey: choco install ninja")
+    print("or visit ninja website: https://ninja-build.org/")
+    print("checking ninja command now...")
+    x=subprocess.call(list(filter(None, CHECK_NINJA_CMD.split(' '))))
+    print('check result:', x)
+    assert(x == 0)
+    #
+    # STEP 1.5: debug only (TODO: create flag --verbose!)
+    CMAKE_CMD="cat "+root_path+"/CMakeLists.txt"
+    print("showing CMakeLists.txt... "+CMAKE_CMD)
+    x=subprocess.call(list(filter(None, CMAKE_CMD.split(' '))))
+    print('cmake result:', x)
+    assert(x == 0)
+    #
+    # STEP 2: build with cmake+ninja
+    CMAKE_CMD="cmake -B"+root_path+"/build -S"+root_path+" -GNinja"
+    NINJA_CMD="ninja -C "+root_path+"/build"
+    print("building... "+CMAKE_CMD)
+    x=subprocess.call(list(filter(None, CMAKE_CMD.split(' '))))
+    print('cmake result:', x)
+    assert(x == 0)
+    x=subprocess.call(list(filter(None, NINJA_CMD.split(' '))))
+    print('ninja result:', x)
+    assert(x == 0)
 
-if len(src_main.items()) > 0:
-    print("OK: at least one main() has been found!")
-else:
-    print("WARNING: no main() has been found!")
+    if len(src_main.items()) > 0:
+        print("OK: at least one main() has been found!")
+    else:
+        print("WARNING: no main() has been found!")
 
+if __name__ == '__main__':
+    main()
