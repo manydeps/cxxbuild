@@ -4,6 +4,8 @@
 
 ![C++17](https://img.shields.io/badge/std-c%2B%2B17-blue)
 
+[![DOI](https://zenodo.org/badge/715821683.svg)](https://zenodo.org/doi/10.5281/zenodo.10447208)
+
 Version: `cxxbuild version=1.4.1`  Installation: `pip install cxxbuild`
 
 cxxbuild is a python script to easily build C++ programs: just invoke 'cxxbuild' and it works!
