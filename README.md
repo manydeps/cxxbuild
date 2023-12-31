@@ -4,7 +4,7 @@
 
 ![C++17](https://img.shields.io/badge/std-c%2B%2B17-blue)
 
-Version: `cxxbuild version=1.4.0`  Installation: `pip install cxxbuild`
+Version: `cxxbuild version=1.4.1`  Installation: `pip install cxxbuild`
 
 cxxbuild is a python script to easily build C++ programs: just invoke 'cxxbuild' and it works!
 
