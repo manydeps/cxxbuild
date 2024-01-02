@@ -49,6 +49,7 @@ RUN bash -i -c "nvm install --lts"
 
 # bazel (using npm)
 RUN bash -i -c "npm install -g @bazel/bazelisk"
+RUN bash -i -c "npm install -g @bazel/buildifier"
 
 # install cpplint into /usr/local/bin/cpplint
 RUN python3 -m pip install cpplint 

@@ -35,8 +35,9 @@ Then, just run: `cxxbuild help`
 ## Running demos 
 
 ```
-python3 cxxbuild.py demo/project1
-python3 cxxbuild.py demo/project2
+python3 cxxbuild/cxxbuild.py demo/project1
+python3 cxxbuild/cxxbuild.py demo/project2
+python3 cxxbuild/cxxbuild.py demo/project3
 ```
 
 Each of them should build some specific demo project, without any issues.

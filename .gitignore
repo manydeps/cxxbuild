@@ -8,3 +8,4 @@ Testing/
 *.egg*
 __pycache__
 dist/
+package-lock.json
