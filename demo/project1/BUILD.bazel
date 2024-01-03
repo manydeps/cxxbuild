@@ -1,0 +1,22 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+
+package(
+    default_visibility = ["//visibility:public"],
+)
+
+cc_binary(
+    name = "demo1",
+    srcs = glob([
+        "src/demo1.cpp", 
+        "src/something.cpp", 
+        "src/*.h"
+    ]),
+    deps = [":my_include", "@fmt//:fmt"],
+)
+
+cc_library(
+    name = "my_include",
+    hdrs = glob(["include/**/*.hpp","include/**/*.h"]),
+    includes = ["include"],
+    deps = ["@fmt//:fmt"]
+)

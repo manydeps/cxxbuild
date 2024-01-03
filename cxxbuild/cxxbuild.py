@@ -109,6 +109,9 @@ def get_cmakelists_from_cxxdeps(root_path, cmakelists, INCLUDE_DIRS, src_main, s
                     pkg_manager = fields[k]
                     mode = fields[k+1]
                     k = k+2
+                    if pkg_manager[0:6] == 'bazel+':
+                        print("WARNING: ignoring 'bazel+' entry for CMAKE: "+project_name)
+                        continue
                     if pkg_manager == 'system':
                         # AT THIS POINT, SYSTEM LIBRARY MUST HAVE ITS LIB INSIDE, example: ['m']
                         cmakelists.append('# system dependency: -l'+project_name)
@@ -135,7 +138,7 @@ def get_cmakelists_from_cxxdeps(root_path, cmakelists, INCLUDE_DIRS, src_main, s
                             cmakelists.append("ENDIF()")
                         continue
                     #end-if system
-                    if pkg_manager == 'git':
+                    if pkg_manager == 'git' or pkg_manager == 'cmake+git':
                         git_url = fields[k]
                         k=k+1
                     cmakelists.append("FetchContent_Declare("+project_name+" GIT_REPOSITORY "+git_url+" GIT_TAG "+version_number+")")
@@ -208,8 +211,8 @@ def get_toml_dep(dep_name, section_name, dep_object):
     complement = ""
     if dep_type == "":
         for x1, y1 in dep_object.items():
-            if x1 == "git":
-                dep_type = "git"
+            if x1 == "git" or x1 == "cmake+git" or x1 == "bazel+git":
+                dep_type = x1 # some "git" type
                 complement = y1
                 for x2, y2 in dep_object.items():
                     if x2 == "tag":
@@ -465,6 +468,8 @@ def main():
     search_src="src"
     search_tests="tests"
     search_include="include"
+    use_cmake=None
+    use_bazel=None
     for i in range(len(sys.argv)):
         if (sys.argv[i] == "--src"):
             search_src = str(sys.argv[i + 1])
@@ -472,6 +477,17 @@ def main():
             search_tests = str(sys.argv[i + 1])
         if (sys.argv[i] == "--include"):
             search_include = str(sys.argv[i + 1])
+        if (sys.argv[i] == "--cmake"):
+            use_cmake = True
+            use_bazel = False
+        if (sys.argv[i] == "--bazel"):
+            use_cmake = False
+            use_bazel = True
+            
+    # build system defaults to cmake
+    if use_cmake is None:
+        use_cmake = True
+        use_bazel = False
 
     #
     print("begin build on root_path=",root_path)

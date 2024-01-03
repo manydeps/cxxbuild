@@ -9,3 +9,5 @@ Testing/
 __pycache__
 dist/
 package-lock.json
+bazel-*
+*.bazel.lock

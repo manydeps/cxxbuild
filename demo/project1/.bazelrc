@@ -1,0 +1,5 @@
+common --enable_platform_specific_config
+#
+build:windows --cxxopt=-std:c++20   
+build:linux   --cxxopt=-std=c++20 --cxxopt=-lcrypto --cxxopt=-lpthread
+build:macos   --cxxopt=-std=c++20 --cxxopt=-lcrypto --cxxopt=-lpthread

@@ -11,7 +11,9 @@
 # MEANING THAT: "lib:m" => "lib:m == * [m] system *"
 # FINALLY: a "special" part allows specific behaviors to happen, 
 # due to the classic "workarounds" maybe required by some projects to work properly :/
-fmt == "9.1.0"     [ fmt ]                    git *    https://github.com/fmtlib/fmt.git
-Catch2 == "v3.3.1" [ Catch2::Catch2WithMain ] git test https://github.com/catchorg/Catch2.git
+fmt == "9.1.0"     [ fmt ]                    cmake+git *    https://github.com/fmtlib/fmt.git
+fmt == "9.1.0"     [ fmt ]                    bazel+bcr *
+Catch2 == "v3.3.1" [ Catch2::Catch2WithMain ] cmake+git test https://github.com/catchorg/Catch2.git
+catch2 == *        [ catch2_main ]            bazel+git test https://github.com/catchorg/Catch2.git 863c662c0eff026300f4d729a7054e90d6d12cdd
 pthread:!windows
 crypto:linux

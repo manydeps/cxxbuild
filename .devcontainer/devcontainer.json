@@ -26,10 +26,9 @@
 				"editor.formatOnSave": true,
 				"testMate.cpp.test.advancedExecutables": [
 					{
-						//"pattern": "{bazel-bin}/**/*{test}*"
-						"pattern": "**/{build}/**/*{test}*"
+						"pattern": "**/{build,bazel-bin}/**/*{test}*"
 					}
-				],
+				]
 			}
 		}
 	},
