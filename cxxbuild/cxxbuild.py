@@ -182,6 +182,151 @@ def get_cmakelists_from_cxxdeps(root_path, cmakelists, INCLUDE_DIRS, src_main, s
 
     return cmakelists
 
+class BazelFiles:
+    def __init__(self):
+        self.MODULE = []
+        self.bazelrc = []
+        self.BUILD_root = []
+        self.BUILD_tests = []
+        # helpers
+        self.targets_main = []
+        self.targets_tests = []
+        self.targets_include = []
+        self.cxxopt_windows = []
+        self.cxxopt_linux = []
+        self.cxxopt_macos = []
+
+def get_bazelfiles_from_cxxdeps(root_path, bzlfiles, INCLUDE_DIRS, src_main, src_test_main):
+    # bzl = BazelFiles()
+    try:
+        with open(root_path+'/cxxdeps.txt', 'r') as fd:
+            x=fd.readlines()
+            #print(x)
+            # cmakelists.append("# begin dependencies from cxxdeps.txt")
+            for l in x:
+                if (len(l) >= 1) and (l[0] != '#'):
+                    # good line!
+                    print(l)
+                    fields = l.split()
+                    print(fields)
+                    # assume all spacing is correct, for now!
+                    if len(fields) == 0:
+                        # IGNORE (EMPTY LINE!)
+                        continue
+                    project_name_full = fields[0]
+                    lproj = project_name_full.split(":")
+                    project_name = project_name_full.split(":")[0]
+                    triplet = ""
+                    not_triplet = False
+                    if len(lproj) > 1:
+                        triplet = project_name_full.split(":")[1]
+                        if triplet.startswith("!"):
+                            not_triplet = True
+                            triplet = triplet[1:]  # remove "!"
+                    #
+                    import platform
+                    my_system = platform.system()
+                    #
+                    print("PROJECT:", project_name, " TRIPLET:", triplet, "SYSTEM:", my_system)
+                    #
+                    # cmakelists.append("# cxxdeps dependency "+project_name)
+                    if len(fields) == 1:
+                        # SYSTEM STATIC LIBRARY! example: -lm
+                        # MANUALLY PUSH STANDARD PARAMETERS: m == * [ m ] system *
+                        fields.append('==')
+                        fields.append('*')
+                        fields.append('[')
+                        fields.append(project_name)
+                        fields.append(']')
+                        fields.append('system')
+                        fields.append('*')
+                    # expects '==' now!
+                    assert(fields[1] == "==")
+                    version_number = fields[2].strip('"')
+                    if len(fields) == 3:
+                        # SYSTEM STATIC LIBRARY WITH VERSION! example: -lm=0.0.1
+                        # DON'T DOING THIS NOW...
+                        print("WARNING: ignoring system library WITH VERSION: "+project_name)
+                        assert(False)
+                        continue
+                    # begin reading library list
+                    assert fields[3] == '['
+                    libs = []
+                    k = 4
+                    next_lib = fields[k]
+                    while next_lib != ']':
+                        libs.append(next_lib)
+                        k = k + 1
+                        next_lib = fields[k]
+                    # finished parsing libs list
+                    assert fields[k] == ']'
+                    k = k+1
+                    # MUST HAVE A pkg_manager and mode (simplifying this for now...)
+                    pkg_manager = fields[k]
+                    mode = fields[k+1]
+                    k = k+2
+                    if pkg_manager[0:5] == 'cmake+':
+                        print("WARNING: ignoring 'cmake+' entry for BAZEL: "+project_name)
+                        continue
+                    if pkg_manager == 'system':
+                        # AT THIS POINT, SYSTEM LIBRARY MUST HAVE ITS LIB INSIDE, example: ['m']
+                        # cmakelists.append('# system dependency: -l'+project_name)
+                        add_system_triplet_bazel(bzl, triplet, not_triplet, my_system, project_name)
+                        # ADD TO all, test, etc... no difference!
+                        continue
+                    #end-if system
+                    if pkg_manager == 'git' or pkg_manager == 'bazel+git':
+                        git_url = fields[k]
+                        k=k+1
+                        git_commit = fields[k]
+                        k=k+1
+                        # attach it to bazel dev_dependency, if mode is 'test'
+                        if mode == 'test':
+                            bzl.MODULE.append("bazel_dep(name = "+project_name+", dev_dependency=True)")
+                        # attach it to libraries, binaries and test binaries, if mode is *
+                        if mode == '*':
+                            bzl.MODULE.append("bazel_dep(name = "+project_name+")")
+                        bzl.MODULE.append("git_override(")
+                        bzl.MODULE.append("    module_name = "+project_name+",")
+                        bzl.MODULE.append("    remote = "+git_url+",")
+                        bzl.MODULE.append("    commit = "+git_commit+",")
+                        bzl.MODULE.append(")")
+                        #for inc in bzl.targets_include:
+                        #    for l in libs:
+                        #        inc[-1] = inc[-1] + "target_link_libraries(my_headers"+str(i)+" INTERFACE "+l+")")
+                        for main_target in bzl.targets_main:
+                            for l in libs:
+                                main_target[-1] = main_target[-1] + "\"@"+project_name+"//:"+l+","  
+                        for test_target in bzl.targets_tests:
+                            for l in libs:
+                                test_target[-1] = test_target[-1] + "\"@"+project_name+"//:"+l+"," 
+                        continue
+                    if pkg_manager == 'bcr' or pkg_manager == 'bazel+bcr':
+                        # attach it to bazel dev_dependency, if mode is 'test'
+                        if mode == 'test':
+                            bzl.MODULE.append("bazel_dep(name = "+project_name+", dev_dependency=True)")
+                        # attach it to libraries, binaries and test binaries, if mode is *
+                        if mode == '*':
+                            bzl.MODULE.append("bazel_dep(name = "+project_name+")")
+                        #for inc in bzl.targets_include:
+                        #    for l in libs:
+                        #        inc[-1] = inc[-1] + "target_link_libraries(my_headers"+str(i)+" INTERFACE "+l+")")
+                        for main_target in bzl.targets_main:
+                            for l in libs:
+                                main_target[-1] = main_target[-1] + "\"@"+project_name+"//:"+l+","  
+                        for test_target in bzl.targets_tests:
+                            for l in libs:
+                                test_target[-1] = test_target[-1] + "\"@"+project_name+"//:"+l+"," 
+                        continue
+                # end if not comment
+            # end for line
+        # end cxxdeps
+
+    except FileNotFoundError:
+        print("File cxxdeps.txt does not exist... ignoring it!")
+
+    return bzl
+
 def get_toml_dep(dep_name, section_name, dep_object):
     print("get_toml_dep(...) dep_name: ", dep_name, " section:", section_name, " dep_object:", dep_object)
     local_dep = []
@@ -217,6 +362,12 @@ def get_toml_dep(dep_name, section_name, dep_object):
                 for x2, y2 in dep_object.items():
                     if x2 == "tag":
                         version = "\""+y2+"\""
+                        # only tag OR commit
+                        break 
+                    if x2 == "commit":
+                        complement = "\""+y2+"\""
+                        # only tag OR commit
+                        break
     if dep_type == "":
         dep_type = "system" # assuming 'system' as default
     #
@@ -262,6 +413,28 @@ def make_if_triplet(triplet, not_triplet, my_system):
         return striplet
     assert(False)
     return ""
+
+def add_system_triplet_bazel(bzl, triplet, not_triplet, my_system, project_name):
+    assert(triplet != "")
+    if triplet == "windows":
+        if not_triplet:
+            bzl.cxxopt_linux.append("-l"+project_name)
+            bzl.cxxopt_macos.append("-l"+project_name)
+        else:
+            bzl.cxxopt_windows.append("-l"+project_name)
+    if triplet == "linux":
+        if not_triplet:
+            bzl.cxxopt_windows.append("-l"+project_name)
+            bzl.cxxopt_macos.append("-l"+project_name)
+        else:
+            bzl.cxxopt_linux.append("-l"+project_name)
+    if triplet == "osx":
+        if not_triplet:
+            bzl.cxxopt_linux.append("-l"+project_name)
+            bzl.cxxopt_windows.append("-l"+project_name)
+        else:
+            bzl.cxxopt_linux.append("-l"+project_name)
+    return True
 
 def generate_cmakelists(root_path, INCLUDE_DIRS, src_main, src_test_main, src_list, src_test_nomain):
     # READ cxxdeps.txt file, if available...
@@ -309,7 +482,149 @@ def generate_cmakelists(root_path, INCLUDE_DIRS, src_main, src_test_main, src_li
             cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE my_headers"+str(i)+")")    
     #
     #print(cmakelists)
+    generate_txt_from_toml(root_path)
 
+    # cxxdeps.txt
+    cmakelists = get_cmakelists_from_cxxdeps(root_path, cmakelists, INCLUDE_DIRS, src_main, src_test_main)
+
+
+
+    # Generate CMakeLists.txt (or look for other option, such as 'bazel')
+    # Assuming CMake and Ninja for now (TODO: must detect and warn to install!)
+
+    # TODO: check if some CMakeLists.txt exists before overwriting it!
+    # TODO: make backup of CMakeLists.txt only if content is different...
+
+    # ============ create CMakeLists.txt ===========
+    with open(root_path+'/CMakeLists.txt', 'w') as file:
+        file.write('\n'.join(cmakelists))
+
+    print("-----------------------------------")
+    print("CMakeLists.txt generated on folder:")
+    print(" => "+root_path+'/CMakeLists.txt')
+    print("-----------------------------------")
+
+def generate_bazelfiles(root_path, INCLUDE_DIRS, src_main, src_test_main, src_list, src_test_nomain):
+    # READ cxxdeps.txt file, if available...
+    # AT THIS POINT, ASSUMING 'cmake' OPTION (NO 'bazel' FOR NOW!)
+    bzl = BazelFiles()
+    bzl.MODULE = []
+    bzl.MODULE.append("bazel_dep(name = \"hedron_compile_commands\", dev_dependency = True)")
+    bzl.MODULE.append("git_override(")
+    bzl.MODULE.append("    module_name = \"hedron_compile_commands\",")
+    bzl.MODULE.append("    remote = \"https://github.com/hedronvision/bazel-compile-commands-extractor.git\",")
+    bzl.MODULE.append("    commit = \"daae6f40adfa5fdb7c89684cbe4d88b691c63b2d\",")
+    bzl.MODULE.append(")")
+    bzl.MODULE.append("# bazel run @hedron_compile_commands//:refresh_all")
+    bzl.MODULE.append("#")
+
+    bzl.bazelrc = []
+    bzl.bazelrc.append("common --enable_platform_specific_config")
+    bzl.bazelrc.append("#")
+
+    bzl.BUILD_root = []
+    bzl.BUILD_root.append("load(\"@rules_cc//cc:defs.bzl\", \"cc_binary\", \"cc_library\")")
+    bzl.BUILD_root.append("#")
+    bzl.BUILD_root.append("package(")
+    bzl.BUILD_root.append("    default_visibility = [\"//visibility:public\"],")
+    bzl.BUILD_root.append(")")
+    bzl.BUILD_root.append("#")
+
+    bzl.BUILD_tests = []
+    bzl.BUILD_tests.append("load(\"@rules_cc//cc:defs.bzl\", \"cc_library\", \"cc_test\")")
+    bzl.BUILD_tests.append("package(default_visibility = [\"//visibility:public\"])")
+    bzl.BUILD_tests.append("#")
+    bzl.BUILD_tests.append("test_suite(")
+    bzl.BUILD_tests.append("    name = \"suite-tests\",")
+    bzl.BUILD_tests.append("    tests = [")
+    bzl.BUILD_tests.append("        \"all_tests\"")
+    bzl.BUILD_tests.append("    ]")
+    bzl.BUILD_tests.append(")")
+
+    # add sources! ADD LATER IN GLOBs
+    nomain_src_list = []
+    for f in src_list:
+        for filepath, app_name in src_main.items():
+            filepath2 = filepath.replace("\\", "/")
+            f2 = f.replace("\\", "/")
+            if filepath2 != f2:
+                nomain_src_list.append(f2)
+    #
+    bzl.targets_main = []
+    bzl.targets_tests = []
+    bzl.targets_include = []
+
+    # add_executable for binaries
+    for filepath, app_name in src_main.items():
+        target_main = []
+        target_main.append("cc_binary(")
+        target_main.append("    name = \""+app_name[1]+"\",")
+        target_main.append("    srcs = glob([")
+        target_main.append("\t\t\""+filepath.replace("\\", "/")+"\",")
+        for k in nomain_src_list:
+            target_main.append("\t\t\""+k+"\",")
+        target_main.append("\t\t\""+"src/*.h") # TODO: fix 'src'
+        target_main.append("]),")
+        bzl.targets_main.append(target_main)
+    #
+
+    # add_executable for test binaries
+    print("finding test executables!")
+    # if no main is found, then each test is assumed to be independent!
+    if len(src_test_main.items()) == 0:
+        print("WARNING: no main() is found for tests... using main-less strategy!")
+        src_test_main = src_test_nomain
+    for filepath, app_name in src_test_main.items():
+        target_tests = []
+        target_tests.append("cc_test(")
+        target_tests.append("    name = \"all_tests\",")
+        target_tests.append("    srcs = glob([")
+        target_tests.append("\t\t\""+filepath.replace("\\", "/")+"\",")
+        target_tests.append("    ]),")
+        bzl.targets_tests.append(target_tests)
+
+    # INCLUDE_DIRS will act as header-only libraries
+    #  => DO NOT ADD SOURCE FILES INTO include FOLDERS!!!
+    for i in range(len(INCLUDE_DIRS)):
+        target_include = []
+        target_include.append("cc_library(")
+        target_include.append("    name = \"my_headers"+str(i)+"\",")
+        target_include.append("    hdrs = glob([\"include/**/*.hpp\",\"include/**/*.h\"]),")
+        target_include.append("    includes = [\"include\"],")
+        bzl.targets_include.append(target_include)
+        for tmain in bzl.targets_main:
+            tmain.append("deps = [\":my_headers"+str(i)+"\",")
+        for ttest in bzl.targets_tests:
+            ttest.append("deps = [\"//:my_headers"+str(i)+"\",")
+
+    # finish basic part, begin dependencies
+    print("bzl.targets_main:", bzl.targets_main)
+    print("bzl.targets_tests:", bzl.targets_tests)
+    print("bzl.targets_include:", bzl.targets_include)
+    #
+    generate_txt_from_toml(root_path)
+
+    # cxxdeps.txt
+    bzl = get_bazelfiles_from_cxxdeps(root_path, bzl, INCLUDE_DIRS, src_main, src_test_main)
+
+
+
+    # Generate CMakeLists.txt (or look for other option, such as 'bazel')
+    # Assuming CMake and Ninja for now (TODO: must detect and warn to install!)
+
+    # TODO: check if some CMakeLists.txt exists before overwriting it!
+    # TODO: make backup of CMakeLists.txt only if content is different...
+
+    # ============ create CMakeLists.txt ===========
+    with open(root_path+'/CMakeLists.txt', 'w') as file:
+        file.write('\n'.join(cmakelists))
+
+    print("-----------------------------------")
+    print("CMakeLists.txt generated on folder:")
+    print(" => "+root_path+'/CMakeLists.txt')
+    print("-----------------------------------")
+
+def generate_txt_from_toml(root_path):
     try:
         cxxdeps_all = []
         cxxdeps_test = []
@@ -370,26 +685,6 @@ def generate_cmakelists(root_path, INCLUDE_DIRS, src_main, src_test_main, src_li
             
     except FileNotFoundError:
         print("File cxxdeps.toml does not exist... ignoring it!")
-
-    # cxxdeps.txt
-    cmakelists = get_cmakelists_from_cxxdeps(root_path, cmakelists, INCLUDE_DIRS, src_main, src_test_main)
-
-
-
-    # Generate CMakeLists.txt (or look for other option, such as 'bazel')
-    # Assuming CMake and Ninja for now (TODO: must detect and warn to install!)
-
-    # TODO: check if some CMakeLists.txt exists before overwriting it!
-    # TODO: make backup of CMakeLists.txt only if content is different...
-
-    # ============ create CMakeLists.txt ===========
-    with open(root_path+'/CMakeLists.txt', 'w') as file:
-        file.write('\n'.join(cmakelists))
-
-    print("-----------------------------------")
-    print("CMakeLists.txt generated on folder:")
-    print(" => "+root_path+'/CMakeLists.txt')
-    print("-----------------------------------")
 
 def run_cmake(root_path):
         # ============ build with cmake+ninja ===========
