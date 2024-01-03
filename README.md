@@ -42,6 +42,16 @@ python3 cxxbuild/cxxbuild.py demo/project3
 
 Each of them should build some specific demo project, without any issues.
 
+### Demo also working for Bazel (beta)
+
+If you prefer Bazel Build, then you can try this:
+
+```
+python3 cxxbuild/cxxbuild.py demo/project1 --bazel
+```
+
+It will automatically generate files such as `MODULE.bazel` and `BUILD.bazel`.
+
 ## Test summary for demos
 
 - demo/project1: runs on linux, osx and windows* (bash only)
