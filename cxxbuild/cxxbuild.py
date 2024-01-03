@@ -607,22 +607,81 @@ def generate_bazelfiles(root_path, INCLUDE_DIRS, src_main, src_test_main, src_li
     # cxxdeps.txt
     bzl = get_bazelfiles_from_cxxdeps(root_path, bzl, INCLUDE_DIRS, src_main, src_test_main)
 
+    # finalize all files
 
+    for tmain in bzl.targets_main:
+        tmain[-1] = tmain[-1] + "]\n)"
+    for ttest in bzl.targets_tests:
+        ttest[-1] = ttest[-1] + "]\n)"
 
-    # Generate CMakeLists.txt (or look for other option, such as 'bazel')
-    # Assuming CMake and Ninja for now (TODO: must detect and warn to install!)
+    # TODO: check if files exist and update... now, just overwrite!
 
-    # TODO: check if some CMakeLists.txt exists before overwriting it!
-    # TODO: make backup of CMakeLists.txt only if content is different...
-
-    # ============ create CMakeLists.txt ===========
-    with open(root_path+'/CMakeLists.txt', 'w') as file:
-        file.write('\n'.join(cmakelists))
+    # ============ create MODULE.bazel ===========
+    with open(root_path+'/MODULE.bazel', 'w') as file:
+        file.write('\n'.join(bzl.MODULE))
 
     print("-----------------------------------")
-    print("CMakeLists.txt generated on folder:")
-    print(" => "+root_path+'/CMakeLists.txt')
+    print("MODULE.bazel generated on folder:")
+    print(" => "+root_path+'/MODULE.bazel')
     print("-----------------------------------")
+
+    # ============ create BUILD.bazel ===========
+    with open(root_path+'/BUILD.bazel', 'w') as file:
+        file.write('\n'.join(bzl.BUILD_root))
+        for tmain in bzl.targets_main:
+            file.write('\n'.join(tmain))
+        for tinclude in bzl.targets_include:
+            file.write('\n'.join(tinclude))
+
+    print("-----------------------------------")
+    print("BUILD.bazel generated on folder:")
+    print(" => "+root_path+'/BUILD.bazel')
+    print("-----------------------------------")
+
+    # ============ create .bazelrc ===========
+    lwin = "build:windows --cxxopt=-std:c++20"
+    for topt in bzl.cxxopt_windows:
+        lwin += " --cxxopt="+topt
+    llinux = "build:linux --cxxopt=-std=c++20"
+    for topt in bzl.cxxopt_windows:
+        llinux += " --cxxopt="+topt
+    lmacos = "build:macos --cxxopt=-std=c++20"
+    for topt in bzl.cxxopt_windows:
+        lmacos += " --cxxopt="+topt
+    bzl.bazelrc.append(lwin)
+    bzl.bazelrc.append(llinux)
+    bzl.bazelrc.append(lmacos)
+
+    with open(root_path+'/.bazelrc', 'w') as file:
+        file.write('\n'.join(bzl.bazelrc))
+
+    print("-----------------------------------")
+    print(".bazelrc generated on folder:")
+    print(" => "+root_path+'/.bazelrc')
+    print("-----------------------------------")
+
+    # ============ create tests/BUILD ===========
+    # TODO: fix 'tests'
+    with open(root_path+'/tests/BUILD', 'w') as file:
+        file.write('\n'.join(bzl.BUILD_tests))
+        for ttest in bzl.targets_tests:
+            file.write('\n'.join(ttest))
+
+    print("-----------------------------------")
+    print("tests/BUILD generated on folder:")
+    print(" => "+root_path+'/tests/BUILD')
+    print("-----------------------------------")
+
+    # ============ create .bazelignore ===========
+    with open(root_path+'/.bazelignore', 'w') as file:
+        file.write('build/\n')
+
+    print("-----------------------------------")
+    print(".bazelignore generated on folder:")
+    print(" => "+root_path+'/.bazelignore')
+    print("-----------------------------------")
+
+    print("FINISHED BAZEL GENERATION!")
 
 def generate_txt_from_toml(root_path):
     try:
@@ -872,7 +931,12 @@ def main():
 
     print("INCLUDE_DIRS=",INCLUDE_DIRS)
 
-    generate_cmakelists(root_path, INCLUDE_DIRS, src_main, src_test_main, src_list, src_test_nomain)
+    if use_cmake == True:
+        generate_cmakelists(root_path, INCLUDE_DIRS, src_main, src_test_main, src_list, src_test_nomain)
+    elif use_bazel == True:
+        generate_bazelfiles(root_path, INCLUDE_DIRS, src_main, src_test_main, src_list, src_test_nomain)
+    else:
+        assert(False)
 
     run_cmake(root_path)
 
