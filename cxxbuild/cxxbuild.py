@@ -196,8 +196,7 @@ class BazelFiles:
         self.cxxopt_linux = []
         self.cxxopt_macos = []
 
-def get_bazelfiles_from_cxxdeps(root_path, bzlfiles, INCLUDE_DIRS, src_main, src_test_main):
-    # bzl = BazelFiles()
+def get_bazelfiles_from_cxxdeps(root_path, bzl, INCLUDE_DIRS, src_main, src_test_main):
     try:
         with open(root_path+'/cxxdeps.txt', 'r') as fd:
             x=fd.readlines()
@@ -282,41 +281,41 @@ def get_bazelfiles_from_cxxdeps(root_path, bzlfiles, INCLUDE_DIRS, src_main, src
                         k=k+1
                         # attach it to bazel dev_dependency, if mode is 'test'
                         if mode == 'test':
-                            bzl.MODULE.append("bazel_dep(name = "+project_name+", dev_dependency=True)")
+                            bzl.MODULE.append("bazel_dep(name = \""+project_name+"\", dev_dependency=True)")
                         # attach it to libraries, binaries and test binaries, if mode is *
                         if mode == '*':
-                            bzl.MODULE.append("bazel_dep(name = "+project_name+")")
+                            bzl.MODULE.append("bazel_dep(name = \""+project_name+"\")")
                         bzl.MODULE.append("git_override(")
-                        bzl.MODULE.append("    module_name = "+project_name+",")
-                        bzl.MODULE.append("    remote = "+git_url+",")
-                        bzl.MODULE.append("    commit = "+git_commit+",")
+                        bzl.MODULE.append("    module_name = \""+project_name+"\",")
+                        bzl.MODULE.append("    remote = \""+git_url+"\",")
+                        bzl.MODULE.append("    commit = \""+git_commit+"\",")
                         bzl.MODULE.append(")")
                         #for inc in bzl.targets_include:
                         #    for l in libs:
                         #        inc[-1] = inc[-1] + "target_link_libraries(my_headers"+str(i)+" INTERFACE "+l+")")
                         for main_target in bzl.targets_main:
                             for l in libs:
-                                main_target[-1] = main_target[-1] + "\"@"+project_name+"//:"+l+","  
+                                main_target[-1] = main_target[-1] + "\"@"+project_name+"//:"+l+"\","  
                         for test_target in bzl.targets_tests:
                             for l in libs:
-                                test_target[-1] = test_target[-1] + "\"@"+project_name+"//:"+l+"," 
+                                test_target[-1] = test_target[-1] + "\"@"+project_name+"//:"+l+"\"," 
                         continue
                     if pkg_manager == 'bcr' or pkg_manager == 'bazel+bcr':
                         # attach it to bazel dev_dependency, if mode is 'test'
                         if mode == 'test':
-                            bzl.MODULE.append("bazel_dep(name = "+project_name+", dev_dependency=True)")
+                            bzl.MODULE.append("bazel_dep(name = \""+project_name+"\", version = \""+version_number+"\", dev_dependency=True)")
                         # attach it to libraries, binaries and test binaries, if mode is *
                         if mode == '*':
-                            bzl.MODULE.append("bazel_dep(name = "+project_name+")")
+                            bzl.MODULE.append("bazel_dep(name = \""+project_name+"\", version = \""+version_number+"\")")
                         #for inc in bzl.targets_include:
                         #    for l in libs:
                         #        inc[-1] = inc[-1] + "target_link_libraries(my_headers"+str(i)+" INTERFACE "+l+")")
                         for main_target in bzl.targets_main:
                             for l in libs:
-                                main_target[-1] = main_target[-1] + "\"@"+project_name+"//:"+l+","  
+                                main_target[-1] = main_target[-1] + "\"@"+project_name+"//:"+l+"\","  
                         for test_target in bzl.targets_tests:
                             for l in libs:
-                                test_target[-1] = test_target[-1] + "\"@"+project_name+"//:"+l+"," 
+                                test_target[-1] = test_target[-1] + "\"@"+project_name+"//:"+l+"\"," 
                         continue
                 # end if not comment
             # end for line
@@ -539,7 +538,7 @@ def generate_bazelfiles(root_path, INCLUDE_DIRS, src_main, src_test_main, src_li
     bzl.BUILD_tests.append("    tests = [")
     bzl.BUILD_tests.append("        \"all_tests\"")
     bzl.BUILD_tests.append("    ]")
-    bzl.BUILD_tests.append(")")
+    bzl.BUILD_tests.append(")\n")
 
     # add sources! ADD LATER IN GLOBs
     nomain_src_list = []
@@ -557,14 +556,14 @@ def generate_bazelfiles(root_path, INCLUDE_DIRS, src_main, src_test_main, src_li
     # add_executable for binaries
     for filepath, app_name in src_main.items():
         target_main = []
-        target_main.append("cc_binary(")
+        target_main.append("\ncc_binary(")
         target_main.append("    name = \""+app_name[1]+"\",")
         target_main.append("    srcs = glob([")
         target_main.append("\t\t\""+filepath.replace("\\", "/")+"\",")
         for k in nomain_src_list:
             target_main.append("\t\t\""+k+"\",")
-        target_main.append("\t\t\""+"src/*.h") # TODO: fix 'src'
-        target_main.append("]),")
+        target_main.append("\t\t\""+"src/*.h\"") # TODO: fix 'src'
+        target_main.append("\t]),")
         bzl.targets_main.append(target_main)
     #
 
@@ -576,7 +575,7 @@ def generate_bazelfiles(root_path, INCLUDE_DIRS, src_main, src_test_main, src_li
         src_test_main = src_test_nomain
     for filepath, app_name in src_test_main.items():
         target_tests = []
-        target_tests.append("cc_test(")
+        target_tests.append("\ncc_test(")
         target_tests.append("    name = \"all_tests\",")
         target_tests.append("    srcs = glob([")
         target_tests.append("\t\t\""+filepath.replace("\\", "/")+"\",")
@@ -587,15 +586,18 @@ def generate_bazelfiles(root_path, INCLUDE_DIRS, src_main, src_test_main, src_li
     #  => DO NOT ADD SOURCE FILES INTO include FOLDERS!!!
     for i in range(len(INCLUDE_DIRS)):
         target_include = []
-        target_include.append("cc_library(")
+        target_include.append("\ncc_library(")
         target_include.append("    name = \"my_headers"+str(i)+"\",")
         target_include.append("    hdrs = glob([\"include/**/*.hpp\",\"include/**/*.h\"]),")
         target_include.append("    includes = [\"include\"],")
         bzl.targets_include.append(target_include)
         for tmain in bzl.targets_main:
-            tmain.append("deps = [\":my_headers"+str(i)+"\",")
+            tmain.append("\tdeps = [\":my_headers"+str(i)+"\",")
+            #pass
         for ttest in bzl.targets_tests:
-            ttest.append("deps = [\"//:my_headers"+str(i)+"\",")
+            ttest.append("\tdeps = [\"//:my_headers"+str(i)+"\",")
+            #pass
+        break # TODO: REMOVE THIS BREAK!
 
     # finish basic part, begin dependencies
     print("bzl.targets_main:", bzl.targets_main)
@@ -613,6 +615,8 @@ def generate_bazelfiles(root_path, INCLUDE_DIRS, src_main, src_test_main, src_li
         tmain[-1] = tmain[-1] + "]\n)"
     for ttest in bzl.targets_tests:
         ttest[-1] = ttest[-1] + "]\n)"
+    for tinc in bzl.targets_include:
+        tinc[-1] = tinc[-1] + "\n)"
 
     # TODO: check if files exist and update... now, just overwrite!
 
@@ -938,7 +942,12 @@ def main():
     else:
         assert(False)
 
-    run_cmake(root_path)
+    if use_cmake == True:
+        run_cmake(root_path)
+    elif use_bazel == True:
+        print("FINISHED! Please run bazel with command: bazel build ...")
+    else:
+        assert(False)
 
     if len(src_main.items()) > 0:
         print("OK: at least one main() has been found!")

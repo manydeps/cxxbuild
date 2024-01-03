@@ -1,22 +1,20 @@
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
-
+#
 package(
     default_visibility = ["//visibility:public"],
 )
-
+#
 cc_binary(
     name = "demo1",
     srcs = glob([
-        "src/demo1.cpp", 
-        "src/something.cpp", 
-        "src/*.h"
-    ]),
-    deps = [":my_include", "@fmt//:fmt"],
+		"src/demo1.cpp",
+		"src/something.cpp",
+		"src/*.h"
+	]),
+	deps = [":my_headers0","@fmt//:fmt","@catch2//:catch2_main",]
 )
-
 cc_library(
-    name = "my_include",
+    name = "my_headers0",
     hdrs = glob(["include/**/*.hpp","include/**/*.h"]),
     includes = ["include"],
-    deps = ["@fmt//:fmt"]
 )
