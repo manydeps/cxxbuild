@@ -3,7 +3,7 @@ fmt_cmake={ alias="fmt", git="https://github.com/fmtlib/fmt.git", tag="9.1.0", l
     "fmt"
 ], build="cmake" }
 fmt_bazel={ alias="fmt", bcr="fmt", version="9.1.0", links=["fmt"], build="bazel" }
-pthread={ triplet="!windows" }
+pthread={ platform="!windows" }
 
 [test]
 Catch2={ git="https://github.com/catchorg/Catch2.git", tag="v3.5.1", links=[
@@ -14,9 +14,9 @@ catch2={ git="https://github.com/catchorg/Catch2.git", links=[
 ], commit="f981c9cbcac07a2690e5a86767eba490b5465463", build="bazel" }
 
 [dev]
-bazel_win={ alias="bazel", choco=["bazelisk"], triplet="windows" }
-bazel_linux={ alias="bazel", npm=["bazelisk"], triplet="linux" }
-ninja_win={ alias="ninja", choco=["ninja"], triplet="windows" }
-ninja_linux={ alias="ninja", apt=["ninja-build"], triplet="linux" }
+bazel_win={ alias="bazel", choco=["bazelisk"], platform="windows" }
+bazel_linux={ alias="bazel", npm=["bazelisk"], platform="linux" }
+ninja_win={ alias="ninja", choco=["ninja"], platform="windows" }
+ninja_linux={ alias="ninja", apt=["ninja-build"], platform="linux" }
 cmake={ pip=["cmake"], deps=["ninja"] }
 conan={ pip=["conan"] }

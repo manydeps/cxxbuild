@@ -351,7 +351,7 @@ def get_toml_dep(dep_name, section_name, dep_object):
             build = y1+"+"
     triplet=""
     for x1, y1 in dep_object.items():
-        if x1 == "triplet":
+        if x1 == "platform":
             triplet = y1
     if triplet != "":
         dep_name = dep_name + ":" + triplet
