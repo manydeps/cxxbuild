@@ -132,6 +132,9 @@ This is quite simple and powerful, with few lines describing the following:
 - take system `-lm` dependency
 
 The `git` part could be any package manager, such as conan and vcpkg, although not implemented yet!
+The `git` can be specified for `cmake` or `bazel`, like `cmake+git` or `bazel+git`.
+
+It can also be `bcr`, for the Bazel Central Registry, or more specifically: `bazel+bcr` (not supported for `cmake+bcr`)
 
 ### Ongoing extensions for cxxdeps
 Some ongoing extensions will allow managing dev dependencies, 
@@ -184,7 +187,7 @@ Here one can find sections `all` (equivalent to `*`), `test` and `dev`.
 This example install system libraries `-lm` and `-lpthread` for runtime dependencies (`all`),
 `catch2` test library linked with cmake `Catch2::Catch2WithMain`, and defines several dev packages.
 
-Check an example in project3 with: `python3 cxxbuild.py demo/project3`
+Check an example in project3 with: `python3 cxxbuild/cxxbuild.py demo/project3`
 
 ### Drawbacks
 
