@@ -18,8 +18,9 @@ Usage:
         cxxbuild
         cxxbuild .
         cxxbuild build .
+        cxxbuild . --c++20 --bazel
     cxxbuild help
-      displays usage()
+      displays this usage message and available options
     cxxbuild lint => TODO: will invoke linter
     cxxbuild clean => TODO: will clean
     cxxbuild test => TODO: will invoke tests
@@ -31,8 +32,13 @@ Usage:
        --include INCLUDE_PATH 
             * sets include folder (default: include) 
     MORE BUILD OPTIONS:
-       * c++11 => TODO: use c++11 standard
-       * bazel => TODO: use bazel build system (instead of cmake)
+       * --c++11 => use c++11 standard
+       * --c++14 => use c++14 standard
+       * --c++17 => use c++17 standard (DEFAULT)
+       * --c++20 => use c++20 standard
+       * --c++23 => use c++23 standard
+       * --cmake => use cmake build system (DEFAULT)
+       * --bazel => use bazel build system (instead of cmake)
 
     SEE ALSO cxxdeps.txt FILE:
         fmt == "9.1.0"     [ fmt ]                    git *    https://github.com/fmtlib/fmt.git
