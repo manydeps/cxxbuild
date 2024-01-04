@@ -174,8 +174,8 @@ catch2={ git="https://github.com/catchorg/Catch2.git", tag="v3.3.1", links=[
 ] }
 
 [dev]
-bazel=[{ choco=["bazelisk"], triplet="windows" }, { npm=["bazelisk"], triplet="linux" }]
-ninja=[{ choco=["ninja"], triplet="windows" }, { apt=["ninja-build"], triplet="linux" }]
+bazel=[{ choco=["bazelisk"], platform="windows" }, { npm=["bazelisk"], platform="linux" }]
+ninja=[{ choco=["ninja"], platform="windows" }, { apt=["ninja-build"], platform="linux" }]
 cmake={ pip=["cmake"], deps=["ninja"] }
 conan={ pip=["conan"] }
 ```
