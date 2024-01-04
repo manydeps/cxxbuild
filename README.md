@@ -23,6 +23,8 @@ Or, just install it from pip: `pip install cxxbuild`
 
 Then, just run: `cxxbuild help`
 
+From this point, we assume cxxbuild is installed in your system :)
+
 ## Basic commands
 
 `cxxbuild` has four main modes (three unimplemented, yet):
@@ -34,23 +36,13 @@ Then, just run: `cxxbuild help`
 
 ## Running demos 
 
-```
-python3 cxxbuild/cxxbuild.py demo/project1
-python3 cxxbuild/cxxbuild.py demo/project2
-python3 cxxbuild/cxxbuild.py demo/project3
-```
 
-Each of them should build some specific demo project, without any issues.
+- Demo 1 [README](demo/project1/README.md): `cxxbuild demo/project1`
+- Demo 2 [README](demo/project2/README.md): `cxxbuild demo/project2`
+- Demo 3 [README](demo/project3/README.md): `cxxbuild demo/project3`
 
-### Demo also working for Bazel (beta)
-
-If you prefer Bazel Build, then you can try this:
-
-```
-python3 cxxbuild/cxxbuild.py demo/project1 --bazel
-```
-
-It will automatically generate files such as `MODULE.bazel` and `BUILD.bazel`.
+All of them support both CMake and Bazel build systems,
+for common platforms Linux, Windows and Mac.
 
 ## Test summary for demos
 
