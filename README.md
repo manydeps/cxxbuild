@@ -2,7 +2,7 @@
 
 [![Demo on windows, linux and macos](https://github.com/manydeps/cxxbuild/actions/workflows/demo.yml/badge.svg)](https://github.com/manydeps/cxxbuild/actions/workflows/demo.yml)
 
-![C++17](https://img.shields.io/badge/std-c%2B%2B17-blue)
+![C++17](https://img.shields.io/badge/std-c%2B%2B17-blue) ![C++20](https://img.shields.io/badge/std-c%2B%2B20-blue)
 
 [![DOI](https://zenodo.org/badge/715821683.svg)](https://zenodo.org/doi/10.5281/zenodo.10447208)
 
