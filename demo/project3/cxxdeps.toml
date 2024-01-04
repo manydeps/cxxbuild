@@ -14,7 +14,8 @@ catch2={ git="https://github.com/catchorg/Catch2.git", links=[
 ], commit="f981c9cbcac07a2690e5a86767eba490b5465463", build="bazel" }
 
 [dev]
-bazel=[{ choco=["bazelisk"], triplet="windows" }, { npm=["bazelisk"], triplet="linux" }]
+bazel_win={ alias="bazel", choco=["bazelisk"], triplet="windows" }
+bazel_linux={ alias="bazel", npm=["bazelisk"], triplet="linux" }
 ninja=[{ choco=["ninja"], triplet="windows" }, { apt=["ninja-build"], triplet="linux" }]
 cmake={ pip=["cmake"], deps=["ninja"] }
 conan={ pip=["conan"] }
