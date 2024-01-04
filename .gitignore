@@ -11,3 +11,5 @@ dist/
 package-lock.json
 bazel-*
 *.bazel.lock
+.pypirc
+

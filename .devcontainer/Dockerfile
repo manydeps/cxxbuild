@@ -67,3 +67,5 @@ RUN sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/b
 RUN sudo update-alternatives --install /usr/bin/clangd clangd /usr/bin/clangd-17 10
 RUN sudo update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-17 10
 
+RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
+     && apt-get -y install --no-install-recommends python3.10-venv
