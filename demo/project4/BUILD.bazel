@@ -1,0 +1,37 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+#
+package(
+    default_visibility = ["//visibility:public"],
+)
+#
+cc_binary(
+    name = "demo4",
+    srcs = glob([
+		"src/demo4.cpp",
+		"src/something.cpp",
+		"src/*.h"
+	]),
+	deps = [":my_headers0",]
+)
+cc_library(
+    name = "my_headers0",
+    hdrs = glob(["include/**/*.hpp","include/**/*.h"]),
+    includes = ["include"],
+    # no 'dep' attribute in cc_library
+    # dep = []
+)
+#
+test_suite(
+    name = "suite-tests",
+    tests = [
+        "all_tests"
+    ]
+)
+
+cc_test(
+    name = "all_tests",
+    srcs = glob([
+		"tests/my_test.cpp",
+    ]),
+	deps = ["//:my_headers0","@catch2//:catch2_main",]
+)

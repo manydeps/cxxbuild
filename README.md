@@ -40,15 +40,17 @@ From this point, we assume cxxbuild is installed in your system :)
 - Demo 1 [README](demo/project1/README.md): `cxxbuild demo/project1`
 - Demo 2 [README](demo/project2/README.md): `cxxbuild demo/project2`
 - Demo 3 [README](demo/project3/README.md): `cxxbuild demo/project3`
+- Demo 4 [README](demo/project4/README.md): `cxxbuild demo/project4 --c++20`
 
 All of them support both CMake and Bazel build systems,
 for common platforms Linux, Windows and Mac.
 
 ## Test summary for demos
 
-- demo/project1: runs on linux, osx and windows* (bash only)
-- demo/project2: runs on linux, osx and windows (bash and cmd)
-- demo/project3: runs on linux, osx and windows* (bash only)
+- demo/project1: runs on linux, osx and windows* (bash only) - default c++17 (works with c++11 to c++23)
+- demo/project2: runs on linux, osx and windows (bash and cmd) - default c++17 (works with c++11 to c++23)
+- demo/project3: runs on linux, osx and windows* (bash only) - default c++17 (works with c++11 to c++23)
+- demo/project4: runs on linux, osx and windows* (bash only) - requires minimum c++20
 
 (*) Some limitations on windows/cmd are related to fmt dependency on cmake, not cxxbuild.
 

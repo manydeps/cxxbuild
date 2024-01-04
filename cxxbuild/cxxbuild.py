@@ -467,15 +467,13 @@ def add_system_triplet_bazel(bzl, triplet, not_triplet, my_system, project_name)
             bzl.cxxopt_linux.append("-l"+project_name)
     return True
 
-def generate_cmakelists(root_path, INCLUDE_DIRS, src_main, src_test_main, src_list, src_test_nomain):
+def generate_cmakelists(cppstd, root_path, INCLUDE_DIRS, src_main, src_test_main, src_list, src_test_nomain):
     # READ cxxdeps.txt file, if available...
     # AT THIS POINT, ASSUMING 'cmake' OPTION (NO 'bazel' FOR NOW!)
     cmakelists = []
     cmakelists.append("cmake_minimum_required(VERSION 3.27)")
     cmakelists.append("project(my-project LANGUAGES CXX VERSION 0.0.1)")
-    # TODO: get 'c++20' parameter and use it, if necessary.
-    # Standard C++ is c++17, for now! Always adopt ONE LESS the current one (c++20)!
-    cmakelists.append("set (CMAKE_CXX_STANDARD 20)") # TODO: make it 17
+    cmakelists.append("set (CMAKE_CXX_STANDARD "+cppstd+")") 
     cmakelists.append("set (CMAKE_CXX_STANDARD_REQUIRED ON)")
     cmakelists.append("set (CMAKE_CXX_EXTENSIONS OFF)")
     cmakelists.append("set (CMAKE_EXPORT_COMPILE_COMMANDS ON)")
@@ -535,7 +533,7 @@ def generate_cmakelists(root_path, INCLUDE_DIRS, src_main, src_test_main, src_li
     print(" => "+root_path+'/CMakeLists.txt')
     print("-----------------------------------")
 
-def generate_bazelfiles(root_path, INCLUDE_DIRS, src_main, src_test_main, src_list, src_test_nomain):
+def generate_bazelfiles(cppstd, root_path, INCLUDE_DIRS, src_main, src_test_main, src_list, src_test_nomain):
     # READ cxxdeps.txt file, if available...
     # AT THIS POINT, ASSUMING 'cmake' OPTION (NO 'bazel' FOR NOW!)
     bzl = BazelFiles()
@@ -689,13 +687,13 @@ def generate_bazelfiles(root_path, INCLUDE_DIRS, src_main, src_test_main, src_li
     print("-----------------------------------")
 
     # ============ create .bazelrc ===========
-    lwin = "build:windows --cxxopt=-std:c++20"
+    lwin = "build:windows --cxxopt=-std:c++"+cppstd
     for topt in bzl.cxxopt_windows:
         lwin += " --cxxopt="+topt
-    llinux = "build:linux --cxxopt=-std=c++20"
+    llinux = "build:linux --cxxopt=-std=c++"+cppstd
     for topt in bzl.cxxopt_windows:
         llinux += " --cxxopt="+topt
-    lmacos = "build:macos --cxxopt=-std=c++20"
+    lmacos = "build:macos --cxxopt=-std=c++"+cppstd
     for topt in bzl.cxxopt_windows:
         lmacos += " --cxxopt="+topt
     bzl.bazelrc.append(lwin)
@@ -874,6 +872,7 @@ def main():
     search_include="include"
     use_cmake=None
     use_bazel=None
+    cppstd="17"
     for i in range(len(sys.argv)):
         if (sys.argv[i] == "--src"):
             search_src = str(sys.argv[i + 1])
@@ -887,6 +886,16 @@ def main():
         if (sys.argv[i] == "--bazel"):
             use_cmake = False
             use_bazel = True
+        if (sys.argv[i] == "--c++11"):
+            cppstd="11"
+        if (sys.argv[i] == "--c++14"):
+            cppstd="14"
+        if (sys.argv[i] == "--c++17"):
+            cppstd="17"
+        if (sys.argv[i] == "--c++20"):
+            cppstd="20"
+        if (sys.argv[i] == "--c++23"):
+            cppstd="23"
             
     # build system defaults to cmake
     if use_cmake is None:
@@ -987,9 +996,9 @@ def main():
     print("INCLUDE_DIRS=",INCLUDE_DIRS)
 
     if use_cmake == True:
-        generate_cmakelists(root_path, INCLUDE_DIRS, src_main, src_test_main, src_list, src_test_nomain)
+        generate_cmakelists(cppstd, root_path, INCLUDE_DIRS, src_main, src_test_main, src_list, src_test_nomain)
     elif use_bazel == True:
-        generate_bazelfiles(root_path, INCLUDE_DIRS, src_main, src_test_main, src_list, src_test_nomain)
+        generate_bazelfiles(cppstd, root_path, INCLUDE_DIRS, src_main, src_test_main, src_list, src_test_nomain)
     else:
         assert(False)
 
