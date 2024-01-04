@@ -1,0 +1,15 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+#
+package(
+    default_visibility = ["//visibility:public"],
+)
+#
+cc_binary(
+    name = "demo2",
+    srcs = glob([
+		"src/demo2.cpp",
+		"src/something.cpp",
+		"src/*.h"
+	]),
+	deps = []
+)

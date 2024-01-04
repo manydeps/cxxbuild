@@ -277,8 +277,13 @@ def get_bazelfiles_from_cxxdeps(root_path, bzl, INCLUDE_DIRS, src_main, src_test
                     if pkg_manager == 'git' or pkg_manager == 'bazel+git':
                         git_url = fields[k]
                         k=k+1
-                        git_commit = fields[k]
-                        k=k+1
+                        git_commit = ""
+                        if k < len(fields):
+                            git_commit = fields[k]
+                            k=k+1
+                        if git_commit == "":
+                            print("bazel+git requires Commit field!")
+                            assert(False)
                         # attach it to bazel dev_dependency, if mode is 'test'
                         if mode == 'test':
                             bzl.MODULE.append("bazel_dep(name = \""+project_name+"\", dev_dependency=True)")
@@ -336,6 +341,14 @@ def get_bazelfiles_from_cxxdeps(root_path, bzl, INCLUDE_DIRS, src_main, src_test
 def get_toml_dep(dep_name, section_name, dep_object):
     print("get_toml_dep(...) dep_name: ", dep_name, " section:", section_name, " dep_object:", dep_object)
     local_dep = []
+    # check real name (or alias)
+    for x1, y1 in dep_object.items():
+        if x1 == "alias":
+            dep_name = y1
+    build=""   # build system preferred
+    for x1, y1 in dep_object.items():
+        if x1 == "build":
+            build = y1+"+"
     triplet=""
     for x1, y1 in dep_object.items():
         if x1 == "triplet":
@@ -362,18 +375,30 @@ def get_toml_dep(dep_name, section_name, dep_object):
     complement = ""
     if dep_type == "":
         for x1, y1 in dep_object.items():
-            if x1 == "git" or x1 == "cmake+git" or x1 == "bazel+git":
-                dep_type = x1 # some "git" type
-                complement = y1
+            if x1 == "git":
+                dep_type = build+x1   # some "git" type
+                complement = y1 # URL
+                has_tag = False
+                has_commit = False
                 for x2, y2 in dep_object.items():
                     if x2 == "tag":
                         version = "\""+y2+"\""
-                        # only tag OR commit
-                        break 
+                        has_tag = True
                     if x2 == "commit":
-                        complement = "\""+y2+"\""
-                        # only tag OR commit
-                        break
+                        complement = complement + " " + y2
+                        has_commit = True
+                if has_tag and has_commit:
+                    print("WARNING: git has both TAG and COMMIT!")
+        for x1, y1 in dep_object.items():
+            if x1 == "bcr":
+                dep_type = build+x1   # some "git" type
+                print("INFO: bazel 'bcr' package must be the same as dep_name or alias!")
+                assert(dep_name == y1)
+                for x2, y2 in dep_object.items():
+                    if x2 == "version":
+                        version = "\""+y2+"\""
+        # end git or bcr
+
     if dep_type == "":
         dep_type = "system" # assuming 'system' as default
     #
@@ -592,8 +617,8 @@ def generate_bazelfiles(root_path, INCLUDE_DIRS, src_main, src_test_main, src_li
     # INCLUDE_DIRS will act as header-only libraries
     #  => DO NOT ADD SOURCE FILES INTO include FOLDERS!!!
     print("INCLUDE_DIRS:", INCLUDE_DIRS)
-    # FOR NOW: make sure only a single include exists, for bazel sake!
-    assert(len(INCLUDE_DIRS) == 1) 
+    # FOR NOW: make sure at most a single include exists, for bazel sake!
+    assert(len(INCLUDE_DIRS) <= 1) 
     for i in range(len(INCLUDE_DIRS)):
         incdir = INCLUDE_DIRS[i]
         target_include = []
@@ -606,10 +631,13 @@ def generate_bazelfiles(root_path, INCLUDE_DIRS, src_main, src_test_main, src_li
         bzl.targets_include.append(target_include)
         for tmain in bzl.targets_main:
             tmain.append("\tdeps = [\":my_headers"+str(i)+"\",")
-            #pass
         for ttest in bzl.targets_tests:
             ttest.append("\tdeps = [\"//:my_headers"+str(i)+"\",")
-            #pass
+    if len(INCLUDE_DIRS) == 0:
+        for tmain in bzl.targets_main:
+            tmain.append("\tdeps = [")
+        for ttest in bzl.targets_tests:
+            ttest.append("\tdeps = [")
 
     # finish basic part, begin dependencies
     print("bzl.targets_main:", bzl.targets_main)
@@ -648,10 +676,11 @@ def generate_bazelfiles(root_path, INCLUDE_DIRS, src_main, src_test_main, src_li
             file.write('\n'.join(tmain))
         for tinclude in bzl.targets_include:
             file.write('\n'.join(tinclude))
-        # tests part!
-        file.write('\n'.join(bzl.BUILD_tests))
-        for ttest in bzl.targets_tests:
-            file.write('\n'.join(ttest))
+        if len(bzl.targets_tests) > 0:
+            # tests part!
+            file.write('\n'.join(bzl.BUILD_tests))
+            for ttest in bzl.targets_tests:
+                file.write('\n'.join(ttest))
 
 
     print("-----------------------------------")

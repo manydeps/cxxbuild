@@ -1,11 +1,17 @@
 [all]
-fmt={ git="https://github.com/fmtlib/fmt.git", tag="9.1.0", links=["fmt"] }
+fmt_cmake={ alias="fmt", git="https://github.com/fmtlib/fmt.git", tag="9.1.0", links=[
+    "fmt"
+], build="cmake" }
+fmt_bazel={ alias="fmt", bcr="fmt", version="9.1.0", links=["fmt"], build="bazel" }
 pthread={ triplet="!windows" }
 
 [test]
-catch2={ git="https://github.com/catchorg/Catch2.git", tag="v3.3.1", links=[
+Catch2={ git="https://github.com/catchorg/Catch2.git", tag="v3.5.1", links=[
     "Catch2::Catch2WithMain"
-] }
+], build="cmake" }
+catch2={ git="https://github.com/catchorg/Catch2.git", links=[
+    "catch2_main"
+], commit="f981c9cbcac07a2690e5a86767eba490b5465463", build="bazel" }
 
 [dev]
 bazel=[{ choco=["bazelisk"], triplet="windows" }, { npm=["bazelisk"], triplet="linux" }]

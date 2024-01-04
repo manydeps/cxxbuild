@@ -14,27 +14,23 @@ add_library(my_headers0 INTERFACE)
 target_include_directories(my_headers0 INTERFACE include)
 target_link_libraries(demo3 PRIVATE my_headers0)
 target_link_libraries(my_test PRIVATE my_headers0)
-add_library(my_headers1 INTERFACE)
-target_include_directories(my_headers1 INTERFACE build/_deps/fmt-src/include)
-target_link_libraries(demo3 PRIVATE my_headers1)
-target_link_libraries(my_test PRIVATE my_headers1)
 # begin dependencies from cxxdeps.txt
 # cxxdeps dependency fmt
 FetchContent_Declare(fmt GIT_REPOSITORY https://github.com/fmtlib/fmt.git GIT_TAG 9.1.0)
 FetchContent_MakeAvailable(fmt)
 target_link_libraries(my_headers0 INTERFACE fmt)
-target_link_libraries(my_headers1 INTERFACE fmt)
 target_link_libraries(demo3 PRIVATE fmt)
 target_link_libraries(my_test PRIVATE fmt)
+# cxxdeps dependency fmt
 # cxxdeps dependency pthread
 # system dependency: -lpthread
 IF (NOT WIN32) # !windows
 target_link_libraries(my_headers0 INTERFACE pthread)
-target_link_libraries(my_headers1 INTERFACE pthread)
 target_link_libraries(demo3 PRIVATE pthread)
 target_link_libraries(my_test PRIVATE pthread)
 ENDIF()
-# cxxdeps dependency catch2
-FetchContent_Declare(catch2 GIT_REPOSITORY https://github.com/catchorg/Catch2.git GIT_TAG v3.3.1)
-FetchContent_MakeAvailable(catch2)
+# cxxdeps dependency Catch2
+FetchContent_Declare(Catch2 GIT_REPOSITORY https://github.com/catchorg/Catch2.git GIT_TAG v3.5.1)
+FetchContent_MakeAvailable(Catch2)
 target_link_libraries(my_test PRIVATE Catch2::Catch2WithMain)
+# cxxdeps dependency catch2
