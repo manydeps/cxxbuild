@@ -9,6 +9,16 @@ There is also some `lista01` header-only library hosted on `include/` folder, an
 - pthread system library (on all systems except windows, see triplet `!windows`)
 - crypto system library (on linux systems only, see triplet `linux`)
 
+See details on [cxxdeps.txt](cxxdeps.txt):
+```
+fmt == "9.1.0"     [ fmt ]                    cmake+git *    https://github.com/fmtlib/fmt.git
+fmt == "9.1.0"     [ fmt ]                    bazel+bcr *
+Catch2 == "v3.5.1" [ Catch2::Catch2WithMain ] cmake+git test https://github.com/catchorg/Catch2.git
+catch2 == *        [ catch2_main ]            bazel+git test https://github.com/catchorg/Catch2.git f981c9cbcac07a2690e5a86767eba490b5465463
+pthread:!windows
+crypto:linux
+```
+
 ### How to build
 
 Install cxxbuild with: `pip install cxxbuild`
