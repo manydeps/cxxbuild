@@ -9,9 +9,29 @@ There is also some `lista01` header-only library hosted on `include/` folder, an
 - pthread system library (on all systems except windows, see triplet `!windows`)
 - crypto system library (on linux systems only, see triplet `linux`)
 
-Just type: `python3 cxxbuild.py`
+
+### How to build
+
+Install cxxbuild with: `pip install cxxbuild`
+
+#### For CMake
+Just type: `cxxbuild .`
 
 The files `CMakeLists.txt`, `cxxdeps.txt` and `cxxdeps.dev.txt` will be generated automatically.
 
 Output will be built on `build/demo3` and tests on `build/my_test`
+
+#### For Bazel
+Just type: `cxxbuild . --bazel`
+
+The files `MODULE.bazel` and `BUILD.bazel` will be generated automatically.
+
+Output will be built on `bazel-bin`, as usual with `bazel build ...`
+
+### License
+
+MIT License
+
+
+
 
