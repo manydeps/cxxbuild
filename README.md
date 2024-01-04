@@ -2,7 +2,7 @@
 
 [![Demo on windows, linux and macos](https://github.com/manydeps/cxxbuild/actions/workflows/demo.yml/badge.svg)](https://github.com/manydeps/cxxbuild/actions/workflows/demo.yml)
 
-![C++17](https://img.shields.io/badge/std-c%2B%2B17-blue) ![C++20](https://img.shields.io/badge/std-c%2B%2B20-blue)
+![C++11](https://img.shields.io/badge/std-c%2B%2B11-blue) ![C++14](https://img.shields.io/badge/std-c%2B%2B14-blue) ![C++17](https://img.shields.io/badge/std-c%2B%2B17-blue) ![C++20](https://img.shields.io/badge/std-c%2B%2B20-blue) ![C++23](https://img.shields.io/badge/std-c%2B%2B23-blue)
 
 [![DOI](https://zenodo.org/badge/715821683.svg)](https://zenodo.org/doi/10.5281/zenodo.10447208)
 
@@ -192,6 +192,7 @@ Some people may dislike the imposed organization, like `src/` and `tests/`, but 
 ## Related Works
 
 - See [ccbuild from debian](https://packages.debian.org/pt-br/sid/devel/ccbuild)
+   * See [bneijt/ccbuild](https://github.com/bneijt/ccbuild)
 - See [Mantle project](https://github.com/jpxor/Mantle) (experimental but with similar ideas)
 
 None of them support dependencies, such as `cxxdeps.txt`, or even build systems such as cmake and bazel.
