@@ -640,9 +640,9 @@ def generate_bazelfiles(root_path, INCLUDE_DIRS, src_main, src_test_main, src_li
             ttest.append("\tdeps = [")
 
     # finish basic part, begin dependencies
-    print("bzl.targets_main:", bzl.targets_main)
-    print("bzl.targets_tests:", bzl.targets_tests)
-    print("bzl.targets_include:", bzl.targets_include)
+    print("bzl.targets_main:    COUNT =", len(bzl.targets_main))
+    print("bzl.targets_tests:   COUNT =", len(bzl.targets_tests))
+    print("bzl.targets_include: COUNT =", len(bzl.targets_include))
     #
     generate_txt_from_toml(root_path)
 
@@ -978,6 +978,7 @@ def main():
             incdir = incdir.removeprefix(root_path).removeprefix("/")
             # ignore 'build' stuff
             if incdir[0:6] == 'build/':
+                print("WARNING: 'build/' prefixed folder ignored: ", incdir)
                 pass
             else:
                 INCLUDE_DIRS.append(incdir)
