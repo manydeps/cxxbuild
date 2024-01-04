@@ -11,5 +11,5 @@ bazel_dep(name = "catch2", dev_dependency=True)
 git_override(
     module_name = "catch2",
     remote = "https://github.com/catchorg/Catch2.git",
-    commit = "863c662c0eff026300f4d729a7054e90d6d12cdd",
+    commit = "f981c9cbcac07a2690e5a86767eba490b5465463",
 )

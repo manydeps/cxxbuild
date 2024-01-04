@@ -62,7 +62,12 @@ It will automatically generate files such as `MODULE.bazel` and `BUILD.bazel`.
 
 ## Running demo 1 (explained)
 
-`python3 cxxbuild.py demo/project1`
+`python3 cxxbuild/cxxbuild.py demo/project1`
+
+OR, after installation:
+
+`cxxbuild demo/project1`
+
 
 It will:
 

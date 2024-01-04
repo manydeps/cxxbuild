@@ -14,16 +14,11 @@ add_library(my_headers0 INTERFACE)
 target_include_directories(my_headers0 INTERFACE include)
 target_link_libraries(demo1 PRIVATE my_headers0)
 target_link_libraries(my_test PRIVATE my_headers0)
-add_library(my_headers1 INTERFACE)
-target_include_directories(my_headers1 INTERFACE build/_deps/fmt-src/include)
-target_link_libraries(demo1 PRIVATE my_headers1)
-target_link_libraries(my_test PRIVATE my_headers1)
 # begin dependencies from cxxdeps.txt
 # cxxdeps dependency fmt
 FetchContent_Declare(fmt GIT_REPOSITORY https://github.com/fmtlib/fmt.git GIT_TAG 9.1.0)
 FetchContent_MakeAvailable(fmt)
 target_link_libraries(my_headers0 INTERFACE fmt)
-target_link_libraries(my_headers1 INTERFACE fmt)
 target_link_libraries(demo1 PRIVATE fmt)
 target_link_libraries(my_test PRIVATE fmt)
 # cxxdeps dependency fmt
@@ -36,7 +31,6 @@ target_link_libraries(my_test PRIVATE Catch2::Catch2WithMain)
 # system dependency: -lpthread
 IF (NOT WIN32) # !windows
 target_link_libraries(my_headers0 INTERFACE pthread)
-target_link_libraries(my_headers1 INTERFACE pthread)
 target_link_libraries(demo1 PRIVATE pthread)
 target_link_libraries(my_test PRIVATE pthread)
 ENDIF()
@@ -44,7 +38,6 @@ ENDIF()
 # system dependency: -lcrypto
 IF (UNIX AND NOT APPLE) # linux
 target_link_libraries(my_headers0 INTERFACE crypto)
-target_link_libraries(my_headers1 INTERFACE crypto)
 target_link_libraries(demo1 PRIVATE crypto)
 target_link_libraries(my_test PRIVATE crypto)
 ENDIF()

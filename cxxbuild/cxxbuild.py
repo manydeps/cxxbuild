@@ -282,40 +282,47 @@ def get_bazelfiles_from_cxxdeps(root_path, bzl, INCLUDE_DIRS, src_main, src_test
                         # attach it to bazel dev_dependency, if mode is 'test'
                         if mode == 'test':
                             bzl.MODULE.append("bazel_dep(name = \""+project_name+"\", dev_dependency=True)")
+                            for test_target in bzl.targets_tests:
+                                for l in libs:
+                                    test_target[-1] = test_target[-1] + "\"@"+project_name+"//:"+l+"\"," 
                         # attach it to libraries, binaries and test binaries, if mode is *
                         if mode == '*':
                             bzl.MODULE.append("bazel_dep(name = \""+project_name+"\")")
+                            for inc_target in bzl.targets_include:
+                                for l in libs:
+                                    inc_target[-1] = inc_target[-1] + "\"@"+project_name+"//:"+l+"\"," 
+                            for main_target in bzl.targets_main:
+                                for l in libs:
+                                    main_target[-1] = main_target[-1] + "\"@"+project_name+"//:"+l+"\","  
+                            for test_target in bzl.targets_tests:
+                                for l in libs:
+                                    test_target[-1] = test_target[-1] + "\"@"+project_name+"//:"+l+"\"," 
+                        # for all modes now!
                         bzl.MODULE.append("git_override(")
                         bzl.MODULE.append("    module_name = \""+project_name+"\",")
                         bzl.MODULE.append("    remote = \""+git_url+"\",")
                         bzl.MODULE.append("    commit = \""+git_commit+"\",")
                         bzl.MODULE.append(")")
-                        #for inc in bzl.targets_include:
-                        #    for l in libs:
-                        #        inc[-1] = inc[-1] + "target_link_libraries(my_headers"+str(i)+" INTERFACE "+l+")")
-                        for main_target in bzl.targets_main:
-                            for l in libs:
-                                main_target[-1] = main_target[-1] + "\"@"+project_name+"//:"+l+"\","  
-                        for test_target in bzl.targets_tests:
-                            for l in libs:
-                                test_target[-1] = test_target[-1] + "\"@"+project_name+"//:"+l+"\"," 
                         continue
                     if pkg_manager == 'bcr' or pkg_manager == 'bazel+bcr':
                         # attach it to bazel dev_dependency, if mode is 'test'
                         if mode == 'test':
                             bzl.MODULE.append("bazel_dep(name = \""+project_name+"\", version = \""+version_number+"\", dev_dependency=True)")
+                            for test_target in bzl.targets_tests:
+                                for l in libs:
+                                    test_target[-1] = test_target[-1] + "\"@"+project_name+"//:"+l+"\"," 
                         # attach it to libraries, binaries and test binaries, if mode is *
                         if mode == '*':
                             bzl.MODULE.append("bazel_dep(name = \""+project_name+"\", version = \""+version_number+"\")")
-                        #for inc in bzl.targets_include:
-                        #    for l in libs:
-                        #        inc[-1] = inc[-1] + "target_link_libraries(my_headers"+str(i)+" INTERFACE "+l+")")
-                        for main_target in bzl.targets_main:
-                            for l in libs:
-                                main_target[-1] = main_target[-1] + "\"@"+project_name+"//:"+l+"\","  
-                        for test_target in bzl.targets_tests:
-                            for l in libs:
-                                test_target[-1] = test_target[-1] + "\"@"+project_name+"//:"+l+"\"," 
+                            for inc_target in bzl.targets_include:
+                                for l in libs:
+                                    inc_target[-1]  = inc_target[-1]  + "\"@"+project_name+"//:"+l+"\"," 
+                            for main_target in bzl.targets_main:
+                                for l in libs:
+                                    main_target[-1] = main_target[-1] + "\"@"+project_name+"//:"+l+"\","  
+                            for test_target in bzl.targets_tests:
+                                for l in libs:
+                                    test_target[-1] = test_target[-1] + "\"@"+project_name+"//:"+l+"\"," 
                         continue
                 # end if not comment
             # end for line
@@ -530,9 +537,9 @@ def generate_bazelfiles(root_path, INCLUDE_DIRS, src_main, src_test_main, src_li
     bzl.BUILD_root.append("#")
 
     bzl.BUILD_tests = []
-    bzl.BUILD_tests.append("load(\"@rules_cc//cc:defs.bzl\", \"cc_library\", \"cc_test\")")
-    bzl.BUILD_tests.append("package(default_visibility = [\"//visibility:public\"])")
-    bzl.BUILD_tests.append("#")
+    #bzl.BUILD_tests.append("load(\"@rules_cc//cc:defs.bzl\", \"cc_library\", \"cc_test\")")
+    #bzl.BUILD_tests.append("package(default_visibility = [\"//visibility:public\"])")
+    bzl.BUILD_tests.append("\n#")
     bzl.BUILD_tests.append("test_suite(")
     bzl.BUILD_tests.append("    name = \"suite-tests\",")
     bzl.BUILD_tests.append("    tests = [")
@@ -584,12 +591,18 @@ def generate_bazelfiles(root_path, INCLUDE_DIRS, src_main, src_test_main, src_li
 
     # INCLUDE_DIRS will act as header-only libraries
     #  => DO NOT ADD SOURCE FILES INTO include FOLDERS!!!
+    print("INCLUDE_DIRS:", INCLUDE_DIRS)
+    # FOR NOW: make sure only a single include exists, for bazel sake!
+    assert(len(INCLUDE_DIRS) == 1) 
     for i in range(len(INCLUDE_DIRS)):
+        incdir = INCLUDE_DIRS[i]
         target_include = []
         target_include.append("\ncc_library(")
         target_include.append("    name = \"my_headers"+str(i)+"\",")
-        target_include.append("    hdrs = glob([\"include/**/*.hpp\",\"include/**/*.h\"]),")
-        target_include.append("    includes = [\"include\"],")
+        target_include.append("    hdrs = glob([\""+incdir+"/**/*.hpp\",\""+incdir+"/**/*.h\"]),")
+        target_include.append("    includes = [\""+incdir+"\"],")
+        target_include.append("    # no 'dep' attribute in cc_library")
+        target_include.append("    # dep = [")
         bzl.targets_include.append(target_include)
         for tmain in bzl.targets_main:
             tmain.append("\tdeps = [\":my_headers"+str(i)+"\",")
@@ -597,7 +610,6 @@ def generate_bazelfiles(root_path, INCLUDE_DIRS, src_main, src_test_main, src_li
         for ttest in bzl.targets_tests:
             ttest.append("\tdeps = [\"//:my_headers"+str(i)+"\",")
             #pass
-        break # TODO: REMOVE THIS BREAK!
 
     # finish basic part, begin dependencies
     print("bzl.targets_main:", bzl.targets_main)
@@ -616,7 +628,7 @@ def generate_bazelfiles(root_path, INCLUDE_DIRS, src_main, src_test_main, src_li
     for ttest in bzl.targets_tests:
         ttest[-1] = ttest[-1] + "]\n)"
     for tinc in bzl.targets_include:
-        tinc[-1] = tinc[-1] + "\n)"
+        tinc[-1]  = tinc[-1]  + "]\n)"
 
     # TODO: check if files exist and update... now, just overwrite!
 
@@ -636,6 +648,11 @@ def generate_bazelfiles(root_path, INCLUDE_DIRS, src_main, src_test_main, src_li
             file.write('\n'.join(tmain))
         for tinclude in bzl.targets_include:
             file.write('\n'.join(tinclude))
+        # tests part!
+        file.write('\n'.join(bzl.BUILD_tests))
+        for ttest in bzl.targets_tests:
+            file.write('\n'.join(ttest))
+
 
     print("-----------------------------------")
     print("BUILD.bazel generated on folder:")
@@ -666,15 +683,15 @@ def generate_bazelfiles(root_path, INCLUDE_DIRS, src_main, src_test_main, src_li
 
     # ============ create tests/BUILD ===========
     # TODO: fix 'tests'
-    with open(root_path+'/tests/BUILD', 'w') as file:
-        file.write('\n'.join(bzl.BUILD_tests))
-        for ttest in bzl.targets_tests:
-            file.write('\n'.join(ttest))
+    #with open(root_path+'/tests/BUILD', 'w') as file:
+    #    file.write('\n'.join(bzl.BUILD_tests))
+    #    for ttest in bzl.targets_tests:
+    #        file.write('\n'.join(ttest))
 
-    print("-----------------------------------")
-    print("tests/BUILD generated on folder:")
-    print(" => "+root_path+'/tests/BUILD')
-    print("-----------------------------------")
+    #print("-----------------------------------")
+    #print("tests/BUILD generated on folder:")
+    #print(" => "+root_path+'/tests/BUILD')
+    #print("-----------------------------------")
 
     # ============ create .bazelignore ===========
     with open(root_path+'/.bazelignore', 'w') as file:
@@ -930,7 +947,11 @@ def main():
         if "include" in subdirs:
             incdir = root+"/"+search_include
             incdir = incdir.removeprefix(root_path).removeprefix("/")
-            INCLUDE_DIRS.append(incdir)
+            # ignore 'build' stuff
+            if incdir[0:6] == 'build/':
+                pass
+            else:
+                INCLUDE_DIRS.append(incdir)
         # TODO: search in other places too... maybe inside src?
 
     print("INCLUDE_DIRS=",INCLUDE_DIRS)
