@@ -486,27 +486,21 @@ def generate_cmakelists(cppstd, root_path, INCLUDE_DIRS, src_main, src_test_main
     cmakelists.append("Include(FetchContent)")
     # add sources!
     cmakelists.append("set(SOURCES")
-    # get all sources not in main() list (no duplicates)
+    # get all sources not in main() list (no duplicates exist)
     clean_list = []
     clean_list_main = []
     for f in src_list:
         clean_list.append(f.replace("\\", "/"))
-    clean_list = list(set(clean_list))
+    #clean_list = list(set(clean_list)) # do not do this!
     for filepath, app_name in src_main.items():
         clean_list_main.append(filepath.replace("\\", "/"))
-    clean_list_main = list(set(clean_list_main))
+    #clean_list_main = list(set(clean_list_main))  # do not do this!
     clean_list = [x for x in clean_list if x not in clean_list_main]
     for f in clean_list:
         cmakelists.append("\t"+f)
-    '''
-    for f in src_list:
-        for filepath, app_name in src_main.items():
-            filepath2 = filepath.replace("\\", "/")
-            f2 = f.replace("\\", "/")
-            if filepath2 != f2:
-                cmakelists.append("\t"+f2)
-    '''
     cmakelists.append(")")
+    COUNT_APP_ID=1
+    all_apps = []
     # add_executable for binaries
     for filepath, app_name in src_main.items():
         cmakelists.append("add_executable("+app_name[1]+" "+filepath.replace("\\", "/")+" ${SOURCES})")
@@ -993,6 +987,23 @@ def main():
     print("src_test_main:", src_test_main)
     print("src_test_nomain:", src_test_nomain)
     print("src_test_list:", src_test_list)
+
+    # ---------------------------------
+    # FIX app names (avoid duplicates!)
+    COUNT_APP_ID=1
+    all_apps = []
+    for filepath, app_name in src_main.items():
+        app_name_list = list(app_name)
+        app_name1 = app_name_list[1]
+        while app_name1 in all_apps:
+            COUNT_APP_ID = COUNT_APP_ID + 1
+            app_name1 = app_name_list[1] + str(COUNT_APP_ID) # concat number
+        all_apps.append(app_name1)
+        app_name_list[1] = app_name1
+        src_main[filepath] = tuple(app_name_list) 
+    # ---------------------------------
+
+    print("fixed src_main: ", src_main)
 
     # SO... TIME TO FIND INCLUDE FOLDERS
 
