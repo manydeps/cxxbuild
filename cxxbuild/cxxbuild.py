@@ -486,12 +486,26 @@ def generate_cmakelists(cppstd, root_path, INCLUDE_DIRS, src_main, src_test_main
     cmakelists.append("Include(FetchContent)")
     # add sources!
     cmakelists.append("set(SOURCES")
+    # get all sources not in main() list (no duplicates)
+    clean_list = []
+    clean_list_main = []
+    for f in src_list:
+        clean_list.append(f.replace("\\", "/"))
+    clean_list = list(set(clean_list))
+    for filepath, app_name in src_main.items():
+        clean_list_main.append(filepath.replace("\\", "/"))
+    clean_list_main = list(set(clean_list_main))
+    clean_list = [x for x in clean_list if x not in clean_list_main]
+    for f in clean_list:
+        cmakelists.append("\t"+f)
+    '''
     for f in src_list:
         for filepath, app_name in src_main.items():
             filepath2 = filepath.replace("\\", "/")
             f2 = f.replace("\\", "/")
             if filepath2 != f2:
                 cmakelists.append("\t"+f2)
+    '''
     cmakelists.append(")")
     # add_executable for binaries
     for filepath, app_name in src_main.items():
