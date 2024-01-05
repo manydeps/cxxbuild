@@ -6,7 +6,7 @@
 
 [![DOI](https://zenodo.org/badge/715821683.svg)](https://zenodo.org/doi/10.5281/zenodo.10447208)
 
-Version: `cxxbuild version=1.5.1`  Installation: `pip install cxxbuild`
+Version: `cxxbuild version=1.5.2`  Installation: `pip install cxxbuild`
 
 cxxbuild is a python script to easily build C++ programs: just invoke 'cxxbuild' and it works!
 
