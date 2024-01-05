@@ -199,6 +199,38 @@ None of them support dependencies, such as `cxxdeps.txt`, or even build systems 
 
 Hopefully, when this project is fully finished, C++ will be a better place for all of us :)
 
+### Case of Study
+
+In order to check the capabilities of cxxbuild, it was used to build the C/C++ ccbuild tool.
+Unfortunately, few tweaks were necessary in the generated CMakeLists, due to FLEX dependency, 
+but it was quite easy on general. See [Issue 34 on ccbuild project](https://github.com/bneijt/ccbuild/issues/34)
+
+General instructions:
+- Create `cxxdeps.txt` file:
+
+```
+bobcat
+gnutls
+fl
+png
+# apt install flex 
+# apt install libboost-all-dev
+# apt install gnutls-dev
+# apt install libbobcat-dev
+# libpng-dev
+```
+
+- Use the following build script: `cxxbuild . --tests test --include src --include src/sourceScanner --c++20`
+- Add this to last line of CMakeLists: `add_definitions(-DVERSION="v2.0.7-39-gdf7b35c")`
+- Add this to SOURCES: `${FLEX_SourceScanner_OUTPUTS}`
+- Add these two lines before the SOURCES:
+
+```
+find_package(FLEX)
+FLEX_TARGET(SourceScanner "src/sourceScanner/lexer"  "src/sourceScanner/yylex.cc" )
+```
+
+And that's it! It builds all avaliable targets and tests for ccbuild.
 
 ## Acknowledgements
 
