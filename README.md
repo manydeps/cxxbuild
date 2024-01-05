@@ -6,9 +6,9 @@
 
 [![DOI](https://zenodo.org/badge/715821683.svg)](https://zenodo.org/doi/10.5281/zenodo.10447208)
 
-Version: `cxxbuild version=1.5.2`  Installation: `pip install cxxbuild`
+_**cxxbuild** is a python script to easily generate C/C++ build files for cmake and bazel._
 
-cxxbuild is a python script to easily build C++ programs: just invoke 'cxxbuild' and it works!
+Version: `cxxbuild version=1.5.2`  Installation: `pip install cxxbuild`
 
 For basic introduction, read the post: [Using cxxbuild to easily build C++ project with tests and dependencies](https://igormcoelho.medium.com/using-cxxbuild-to-easily-build-c-project-with-tests-and-dependencies-a3726b453f75)
 
