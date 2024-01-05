@@ -884,6 +884,7 @@ def main():
     search_src="src"
     search_tests="tests"
     search_include="include"
+    INCLUDE_DIRS = []
     use_cmake=None
     use_bazel=None
     cppstd="17"
@@ -894,6 +895,8 @@ def main():
             search_tests = str(sys.argv[i + 1])
         if (sys.argv[i] == "--include"):
             search_include = str(sys.argv[i + 1])
+            # force --include to appear
+            INCLUDE_DIRS.append(root_path+"/"+search_include)
         if (sys.argv[i] == "--cmake"):
             use_cmake = True
             use_bazel = False
@@ -1007,7 +1010,7 @@ def main():
 
     # SO... TIME TO FIND INCLUDE FOLDERS
 
-    INCLUDE_DIRS = []
+    #INCLUDE_DIRS = []
     for root, subdirs, files in os.walk(root_path):
         root = root.removeprefix(root_path).removeprefix("/")
         #print("root: ", root)
@@ -1023,6 +1026,8 @@ def main():
             else:
                 INCLUDE_DIRS.append(incdir)
         # TODO: search in other places too... maybe inside src?
+    # keep unique only!
+    INCLUDE_DIRS = list(set(INCLUDE_DIRS))
 
     print("INCLUDE_DIRS=",INCLUDE_DIRS)
 
