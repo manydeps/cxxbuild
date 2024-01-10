@@ -1,0 +1,7 @@
+[all]
+fmt={ git="https://github.com/fmtlib/fmt.git", tag="9.1.0", links=["fmt"] }
+
+[test]
+Catch2={ git="https://github.com/catchorg/Catch2.git", tag="v3.5.1", links=[
+    "Catch2::Catch2WithMain"
+] }
