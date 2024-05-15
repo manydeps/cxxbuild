@@ -13,6 +13,23 @@ Version: `cxxbuild version=1.5.2`  Installation: `pip install cxxbuild`
 For basic introduction, read the post: [Using cxxbuild to easily build C++ project with tests and dependencies](https://igormcoelho.medium.com/using-cxxbuild-to-easily-build-c-project-with-tests-and-dependencies-a3726b453f75)
 
 We know it is very hard to start a C++ project and learn basics of build systems such as CMake and Bazel, and package managers like conan and vcpkg... so just type "cxxbuild" and be happy!
+But you MUST follow this basic organization below:
+
+```
+project_folder/
+              |
+              | include/
+              |        | package1_name/
+              |                       | file1.h
+              |                       | file2.hpp
+              |                       | ...
+              | src/
+              |    | file1.cpp
+              |    | file2.c
+              |    | file_main.cpp
+              |    | ...
+              | cxxdeps.txt
+```
 
 The strongest point of this project is the `cxxdeps.txt` format, 
 that allow easy specification of dependencies from different package managers (in similar style of python `requirements.txt` format)
