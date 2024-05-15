@@ -16,19 +16,19 @@ We know it is very hard to start a C++ project and learn basics of build systems
 But you MUST follow this basic organization below:
 
 ```
-project_folder/
-              |
-              | include/
-              |        | package1_name/
-              |                       | file1.h
-              |                       | file2.hpp
-              |                       | ...
-              | src/
-              |    | file1.cpp
-              |    | file2.c
-              |    | file_main.cpp
-              |    | ...
-              | cxxdeps.txt
+project/
+       |
+       | include/
+       |        | package1/
+       |                  | file1.h
+       |                  | file2.hpp
+       |                  | ...
+       | src/
+       |    | file1.cpp
+       |    | file2.c
+       |    | file_main.cpp
+       |    | ...
+       | cxxdeps.txt
 ```
 
 The strongest point of this project is the `cxxdeps.txt` format, 
