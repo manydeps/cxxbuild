@@ -25,16 +25,22 @@ jobs:
       if: contains(matrix.os, 'ubuntu')
       run: |
         sudo apt-get install ninja-build -y
-    - name: Install ninja-build (macos)
+    - name: Install ninja-build and dependencies (macos)
       if: contains(matrix.os, 'macos')
       run: |
         brew install ninja
+        python3 -m pip install -r requirements.txt --break-system-packages
     - name: Install cmake with pip
       run: |
         pipx install cmake
-    - name: Install local cxxbuild.py dependencies
+    - name: Install local cxxbuild.py dependencies (Ubuntu)
+      if: contains(matrix.os, 'ubuntu')
       run: |
-        python3 -m pip install -r requirements.txt --break-system-packages
+        python3 -m pip install -r requirements.txt
+    - name: Install local cxxbuild.py dependencies (Windows)
+      if: contains(matrix.os, 'windows')
+      run: |
+        python3 -m pip install -r requirements.txt
     - name: demo-project1
       shell: bash
       run: |
