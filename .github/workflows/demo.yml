@@ -52,6 +52,11 @@ jobs:
       shell: bash
       run: |
         python3 cxxbuild/cxxbuild.py demo/project1 --bazel
+    - name: demo-project1 (bazel macos)
+      if: contains(matrix.os, 'macos')
+      shell: bash
+      run: |
+        python3 cxxbuild/cxxbuild.py demo/project1 --bazel
     - name: demo-project2 (cmake)
       shell: bash
       run: |
