@@ -32,7 +32,7 @@ jobs:
         brew install pipx
     - name: Install cmake with pip
       run: |
-        python3 -m pipx install cmake
+        pipx install cmake
     - name: Install local cxxbuild.py dependencies
       run: |
         python3 -m pip install -r requirements.txt
