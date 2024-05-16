@@ -41,27 +41,39 @@ jobs:
     - name: Install cmake with pipx (All)
       run: |
         pipx install cmake
-    - name: demo-project1
+    - name: demo-project1 (cmake)
       shell: bash
       run: |
-        ls -la
-        pwd
         python3 cxxbuild/cxxbuild.py demo/project1
+    - name: demo-project1 (bazel)
+      shell: bash
+      run: |
         python3 cxxbuild/cxxbuild.py demo/project1 --bazel
-    - name: demo-project2
+    - name: demo-project2 (cmake)
       shell: bash
       run: |
         python3 cxxbuild/cxxbuild.py demo/project2
+    - name: demo-project2 (bazel)
+      shell: bash
+      run: |
+        python3 cxxbuild/cxxbuild.py demo/project2 --bazel
     - name: demo-project2 (windows cmd)
       if: contains(matrix.os, 'windows')
       shell: cmd
       run: |
         python3 cxxbuild/cxxbuild.py demo/project2
+    - name: demo-project2 (windows cmd) (bazel)
+      if: contains(matrix.os, 'windows')
+      shell: cmd
+      run: |
         python3 cxxbuild/cxxbuild.py demo/project2 --bazel
-    - name: demo-project3
+    - name: demo-project3 (cmake)
       shell: bash
       run: |
         python3 cxxbuild/cxxbuild.py demo/project3
+    - name: demo-project3 (bazel)
+      shell: bash
+      run: |
         python3 cxxbuild/cxxbuild.py demo/project3 --bazel
     - name: demo-project4 C++20 (macos only, until github CI linux/win compilers support c++20)
       if: contains(matrix.os, 'macos')
@@ -69,8 +81,7 @@ jobs:
       run: |
         python3 cxxbuild/cxxbuild.py demo/project4 --c++20
         python3 cxxbuild/cxxbuild.py demo/project4 --c++20 --bazel
-
-    - name: demo-project5
+    - name: demo-project5 (cmake only)
       shell: bash
       run: |
         python3 cxxbuild/cxxbuild.py demo/project5
