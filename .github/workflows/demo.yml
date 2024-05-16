@@ -25,25 +25,29 @@ jobs:
       if: contains(matrix.os, 'ubuntu')
       run: |
         sudo apt-get install ninja-build -y
+        bash -i -c "npm install -g @bazel/bazelisk"
         python3 -m pip install -r requirements.txt
-    - name: Install ninja-build and local dependencies (macos)
+    - name: Install ninja-build, bazel and local dependencies (macos)
       if: contains(matrix.os, 'macos')
       run: |
         brew install ninja
+        brew install bazel
         python3 -m pip install -r requirements.txt --break-system-packages
-    - name: Install cmake with pipx (Alls)
+    - name: Install bazel and local dependencies (windows)
+      if: contains(matrix.os, 'macos')
+      run: |
+        choco install bazel
+        python3 -m pip install -r requirements.txt
+    - name: Install cmake with pipx (All)
       run: |
         pipx install cmake
-    - name: Install local cxxbuild.py dependencies (Windows)
-      if: contains(matrix.os, 'windows')
-      run: |
-        python3 -m pip install -r requirements.txt
     - name: demo-project1
       shell: bash
       run: |
         ls -la
         pwd
         python3 cxxbuild/cxxbuild.py demo/project1
+        python3 cxxbuild/cxxbuild.py demo/project1 --bazel
     - name: demo-project2
       shell: bash
       run: |
@@ -53,14 +57,23 @@ jobs:
       shell: cmd
       run: |
         python3 cxxbuild/cxxbuild.py demo/project2
+        python3 cxxbuild/cxxbuild.py demo/project2 --bazel
     - name: demo-project3
       shell: bash
       run: |
         python3 cxxbuild/cxxbuild.py demo/project3
-    - name: demo-project4
+        python3 cxxbuild/cxxbuild.py demo/project3 --bazel
+    - name: demo-project4 C++20 (macos only, until github CI linux/win compilers support c++20)
+      if: contains(matrix.os, 'macos')
       shell: bash
       run: |
         python3 cxxbuild/cxxbuild.py demo/project4 --c++20
+        python3 cxxbuild/cxxbuild.py demo/project4 --c++20 --bazel
+
+    - name: demo-project5
+      shell: bash
+      run: |
+        python3 cxxbuild/cxxbuild.py demo/project5
 
 
 

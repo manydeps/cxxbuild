@@ -847,6 +847,40 @@ def run_cmake(root_path):
     print('ninja result:', x)
     assert(x == 0)
 
+def run_bazel(root_path):
+    # ============ build with bazel ===========
+    # STEP 1: check that 'bazel' command exists
+    CHECK_BAZEL_CMD="bazel --version"
+    print("Please install latest bazel with NVM: bash -i -c \"npm install -g @bazel/bazelisk\"")
+    print("   - on windows: choco install bazel")
+    print("   - on macos:   brew install bazel")
+    print("or visit bazel website: https://bazel.build/install")
+    print("checking bazel command now...")
+    x=subprocess.call(list(filter(None, CHECK_BAZEL_CMD.split(' '))))
+    print('check result:', x)
+    assert(x == 0)
+    #
+    # STEP 1.5: debug only (TODO: create flag --verbose!)
+    BAZEL_CMD="cat "+root_path+"/MODULE.bazel"
+    print("showing MODULE.bazel... "+BAZEL_CMD)
+    x=subprocess.call(list(filter(None, BAZEL_CMD.split(' '))))
+    print('\nbazel result:', x)
+    assert(x == 0)
+    #
+    BAZEL_CMD="cat "+root_path+"/BUILD.bazel"
+    print("showing BUILD.bazel... "+BAZEL_CMD)
+    x=subprocess.call(list(filter(None, BAZEL_CMD.split(' '))))
+    print('\nbazel result:', x)
+    assert(x == 0)
+    #
+    # STEP 2: build with bazel
+    BAZEL_CMD="bazel build ..."
+    print("building...\n"+BAZEL_CMD)
+    x=subprocess.call(list(filter(None, BAZEL_CMD.split(' '))), cwd=root_path)
+    print('bazel result:', x)
+    assert(x == 0)
+
+
 # detect if it's 'cmd' for windows, but not 'bash'
 def is_cmd():
     return os.name == 'nt' and 'WSL_DISTRO_NAME' not in os.environ
@@ -1041,8 +1075,9 @@ def main():
     if use_cmake == True:
         run_cmake(root_path)
     elif use_bazel == True:
-        print("FINISHED! Please run bazel with command: bazel build ...")
+        run_bazel(root_path)
     else:
+        print("UNKNOWN BUILDER! cxxbuild ERROR...")
         assert(False)
 
     if len(src_main.items()) > 0:

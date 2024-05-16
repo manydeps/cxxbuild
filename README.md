@@ -56,9 +56,13 @@ From this point, we assume cxxbuild is installed in your system :)
 
 
 - Demo 1 [README](demo/project1/README.md): `cxxbuild demo/project1`
+    * Dependencies: fmt, catch2, pthread:!windows, crypto:linux
 - Demo 2 [README](demo/project2/README.md): `cxxbuild demo/project2`
+    * Dependencies: NONE
 - Demo 3 [README](demo/project3/README.md): `cxxbuild demo/project3`
+    * Dependencies: fmt, catch2, pthread:!windows
 - Demo 4 [README](demo/project4/README.md): `cxxbuild demo/project4 --c++20`
+    * Dependencies: catch2
 
 All of them support both CMake and Bazel build systems,
 for common platforms Linux, Windows and Mac.
