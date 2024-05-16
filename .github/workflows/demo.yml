@@ -32,9 +32,9 @@ jobs:
     - name: Install cmake with pip
       run: |
         python3 -m pipx install cmake
-    - name: Install cxxbuild dependencies
+    - name: Install local cxxbuild.py dependencies
       run: |
-        pipx runpip cxxbuild install -r requirements.txt 
+        python3 -m pip install -r requirements.txt
     - name: demo-project1
       shell: bash
       run: |
