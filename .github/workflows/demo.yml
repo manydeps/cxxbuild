@@ -99,6 +99,10 @@ jobs:
       shell: bash
       run: |
         python3 cxxbuild/cxxbuild.py demo/project5
+    - name: demo-project6 (cmake only)
+      shell: bash
+      run: |
+        python3 cxxbuild/cxxbuild.py demo/project6
 
 
 

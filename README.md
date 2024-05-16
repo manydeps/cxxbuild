@@ -63,6 +63,10 @@ From this point, we assume cxxbuild is installed in your system :)
     * Dependencies: fmt, catch2, pthread:!windows
 - Demo 4 [README](demo/project4/README.md): `cxxbuild demo/project4 --c++20`
     * Dependencies: catch2
+- Demo 5 [README](demo/project5/README.md): `cxxbuild demo/project5`
+    * Dependencies (cmake-only): fmt, catch2
+- Demo 6 [README](demo/project6/README.md): `cxxbuild demo/project6`
+    * Dependencies (cmake-only): optframe, absl (google abseil)
 
 All of them support both CMake and Bazel build systems,
 for common platforms Linux, Windows and Mac.
