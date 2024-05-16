@@ -145,6 +145,7 @@ Catch2 == "v3.3.1" [ Catch2::Catch2WithMain ] git test https://github.com/catcho
 m
 !std c++17
 !build cmake
+# this is a comment
 ```
 
 This is quite simple and powerful, with few lines describing the following:
