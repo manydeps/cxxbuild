@@ -230,7 +230,7 @@ Examples:
 - Parameter `--bazel` appears on file as `!build bazel`
 - Parameter `--include dir` appears on file as `!include "dir"`
 
-Command-line parameters have priority over `cxxdeps.txt`, but `!build` parameter cannot be overwritten.
+Command-line parameters have priority over `cxxdeps.txt` and can overwrite or complement them (with exception of `!build` parameter that cannot be overwritten).
 
 In the future, the `!options` could be limited by operating system, e.g., `!option:windows`.
 
