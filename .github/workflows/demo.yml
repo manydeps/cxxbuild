@@ -75,11 +75,15 @@ jobs:
       shell: bash
       run: |
         python3 cxxbuild/cxxbuild.py demo/project3 --bazel
-    - name: demo-project4 C++20 (macos only, until github CI linux/win compilers support c++20)
-      if: contains(matrix.os, 'macos')
+    - name: demo-project4 C++20 (cmake)
       shell: bash
       run: |
         python3 cxxbuild/cxxbuild.py demo/project4 --c++20
+
+    - name: demo-project3 (bazel ubuntu)
+      if: contains(matrix.os, 'ubuntu')
+      shell: bash
+      run: |
         python3 cxxbuild/cxxbuild.py demo/project4 --c++20 --bazel
 
 

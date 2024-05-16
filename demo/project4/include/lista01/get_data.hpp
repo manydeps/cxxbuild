@@ -4,7 +4,7 @@
 #ifndef LISTA01_GET_DATA_HPP_
 #define LISTA01_GET_DATA_HPP_
 
-// #include <format>
+#include <format>
 #include <fstream>
 #include <iostream>
 #include <string>
