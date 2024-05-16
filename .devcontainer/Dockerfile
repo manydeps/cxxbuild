@@ -21,11 +21,11 @@ RUN curl --proto '=https' --tlsv1.2 https://apt.llvm.org/llvm.sh -sSf | bash -s 
 
 # clangd, clang-format and clang-tidy
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-     && apt-get -y install --no-install-recommends clang-tidy-17 clang-format-17 clangd-17
+     && apt-get -y install --no-install-recommends clang-tidy-18 clang-format-18 clangd-18
 
 # libc++ for clang (not using libstdc++ from gcc)
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-     && apt-get -y install --no-install-recommends libc++-17-dev libc++abi-17-dev
+     && apt-get -y install --no-install-recommends libc++-18-dev libc++abi-18-dev
 
 # install gcc 13 (latest)
 
@@ -60,12 +60,12 @@ RUN python3 -m pip install bumpver
 # default gcc-12
 RUN sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-13 10
 RUN sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 10
-# default clang-17
-RUN sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-17 10
-RUN sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-17 10
-RUN sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-17 10
-RUN sudo update-alternatives --install /usr/bin/clangd clangd /usr/bin/clangd-17 10
-RUN sudo update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-17 10
+# default clang-18
+RUN sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-18 10
+RUN sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-18 10
+RUN sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-18 10
+RUN sudo update-alternatives --install /usr/bin/clangd clangd /usr/bin/clangd-18 10
+RUN sudo update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-18 10
 
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
      && apt-get -y install --no-install-recommends python3.10-venv
