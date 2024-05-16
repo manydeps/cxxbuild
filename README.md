@@ -215,6 +215,18 @@ None that I know, yet :)
 
 Some people may dislike the imposed organization, like `src/` and `tests/`, but it can be changed manually on script. The idea here is to really make a simplistic script, that really works with highly complex setups (such as taking dependencies from remote and dealing with build systems like cmake and bazel). These things are hard to do even for some experienced c++ programmers... so, as long as it is simple and it works, that is fine! If it doesn't work, file an issue!
 
+### Build options on cxxdeps
+
+The `cxxdeps.txt` file allows defining some usual command line parameters with `!` prefix.
+Examples:
+
+- Parameter `--c++20` appears on file as `!std c++20`
+- Parameter `--cmake` appears on file as `!build cmake`
+- Parameter `--bazel` appears on file as `!build bazel`
+- Parameter `--include dir` appears on file as `!include "dir"`
+
+Command-line parameters have priority over `cxxdeps.txt`, but `!build` parameter cannot be overwritten.
+
 ## Related Works
 
 - See [ccbuild from debian](https://packages.debian.org/pt-br/sid/devel/ccbuild)

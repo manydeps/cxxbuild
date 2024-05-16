@@ -919,37 +919,25 @@ def main():
     build_options_args = []
     for i in range(len(sys.argv)):
         if (sys.argv[i] == "--src"):
-            search_src = str(sys.argv[i + 1])
             build_options_args.append("!src \""+str(sys.argv[i + 1])+"\"")
         if (sys.argv[i] == "--tests"):
-            search_tests = str(sys.argv[i + 1])
             build_options_args.append("!tests \""+str(sys.argv[i + 1])+"\"")
         if (sys.argv[i] == "--include"):
-            search_include = str(sys.argv[i + 1])
             # force --include to appear
             build_options_args.append("!include \""+search_include+"\"")
         if (sys.argv[i] == "--cmake"):
-            use_cmake = True
-            use_bazel = False
             build_options_args.append("!build cmake")
         if (sys.argv[i] == "--bazel"):
-            use_cmake = False
-            use_bazel = True
             build_options_args.append("!build bazel")
         if (sys.argv[i] == "--c++11"):
-            cppstd="11"
             build_options_args.append("!std c++11")
         if (sys.argv[i] == "--c++14"):
-            cppstd="14"
             build_options_args.append("!std c++14")
         if (sys.argv[i] == "--c++17"):
-            cppstd="17"
             build_options_args.append("!std c++17")
         if (sys.argv[i] == "--c++20"):
-            cppstd="20"
             build_options_args.append("!std c++20")
         if (sys.argv[i] == "--c++23"):
-            cppstd="23"
             build_options_args.append("!std c++23")
 
     print("build options from args: "+str(build_options_args))
@@ -991,9 +979,15 @@ def main():
         if oplist[0] == '!tests':
             search_tests = oplist[1].strip("\"")
         if oplist[0] == '!build' and oplist[1] == 'cmake':
+            if use_bazel == True:
+                print("cxxbuild error: cannot redefine build system 'bazel' to 'cmake'")
+                exit(1)
             use_cmake = True
             use_bazel = False
         if oplist[0] == '!build' and oplist[1] == 'bazel':
+            if use_cmake == True:
+                print("cxxbuild error: cannot redefine build system 'cmake' to 'bazel'")
+                exit(1)
             use_cmake = False
             use_bazel = True
         if oplist[0] == '!std' and oplist[1] == 'c++11':
