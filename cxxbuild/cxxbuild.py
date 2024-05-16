@@ -853,7 +853,7 @@ def run_bazel(root_path):
     CHECK_BAZEL_CMD="bazel --version"
     print("Please install latest bazel with NVM: bash -i -c \"npm install -g @bazel/bazelisk\"")
     print("   - on windows: choco install bazel")
-    print("   - on macos:   brew install bazel")
+    print("   - on macos:   brew install bazelisk")
     print("or visit bazel website: https://bazel.build/install")
     print("checking bazel command now...")
     x=subprocess.call(list(filter(None, CHECK_BAZEL_CMD.split(' '))))

@@ -31,10 +31,10 @@ jobs:
       if: contains(matrix.os, 'macos')
       run: |
         brew install ninja
-        brew install bazel
+        brew install bazelisk
         python3 -m pip install -r requirements.txt --break-system-packages
     - name: Install bazel and local dependencies (windows)
-      if: contains(matrix.os, 'macos')
+      if: contains(matrix.os, 'windows')
       run: |
         choco install bazel
         python3 -m pip install -r requirements.txt
