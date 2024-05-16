@@ -54,7 +54,7 @@ def get_cmakelists_from_cxxdeps(root_path, cmakelists, INCLUDE_DIRS, src_main, s
             #print(x)
             cmakelists.append("# begin dependencies from cxxdeps.txt")
             for l in x:
-                if (len(l) >= 1) and (l[0] != '#'):
+                if (len(l) >= 1) and (l[0] != '#') and (l[0] != '!'):
                     # good line!
                     print(l)
                     fields = l.split()
@@ -209,7 +209,7 @@ def get_bazelfiles_from_cxxdeps(root_path, bzl, INCLUDE_DIRS, src_main, src_test
             #print(x)
             # cmakelists.append("# begin dependencies from cxxdeps.txt")
             for l in x:
-                if (len(l) >= 1) and (l[0] != '#'):
+                if (len(l) >= 1) and (l[0] != '#') and (l[0] != '!'):
                     # good line!
                     print(l)
                     fields = l.split()
@@ -906,6 +906,7 @@ def main():
         print("'lint' not implemented, yet!")
         exit()
     root_path = sys.argv[1]
+    
     if "build" in sys.argv:
         # must take path explicitly from third argument!
         # example: cxxbuild build .
@@ -915,39 +916,97 @@ def main():
             usage()
             exit()
 
-    search_src="src"
-    search_tests="tests"
-    search_include="include"
-    INCLUDE_DIRS = []
-    use_cmake=None
-    use_bazel=None
-    cppstd="17"
+    build_options_args = []
     for i in range(len(sys.argv)):
         if (sys.argv[i] == "--src"):
             search_src = str(sys.argv[i + 1])
+            build_options_args.append("!src \""+str(sys.argv[i + 1])+"\"")
         if (sys.argv[i] == "--tests"):
             search_tests = str(sys.argv[i + 1])
+            build_options_args.append("!tests \""+str(sys.argv[i + 1])+"\"")
         if (sys.argv[i] == "--include"):
             search_include = str(sys.argv[i + 1])
             # force --include to appear
-            INCLUDE_DIRS.append(root_path+"/"+search_include)
+            build_options_args.append("!include \""+search_include+"\"")
         if (sys.argv[i] == "--cmake"):
             use_cmake = True
             use_bazel = False
+            build_options_args.append("!build cmake")
         if (sys.argv[i] == "--bazel"):
             use_cmake = False
             use_bazel = True
+            build_options_args.append("!build bazel")
         if (sys.argv[i] == "--c++11"):
             cppstd="11"
+            build_options_args.append("!std c++11")
         if (sys.argv[i] == "--c++14"):
             cppstd="14"
+            build_options_args.append("!std c++14")
         if (sys.argv[i] == "--c++17"):
             cppstd="17"
+            build_options_args.append("!std c++17")
         if (sys.argv[i] == "--c++20"):
             cppstd="20"
+            build_options_args.append("!std c++20")
         if (sys.argv[i] == "--c++23"):
             cppstd="23"
-            
+            build_options_args.append("!std c++23")
+
+    print("build options from args: "+str(build_options_args))
+    #
+    build_options = []
+    # TODO: convert .toml to .txt here, if necessary!
+    # get more build options for cxxdeps.txt
+    try:
+        with open(root_path+'/cxxdeps.txt', 'r') as fd:
+            x=fd.readlines()
+            for l in x:
+                if (len(l) >= 1) and (l[0] == '!'):
+                    build_options.append(l)
+    except FileNotFoundError:
+        print("File cxxdeps.txt does not exist... ignoring it!")
+    
+    # merge with argument build options (priority is LAST)
+    for op in build_options_args:
+        build_options.append(op)
+
+    print("build options (including cxxdeps): "+str(build_options))
+
+    # begin processing build options
+    search_src="src"
+    search_tests="tests"
+    search_include="include"
+    #
+    use_cmake=None
+    use_bazel=None
+    cppstd="17"
+    INCLUDE_DIRS = []
+    for op in build_options:
+        oplist = op.split()
+        print(op.split())
+        if oplist[0] == '!include':
+            INCLUDE_DIRS.append(oplist[1].strip("\""))
+        if oplist[0] == '!src':
+            search_src = oplist[1].strip("\"")
+        if oplist[0] == '!tests':
+            search_tests = oplist[1].strip("\"")
+        if oplist[0] == '!build' and oplist[1] == 'cmake':
+            use_cmake = True
+            use_bazel = False
+        if oplist[0] == '!build' and oplist[1] == 'bazel':
+            use_cmake = False
+            use_bazel = True
+        if oplist[0] == '!std' and oplist[1] == 'c++11':
+            cppstd="11"
+        if oplist[0] == '!std' and oplist[1] == 'c++14':
+            cppstd="14"
+        if oplist[0] == '!std' and oplist[1] == 'c++17':
+            cppstd="17"
+        if oplist[0] == '!std' and oplist[1] == 'c++20':
+            cppstd="20"
+        if oplist[0] == '!std' and oplist[1] == 'c++23':
+            cppstd="23"
+        
     # build system defaults to cmake
     if use_cmake is None:
         use_cmake = True
@@ -1041,6 +1100,7 @@ def main():
     # ---------------------------------
 
     print("fixed src_main: ", src_main)
+    
 
     # SO... TIME TO FIND INCLUDE FOLDERS
 
