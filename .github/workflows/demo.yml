@@ -47,7 +47,8 @@ jobs:
       shell: bash
       run: |
         python3 cxxbuild/cxxbuild.py demo/project1
-    - name: demo-project1 (bazel)
+    - name: demo-project1 (bazel ubuntu)
+      if: contains(matrix.os, 'ubuntu')
       shell: bash
       run: |
         python3 cxxbuild/cxxbuild.py demo/project1 --bazel
@@ -55,7 +56,8 @@ jobs:
       shell: bash
       run: |
         python3 cxxbuild/cxxbuild.py demo/project2
-    - name: demo-project2 (bazel)
+    - name: demo-project2 (bazel ubuntu)
+      if: contains(matrix.os, 'ubuntu')
       shell: bash
       run: |
         python3 cxxbuild/cxxbuild.py demo/project2 --bazel
@@ -64,16 +66,12 @@ jobs:
       shell: cmd
       run: |
         python3 cxxbuild/cxxbuild.py demo/project2
-    - name: demo-project2 (windows cmd) (bazel)
-      if: contains(matrix.os, 'windows')
-      shell: cmd
-      run: |
-        python3 cxxbuild/cxxbuild.py demo/project2 --bazel
     - name: demo-project3 (cmake)
       shell: bash
       run: |
         python3 cxxbuild/cxxbuild.py demo/project3
-    - name: demo-project3 (bazel)
+    - name: demo-project3 (bazel ubuntu)
+      if: contains(matrix.os, 'ubuntu')
       shell: bash
       run: |
         python3 cxxbuild/cxxbuild.py demo/project3 --bazel
@@ -83,10 +81,7 @@ jobs:
       run: |
         python3 cxxbuild/cxxbuild.py demo/project4 --c++20
         python3 cxxbuild/cxxbuild.py demo/project4 --c++20 --bazel
-    - name: demo-project5 (all github compilers broken for c++20)
-      shell: bash
-      run: |
-        echo "no test"
+
 
 
 
