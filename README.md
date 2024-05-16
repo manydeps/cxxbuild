@@ -143,6 +143,8 @@ An example is:
 fmt == "9.1.0"     [ fmt ]                    git *    https://github.com/fmtlib/fmt.git
 Catch2 == "v3.3.1" [ Catch2::Catch2WithMain ] git test https://github.com/catchorg/Catch2.git
 m
+!std c++17
+!build cmake
 ```
 
 This is quite simple and powerful, with few lines describing the following:
@@ -150,6 +152,8 @@ This is quite simple and powerful, with few lines describing the following:
 - take `fmt` project from git repository in specific version
 - take `Catch2` project from git repository in specific version and use it for tests only
 - take system `-lm` dependency
+- C++ standard `c++17` is used
+- build system `cmake` is used
 
 The `git` part could be any package manager, such as conan and vcpkg, although not implemented yet!
 The `git` can be specified for `cmake` or `bazel`, like `cmake+git` or `bazel+git`.
@@ -215,7 +219,7 @@ None that I know, yet :)
 
 Some people may dislike the imposed organization, like `src/` and `tests/`, but it can be changed manually on script. The idea here is to really make a simplistic script, that really works with highly complex setups (such as taking dependencies from remote and dealing with build systems like cmake and bazel). These things are hard to do even for some experienced c++ programmers... so, as long as it is simple and it works, that is fine! If it doesn't work, file an issue!
 
-### Build options on cxxdeps
+### Build `!options` on cxxdeps
 
 The `cxxdeps.txt` file allows defining some usual command line parameters with `!` prefix.
 Examples:
@@ -226,6 +230,8 @@ Examples:
 - Parameter `--include dir` appears on file as `!include "dir"`
 
 Command-line parameters have priority over `cxxdeps.txt`, but `!build` parameter cannot be overwritten.
+
+In the future, the `!options` could be limited by operating system, e.g., `!option:windows`.
 
 ## Related Works
 
