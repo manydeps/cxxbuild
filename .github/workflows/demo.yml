@@ -21,12 +21,14 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - uses: ilammy/msvc-dev-cmd@v1
-    - name: Install ninja-build and local dependencies (Ubuntu)
+    - name: Install ninja-build, bazelisk and local dependencies (Ubuntu)
       if: contains(matrix.os, 'ubuntu')
       run: |
         sudo apt-get install ninja-build -y
-        npm install -g @bazel/bazelisk
         python3 -m pip install -r requirements.txt
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
+        bash -i -c "nvm install --lts"
+        bash -i -c "sudo npm install -g @bazel/bazelisk"
     - name: Install ninja-build, bazel and local dependencies (macos)
       if: contains(matrix.os, 'macos')
       run: |
