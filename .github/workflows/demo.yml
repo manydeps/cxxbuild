@@ -29,13 +29,12 @@ jobs:
       if: contains(matrix.os, 'macos')
       run: |
         brew install ninja
-        brew install pipx
     - name: Install cmake with pip
       run: |
         pipx install cmake
     - name: Install local cxxbuild.py dependencies
       run: |
-        python3 -m pip install -r requirements.txt
+        python3 -m pip install -r requirements.txt --break-system-packages
     - name: demo-project1
       shell: bash
       run: |
