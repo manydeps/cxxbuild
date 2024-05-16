@@ -75,16 +75,16 @@ jobs:
       shell: bash
       run: |
         python3 cxxbuild/cxxbuild.py demo/project3 --bazel
-    - name: demo-project4 C++20 (cmake)
+    - name: demo-project4 C++20 (cmake) (windows only, other github compilers are broken for c++20)
+      if: contains(matrix.os, 'windows')
       shell: bash
       run: |
         python3 cxxbuild/cxxbuild.py demo/project4 --c++20
 
-    - name: demo-project3 (bazel ubuntu)
-      if: contains(matrix.os, 'ubuntu')
+    - name: demo-project5 (cmake only)
       shell: bash
       run: |
-        python3 cxxbuild/cxxbuild.py demo/project4 --c++20 --bazel
+        python3 cxxbuild/cxxbuild.py demo/project5
 
 
 
