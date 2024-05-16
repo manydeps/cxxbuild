@@ -25,7 +25,7 @@ jobs:
       if: contains(matrix.os, 'ubuntu')
       run: |
         sudo apt-get install ninja-build -y
-        bash -i -c "npm install -g @bazel/bazelisk"
+        npm install -g @bazel/bazelisk
         python3 -m pip install -r requirements.txt
     - name: Install ninja-build, bazel and local dependencies (macos)
       if: contains(matrix.os, 'macos')
