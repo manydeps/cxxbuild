@@ -3,3 +3,4 @@ optframe == "master" [ OptFrameAll ] git * https://github.com/optframe/optframe.
 !include "inc"
 !std c++20
 !build cmake
+!version 1.6

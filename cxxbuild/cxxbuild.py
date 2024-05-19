@@ -8,10 +8,12 @@ import sys
 import json
 import subprocess
 
+def version():
+    v = "cxxbuild=1.5.2"
+    return v
 
 def usage():
-    u="""
-cxxbuild=1.5.2
+    u=version()+"""
 Usage:
     cxxbuild [build] [ROOT_PATH] 
       builds with cxxbuild, examples: 
@@ -916,6 +918,7 @@ def main():
             usage()
             exit()
 
+    print(version())
     build_options_args = []
     for i in range(len(sys.argv)):
         if (sys.argv[i] == "--src"):
@@ -972,6 +975,18 @@ def main():
     for op in build_options:
         oplist = op.split()
         print(op.split())
+        if oplist[0] == '!version':
+            MIN_CXXBUILD_VERSION=oplist[1]
+            current_version = version().split("=")[1]
+            # from setuptools._distutils.version import LooseVersion, StrictVersion
+            # if LooseVersion(current_version) < LooseVersion(MIN_CXXBUILD_VERSION):
+            from packaging.version import Version
+            if Version(current_version) < Version(MIN_CXXBUILD_VERSION):
+                print("Insufficient CXXBUILD version! Please upgrade!")
+                print("Current version: "+current_version)
+                print("Required version (cxxdeps): "+MIN_CXXBUILD_VERSION)
+                print("Aborting...")
+                exit(1)
         if oplist[0] == '!include':
             INCLUDE_DIRS.append(oplist[1].strip("\""))
         if oplist[0] == '!src':
