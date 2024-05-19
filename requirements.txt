@@ -4,5 +4,7 @@
 #
 #    pip-compile pyproject.toml
 #
+packaging==24.0
+    # via cxxbuild (pyproject.toml)
 toml==0.10.2
     # via cxxbuild (pyproject.toml)
