@@ -894,8 +894,11 @@ def main():
     print("         welcome to cxxbuild          ")
     print("======================================")
     print(version())
+    # options: 'posix' or 'nt'
     print("os: "+os.name+"; platform: "+platform.system())
-    print("linux: "+platform.freedesktop_os_release().get("VERSION_CODENAME"))
+    # options: 'Darwin', 'Windows' or 'Linux'
+    if platform.system() == "Linux":
+        print("linux: "+platform.freedesktop_os_release().get("VERSION_CODENAME"))
     print("======================================")
 
     # ASSUME '.' as root_path if nothing is passed
