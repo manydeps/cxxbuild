@@ -7,7 +7,7 @@ build-backend="setuptools.build_meta"
 
 [project]
 name="cxxbuild"
-version="1.6.1"
+version="1.6.2"
 description="CxxBuild is a python script to easily build C++ programs: just invoke 'cxxbuild' and it works!"
 readme="README.md"
 authors=[{ name="Igor Machado Coelho", email="igormcoelho@proton.me" }]

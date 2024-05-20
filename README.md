@@ -8,7 +8,7 @@
 
 _**cxxbuild** (or "cplusplusbuild") is a python script to easily generate C/C++ build files for cmake and bazel._
 
-- Version: `cxxbuild version=1.6.1`
+- Version: `cxxbuild version=1.6.2`
 - Installation: `pip install cxxbuild` (or `pipx install cxxbuild` for newer distributions)
 
 For basic introduction, read the post: [Using cxxbuild to easily build C++ project with tests and dependencies](https://igormcoelho.medium.com/using-cxxbuild-to-easily-build-c-project-with-tests-and-dependencies-a3726b453f75)
