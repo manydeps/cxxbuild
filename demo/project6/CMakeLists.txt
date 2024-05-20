@@ -8,6 +8,8 @@ Include(FetchContent)
 add_definitions(-DMY_HELLO="ola mundo")
 add_definitions(-DIS_TEST)
 set(SOURCES
+src/demo6.cpp
+src/demo6.cpp
 )
 add_executable(demo6 src/demo6.cpp ${SOURCES})
 add_library(my_headers0 INTERFACE)

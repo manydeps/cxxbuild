@@ -476,7 +476,7 @@ def add_system_triplet_bazel(bzl, triplet, not_triplet, my_system, project_name)
             bzl.cxxopt_linux.append("-l"+project_name)
     return True
 
-def generate_cmakelists(cppstd, root_path, INCLUDE_DIRS, DEFINITIONS, src_main, src_test_main, src_list, src_test_nomain):
+def generate_cmakelists(cppstd, root_path, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOURCES, src_main, src_test_main, src_list, src_test_nomain):
     # READ cxxdeps.txt file, if available...
     # AT THIS POINT, ASSUMING 'cmake' OPTION (NO 'bazel' FOR NOW!)
     cmakelists = []
@@ -493,6 +493,9 @@ def generate_cmakelists(cppstd, root_path, INCLUDE_DIRS, DEFINITIONS, src_main, 
         cmakelists.append("add_definitions(-D"+d+")")
     # add sources!
     cmakelists.append("set(SOURCES")
+    # add extra sources!
+    for esrc in EXTRA_SOURCES:
+        cmakelists.append(esrc)
     # get all sources not in main() list (no duplicates exist)
     clean_list = []
     clean_list_main = []
@@ -554,7 +557,7 @@ def generate_cmakelists(cppstd, root_path, INCLUDE_DIRS, DEFINITIONS, src_main, 
     print(" => "+root_path+'/CMakeLists.txt')
     print("-----------------------------------")
 
-def generate_bazelfiles(cppstd, root_path, INCLUDE_DIRS, DEFINITIONS, src_main, src_test_main, src_list, src_test_nomain):
+def generate_bazelfiles(cppstd, root_path, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOURCES, src_main, src_test_main, src_list, src_test_nomain):
     # READ cxxdeps.txt file, if available...
     # AT THIS POINT, ASSUMING 'cmake' OPTION (NO 'bazel' FOR NOW!)
     bzl = BazelFiles()
@@ -934,7 +937,11 @@ def main():
     build_options_args = []
     for i in range(len(sys.argv)):
         if (sys.argv[i] == "--src"):
+            # change 'src' folder
             build_options_args.append("!src \""+str(sys.argv[i + 1])+"\"")
+        if (sys.argv[i] == "--extrasrc"):
+            # add extra source file
+            build_options_args.append("!extrasrc "+str(sys.argv[i + 1]))
         if (sys.argv[i] == "--tests"):
             build_options_args.append("!tests \""+str(sys.argv[i + 1])+"\"")
         if (sys.argv[i] == "--include"):
@@ -988,6 +995,7 @@ def main():
     cppstd="17"
     INCLUDE_DIRS = []
     DEFINITIONS = []
+    EXTRA_SOURCES = []
     for op in build_options:
         # import shlex
         # oplist = shlex.split(op)
@@ -1009,6 +1017,8 @@ def main():
             INCLUDE_DIRS.append(oplist[1].strip("\""))
         if oplist[0] == '!define':
             DEFINITIONS.append(op[len(oplist[0]):].strip())
+        if oplist[0] == '!extrasrc':
+            EXTRA_SOURCES.append(op[len(oplist[0]):].strip())
         if oplist[0] == '!src':
             search_src = oplist[1].strip("\"")
         if oplist[0] == '!tests':
@@ -1042,9 +1052,9 @@ def main():
         use_bazel = False
 
     #
-    return run_build(root_path, use_cmake, use_bazel, cppstd, search_src, search_tests, search_include, INCLUDE_DIRS, DEFINITIONS)
+    return run_build(root_path, use_cmake, use_bazel, cppstd, search_src, search_tests, search_include, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOURCES)
 
-def run_build(root_path, use_cmake, use_bazel, cppstd, search_src, search_tests, search_include, INCLUDE_DIRS, DEFINITIONS):
+def run_build(root_path, use_cmake, use_bazel, cppstd, search_src, search_tests, search_include, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOURCES):
     #
     print("begin build on root_path=",root_path)
     # find all source files,
@@ -1159,9 +1169,9 @@ def run_build(root_path, use_cmake, use_bazel, cppstd, search_src, search_tests,
     print("INCLUDE_DIRS=",INCLUDE_DIRS)
 
     if use_cmake == True:
-        generate_cmakelists(cppstd, root_path, INCLUDE_DIRS, DEFINITIONS, src_main, src_test_main, src_list, src_test_nomain)
+        generate_cmakelists(cppstd, root_path, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOURCES, src_main, src_test_main, src_list, src_test_nomain)
     elif use_bazel == True:
-        generate_bazelfiles(cppstd, root_path, INCLUDE_DIRS, DEFINITIONS, src_main, src_test_main, src_list, src_test_nomain)
+        generate_bazelfiles(cppstd, root_path, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOURCES, src_main, src_test_main, src_list, src_test_nomain)
     else:
         assert(False)
 

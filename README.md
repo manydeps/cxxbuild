@@ -258,16 +258,22 @@ bobcat
 gnutls
 fl
 png
+!std c++20
+!tests test
+!include src
+!include src/sourceScanner
+!define VERSION="v2.0.7-39-gdf7b35c"
+!extrasrc ${FLEX_SourceScanner_OUTPUTS}
 # apt install flex 
 # apt install libboost-all-dev
 # apt install gnutls-dev
 # apt install libbobcat-dev
-# libpng-dev
+# apt install libpng-dev
 ```
 
-- Use the following build script: `cxxbuild . --tests test --include src --include src/sourceScanner --c++20`
-- Add this to last line of CMakeLists: `add_definitions(-DVERSION="v2.0.7-39-gdf7b35c")`
-- Add this to SOURCES: `${FLEX_SourceScanner_OUTPUTS}`
+- Use the following build script: `cxxbuild . --tests test --include src --include src/sourceScanner --c++20` (or just `cxxbuild`, since build options will come directly from *cxxdeps.txt*)
+- This line will be added automatically to CMakeLists: `add_definitions(-DVERSION="v2.0.7-39-gdf7b35c")`
+- This line will be added automatically to SOURCES: `${FLEX_SourceScanner_OUTPUTS}`
 - Add these two lines before the SOURCES:
 
 ```

@@ -6,3 +6,5 @@ optframe == "master" [ OptFrameAll ] git * https://github.com/optframe/optframe.
 !version 1.6
 !define MY_HELLO="ola mundo"
 !define IS_TEST
+!extrasrc src/demo6.cpp
+!extrasrc src/demo6.cpp
