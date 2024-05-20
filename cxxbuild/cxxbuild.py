@@ -1030,6 +1030,10 @@ def main():
         use_bazel = False
 
     #
+    return run_build(root_path, use_cmake, use_bazel, cppstd, search_src, search_tests, search_include, INCLUDE_DIRS)
+
+def run_build(root_path, use_cmake, use_bazel, cppstd, search_src, search_tests, search_include, INCLUDE_DIRS):
+    #
     print("begin build on root_path=",root_path)
     # find all source files,
     # find all files with an entry point,
