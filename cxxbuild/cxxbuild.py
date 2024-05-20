@@ -476,7 +476,7 @@ def add_system_triplet_bazel(bzl, triplet, not_triplet, my_system, project_name)
             bzl.cxxopt_linux.append("-l"+project_name)
     return True
 
-def generate_cmakelists(cppstd, root_path, INCLUDE_DIRS, src_main, src_test_main, src_list, src_test_nomain):
+def generate_cmakelists(cppstd, root_path, INCLUDE_DIRS, DEFINITIONS, src_main, src_test_main, src_list, src_test_nomain):
     # READ cxxdeps.txt file, if available...
     # AT THIS POINT, ASSUMING 'cmake' OPTION (NO 'bazel' FOR NOW!)
     cmakelists = []
@@ -487,6 +487,10 @@ def generate_cmakelists(cppstd, root_path, INCLUDE_DIRS, src_main, src_test_main
     cmakelists.append("set (CMAKE_CXX_EXTENSIONS OFF)")
     cmakelists.append("set (CMAKE_EXPORT_COMPILE_COMMANDS ON)")
     cmakelists.append("Include(FetchContent)")
+    # add definitions!
+    for d in DEFINITIONS:
+        # TODO: check definition type! type1: JUST_DEF   type2: DEF="value"
+        cmakelists.append("add_definitions(-D"+d+")")
     # add sources!
     cmakelists.append("set(SOURCES")
     # get all sources not in main() list (no duplicates exist)
@@ -550,7 +554,7 @@ def generate_cmakelists(cppstd, root_path, INCLUDE_DIRS, src_main, src_test_main
     print(" => "+root_path+'/CMakeLists.txt')
     print("-----------------------------------")
 
-def generate_bazelfiles(cppstd, root_path, INCLUDE_DIRS, src_main, src_test_main, src_list, src_test_nomain):
+def generate_bazelfiles(cppstd, root_path, INCLUDE_DIRS, DEFINITIONS, src_main, src_test_main, src_list, src_test_nomain):
     # READ cxxdeps.txt file, if available...
     # AT THIS POINT, ASSUMING 'cmake' OPTION (NO 'bazel' FOR NOW!)
     bzl = BazelFiles()
@@ -935,7 +939,10 @@ def main():
             build_options_args.append("!tests \""+str(sys.argv[i + 1])+"\"")
         if (sys.argv[i] == "--include"):
             # force --include to appear
-            build_options_args.append("!include \""+search_include+"\"")
+            build_options_args.append("!include \""+str(sys.argv[i + 1])+"\"")
+        if (sys.argv[i] == "--define"):
+            # force --define to appear
+            build_options_args.append("!define "+str(sys.argv[i + 1]))
         if (sys.argv[i] == "--cmake"):
             build_options_args.append("!build cmake")
         if (sys.argv[i] == "--bazel"):
@@ -980,7 +987,10 @@ def main():
     use_bazel=None
     cppstd="17"
     INCLUDE_DIRS = []
+    DEFINITIONS = []
     for op in build_options:
+        # import shlex
+        # oplist = shlex.split(op)
         oplist = op.split()
         print(op.split())
         if oplist[0] == '!version':
@@ -997,6 +1007,8 @@ def main():
                 exit(1)
         if oplist[0] == '!include':
             INCLUDE_DIRS.append(oplist[1].strip("\""))
+        if oplist[0] == '!define':
+            DEFINITIONS.append(op[len(oplist[0]):].strip())
         if oplist[0] == '!src':
             search_src = oplist[1].strip("\"")
         if oplist[0] == '!tests':
@@ -1030,9 +1042,9 @@ def main():
         use_bazel = False
 
     #
-    return run_build(root_path, use_cmake, use_bazel, cppstd, search_src, search_tests, search_include, INCLUDE_DIRS)
+    return run_build(root_path, use_cmake, use_bazel, cppstd, search_src, search_tests, search_include, INCLUDE_DIRS, DEFINITIONS)
 
-def run_build(root_path, use_cmake, use_bazel, cppstd, search_src, search_tests, search_include, INCLUDE_DIRS):
+def run_build(root_path, use_cmake, use_bazel, cppstd, search_src, search_tests, search_include, INCLUDE_DIRS, DEFINITIONS):
     #
     print("begin build on root_path=",root_path)
     # find all source files,
@@ -1147,9 +1159,9 @@ def run_build(root_path, use_cmake, use_bazel, cppstd, search_src, search_tests,
     print("INCLUDE_DIRS=",INCLUDE_DIRS)
 
     if use_cmake == True:
-        generate_cmakelists(cppstd, root_path, INCLUDE_DIRS, src_main, src_test_main, src_list, src_test_nomain)
+        generate_cmakelists(cppstd, root_path, INCLUDE_DIRS, DEFINITIONS, src_main, src_test_main, src_list, src_test_nomain)
     elif use_bazel == True:
-        generate_bazelfiles(cppstd, root_path, INCLUDE_DIRS, src_main, src_test_main, src_list, src_test_nomain)
+        generate_bazelfiles(cppstd, root_path, INCLUDE_DIRS, DEFINITIONS, src_main, src_test_main, src_list, src_test_nomain)
     else:
         assert(False)
 

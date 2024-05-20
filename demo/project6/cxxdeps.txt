@@ -4,3 +4,5 @@ optframe == "master" [ OptFrameAll ] git * https://github.com/optframe/optframe.
 !std c++20
 !build cmake
 !version 1.6
+!define MY_HELLO="ola mundo"
+!define IS_TEST

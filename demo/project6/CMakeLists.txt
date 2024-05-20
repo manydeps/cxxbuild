@@ -5,6 +5,8 @@ set (CMAKE_CXX_STANDARD_REQUIRED ON)
 set (CMAKE_CXX_EXTENSIONS OFF)
 set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 Include(FetchContent)
+add_definitions(-DMY_HELLO="ola mundo")
+add_definitions(-DIS_TEST)
 set(SOURCES
 )
 add_executable(demo6 src/demo6.cpp ${SOURCES})
