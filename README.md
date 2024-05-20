@@ -37,7 +37,7 @@ that allow easy specification of dependencies from different package managers (i
 
 To use it locally, just copy [cxxbuild/cxxbuild.py](cxxbuild/cxxbuild.py) file to your project and execute it: `python3 cxxbuild.py help`
 
-Or, just install it from pip: `pip install cxxbuild`
+Or, just install it from pip: `pip install cxxbuild`  (or `pipx install cxxbuild` for newer distributions)
 
 Then, just run: `cxxbuild help`
 
@@ -260,8 +260,8 @@ fl
 png
 !std c++20
 !tests test
-!include src
-!include src/sourceScanner
+!include "src"
+!include "src/sourceScanner"
 !define VERSION="v2.0.7-39-gdf7b35c"
 !extrasrc ${FLEX_SourceScanner_OUTPUTS}
 # apt install flex 
@@ -282,6 +282,8 @@ FLEX_TARGET(SourceScanner "src/sourceScanner/lexer"  "src/sourceScanner/yylex.cc
 ```
 
 And that's it! It builds all avaliable targets and tests for ccbuild.
+
+See complete example on folder [usecases/ccbuild](./usecases/ccbuild).
 
 ## Acknowledgements
 

@@ -1,0 +1,277 @@
+cmake_minimum_required(VERSION 3.27)
+project(my-project LANGUAGES CXX VERSION 0.0.1)
+set (CMAKE_CXX_STANDARD 20)
+set (CMAKE_CXX_STANDARD_REQUIRED ON)
+set (CMAKE_CXX_EXTENSIONS OFF)
+set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
+Include(FetchContent)
+
+find_package(FLEX)
+FLEX_TARGET(SourceScanner "src/sourceScanner/lexer"  "src/sourceScanner/yylex.cc" )
+
+set(SOURCES
+	src/globals/statics.cc
+	src/globals/destroy.cc
+	src/globals/indexoperator.cc
+	src/globals/globals.cc
+	src/globals/getInstance.cc
+	src/resolver/resolve.cc
+	src/resolver/statics.cc
+	src/resolver/expand.cc
+	src/resolver/destroy.cc
+	src/resolver/loadIfExists.cc
+	src/resolver/resolver.cc
+	src/resolver/resolveInto.cc
+	src/resolver/getInstance.cc
+	src/sourceScanner/sourceScanner.cc
+	src/sourceScanner/storeLocal.cc
+	src/sourceScanner/hasMainFunction.cc
+	src/sourceScanner/hasDefine.cc
+	src/sourceScanner/includes.cc
+	src/sourceScanner/storeGlobal.cc
+	src/sourceScanner/storeIgnore.cc
+	src/source/dependencies.cc
+	src/source/markAsDone.cc
+	src/source/hasSourceExtension.cc
+	src/source/changed.cc
+	src/source/directDeps.cc
+	src/source/outputFilename.cc
+	src/source/basenameWithoutExtension.cc
+	src/source/reload.cc
+	src/source/isObjectTarget.cc
+	src/source/genDeps.cc
+	src/source/producesOutput.cc
+	src/source/scan.cc
+	src/source/buildObjectTarget.cc
+	src/source/directory.cc
+	src/source/isLibTarget.cc
+	src/source/source.cc
+	src/source/isLocalHeader.cc
+	src/source/setType.cc
+	src/source/build.cc
+	src/source/upToDate.cc
+	src/source/isInternalHeader.cc
+	src/source/isBinTarget.cc
+	src/source/buildBinTarget.cc
+	src/source/buildHeader.cc
+	src/source/stale.cc
+	src/source/isHeader.cc
+	src/compiler/statics.cc
+	src/compiler/addArgument.cc
+	src/compiler/linkCommand.cc
+	src/compiler/countFirstLinkerArguments.cc
+	src/compiler/libCommand.cc
+	src/compiler/cls.cc
+	src/compiler/ar.cc
+	src/compiler/precompile.cc
+	src/compiler/compile.cc
+	src/compiler/addObject.cc
+	src/compiler/compileCommand.cc
+	src/compiler/precompileCommand.cc
+	src/compiler/link.cc
+	src/compiler/lib.cc
+	src/compiler/operator_add.cc
+	src/compiler/splitInto.cc
+	src/problem/problem.cc
+	src/arguments/statics.cc
+	src/arguments/value.cc
+	src/arguments/flagged.cc
+	src/arguments/destroy.cc
+	src/arguments/arguments.cc
+	src/arguments/values.cc
+	src/arguments/clear.cc
+	src/arguments/initialize.cc
+	src/arguments/outputOptions.cc
+	src/arguments/getInstance.cc
+	src/MD5Info/load.cc
+	src/MD5Info/statics.cc
+	src/MD5Info/save.cc
+	src/MD5Info/destroy.cc
+	src/MD5Info/hashFilenameFor.cc
+	src/MD5Info/MD5Info.cc
+	src/MD5Info/contentHash.cc
+	src/MD5Info/getInstance.cc
+	src/MD5Info/old.cc
+	src/posix/wordexp.c
+	src/string/toUpper.cc
+	src/string/replace.cc
+	src/sources/statics.cc
+	src/sources/destroy.cc
+	src/sources/sources.cc
+	src/sources/erase.cc
+	src/sources/indexoperator.cc
+	src/sources/reloadStaleSources.cc
+	src/sources/getInstance.cc
+	src/system/aapFor.cc
+	src/system/statics.cc
+	src/system/md5.cc
+	src/system/trim.cc
+	src/system/username.cc
+	src/system/resolveTest.cc
+	src/system/system.cc
+	src/system/destroy.cc
+	src/system/mkdtemp.cc
+	src/system/parseArguments.cc
+	src/system/makefileFor.cc
+	src/system/collectTargets.cc
+	src/system/batchCompile.cc
+	src/system/changeTo.cc
+	src/system/trimmed.cc
+	src/system/buildAll.cc
+	src/system/depsFor.cc
+	src/system/distclean.cc
+	src/system/icmake.cc
+	src/system/build.cc
+	src/system/check.cc
+	src/system/addArguments.cc
+	src/system/clean.cc
+	src/system/projectName.cc
+	src/system/dotgraphFor.cc
+	src/system/inspect.cc
+	src/system/uname.cc
+	src/system/exit.cc
+	src/system/dotgraphForAll.cc
+	src/system/localSourcesInto.cc
+	src/system/sleep.cc
+	src/system/lib.cc
+	src/system/aapForAll.cc
+	src/system/makefileForAll.cc
+	src/fileSystem/ensureDirectory.cc
+	src/fileSystem/newer.cc
+	src/fileSystem/rmDirectoryIfExists.cc
+	src/fileSystem/recursiveGlobDirectoriesInto.cc
+	src/fileSystem/modTime.cc
+	src/fileSystem/cleanPath.cc
+	src/fileSystem/globFilesInto.cc
+	src/fileSystem/fileName.cc
+	src/fileSystem/isReadable.cc
+	src/fileSystem/rmIfExists.cc
+	src/fileSystem/touch.cc
+	src/fileSystem/fileExists.cc
+	src/fileSystem/absolutePath.cc
+	src/fileSystem/globInto.cc
+	src/fileSystem/baseName.cc
+	src/fileSystem/globDirectoriesInto.cc
+	src/fileSystem/rename.cc
+	src/fileSystem/cwd.cc
+	src/fileSystem/globSourceFilesInto.cc
+	src/fileSystem/isDirectory.cc
+	src/fileSystem/directoryName.cc
+	src/options/statics.cc
+	src/globallocks/statics.cc
+	${FLEX_SourceScanner_OUTPUTS}
+)
+add_executable(ccbuild src/ccbuild.cc ${SOURCES})
+add_executable(test src/string/test.cc ${SOURCES})
+add_executable(test_system src/system/test_system.cc ${SOURCES})
+add_executable(test2 src/fileSystem/test.cc ${SOURCES})
+add_executable(argvtest_test test/argvtest.cc ${SOURCES})
+add_executable(arguments_test test/arguments.cc ${SOURCES})
+add_executable(include_test test/include.cc ${SOURCES})
+add_executable(openmp_exceptions_test test/openmp_exceptions.cc ${SOURCES})
+add_executable(parsetest_test test/parsetest.cpp ${SOURCES})
+add_executable(zeroblock_mem_test test/zeroblock_mem.cc ${SOURCES})
+add_executable(container_const_test test/container_const.cc ${SOURCES})
+add_executable(attempt1_test test/attempt1.cc ${SOURCES})
+add_executable(thread_test test/threading/thread.cc ${SOURCES})
+add_library(my_headers0 INTERFACE)
+target_include_directories(my_headers0 INTERFACE ./src/sourceScanner)
+target_link_libraries(ccbuild PRIVATE my_headers0)
+target_link_libraries(test PRIVATE my_headers0)
+target_link_libraries(test_system PRIVATE my_headers0)
+target_link_libraries(test2 PRIVATE my_headers0)
+target_link_libraries(argvtest_test PRIVATE my_headers0)
+target_link_libraries(arguments_test PRIVATE my_headers0)
+target_link_libraries(include_test PRIVATE my_headers0)
+target_link_libraries(openmp_exceptions_test PRIVATE my_headers0)
+target_link_libraries(parsetest_test PRIVATE my_headers0)
+target_link_libraries(zeroblock_mem_test PRIVATE my_headers0)
+target_link_libraries(container_const_test PRIVATE my_headers0)
+target_link_libraries(attempt1_test PRIVATE my_headers0)
+target_link_libraries(thread_test PRIVATE my_headers0)
+add_library(my_headers1 INTERFACE)
+target_include_directories(my_headers1 INTERFACE ./src)
+target_link_libraries(ccbuild PRIVATE my_headers1)
+target_link_libraries(test PRIVATE my_headers1)
+target_link_libraries(test_system PRIVATE my_headers1)
+target_link_libraries(test2 PRIVATE my_headers1)
+target_link_libraries(argvtest_test PRIVATE my_headers1)
+target_link_libraries(arguments_test PRIVATE my_headers1)
+target_link_libraries(include_test PRIVATE my_headers1)
+target_link_libraries(openmp_exceptions_test PRIVATE my_headers1)
+target_link_libraries(parsetest_test PRIVATE my_headers1)
+target_link_libraries(zeroblock_mem_test PRIVATE my_headers1)
+target_link_libraries(container_const_test PRIVATE my_headers1)
+target_link_libraries(attempt1_test PRIVATE my_headers1)
+target_link_libraries(thread_test PRIVATE my_headers1)
+# begin dependencies from cxxdeps.txt
+# cxxdeps dependency bobcat
+# system dependency: -lbobcat
+target_link_libraries(my_headers0 INTERFACE bobcat)
+target_link_libraries(my_headers1 INTERFACE bobcat)
+target_link_libraries(ccbuild PRIVATE bobcat)
+target_link_libraries(test PRIVATE bobcat)
+target_link_libraries(test_system PRIVATE bobcat)
+target_link_libraries(test2 PRIVATE bobcat)
+target_link_libraries(argvtest_test PRIVATE bobcat)
+target_link_libraries(arguments_test PRIVATE bobcat)
+target_link_libraries(include_test PRIVATE bobcat)
+target_link_libraries(openmp_exceptions_test PRIVATE bobcat)
+target_link_libraries(parsetest_test PRIVATE bobcat)
+target_link_libraries(zeroblock_mem_test PRIVATE bobcat)
+target_link_libraries(container_const_test PRIVATE bobcat)
+target_link_libraries(attempt1_test PRIVATE bobcat)
+target_link_libraries(thread_test PRIVATE bobcat)
+# cxxdeps dependency gnutls
+# system dependency: -lgnutls
+target_link_libraries(my_headers0 INTERFACE gnutls)
+target_link_libraries(my_headers1 INTERFACE gnutls)
+target_link_libraries(ccbuild PRIVATE gnutls)
+target_link_libraries(test PRIVATE gnutls)
+target_link_libraries(test_system PRIVATE gnutls)
+target_link_libraries(test2 PRIVATE gnutls)
+target_link_libraries(argvtest_test PRIVATE gnutls)
+target_link_libraries(arguments_test PRIVATE gnutls)
+target_link_libraries(include_test PRIVATE gnutls)
+target_link_libraries(openmp_exceptions_test PRIVATE gnutls)
+target_link_libraries(parsetest_test PRIVATE gnutls)
+target_link_libraries(zeroblock_mem_test PRIVATE gnutls)
+target_link_libraries(container_const_test PRIVATE gnutls)
+target_link_libraries(attempt1_test PRIVATE gnutls)
+target_link_libraries(thread_test PRIVATE gnutls)
+# cxxdeps dependency fl
+# system dependency: -lfl
+target_link_libraries(my_headers0 INTERFACE fl)
+target_link_libraries(my_headers1 INTERFACE fl)
+target_link_libraries(ccbuild PRIVATE fl)
+target_link_libraries(test PRIVATE fl)
+target_link_libraries(test_system PRIVATE fl)
+target_link_libraries(test2 PRIVATE fl)
+target_link_libraries(argvtest_test PRIVATE fl)
+target_link_libraries(arguments_test PRIVATE fl)
+target_link_libraries(include_test PRIVATE fl)
+target_link_libraries(openmp_exceptions_test PRIVATE fl)
+target_link_libraries(parsetest_test PRIVATE fl)
+target_link_libraries(zeroblock_mem_test PRIVATE fl)
+target_link_libraries(container_const_test PRIVATE fl)
+target_link_libraries(attempt1_test PRIVATE fl)
+target_link_libraries(thread_test PRIVATE fl)
+# cxxdeps dependency png
+# system dependency: -lpng
+target_link_libraries(my_headers0 INTERFACE png)
+target_link_libraries(my_headers1 INTERFACE png)
+target_link_libraries(ccbuild PRIVATE png)
+target_link_libraries(test PRIVATE png)
+target_link_libraries(test_system PRIVATE png)
+target_link_libraries(test2 PRIVATE png)
+target_link_libraries(argvtest_test PRIVATE png)
+target_link_libraries(arguments_test PRIVATE png)
+target_link_libraries(include_test PRIVATE png)
+target_link_libraries(openmp_exceptions_test PRIVATE png)
+target_link_libraries(parsetest_test PRIVATE png)
+target_link_libraries(zeroblock_mem_test PRIVATE png)
+target_link_libraries(container_const_test PRIVATE png)
+target_link_libraries(attempt1_test PRIVATE png)
+target_link_libraries(thread_test PRIVATE png)
+
+add_definitions(-DVERSION="v2.0.7-39-gdf7b35c")
