@@ -4,6 +4,7 @@
 # Copyleft 2023 Igor Machado Coelho
 
 import os
+import platform
 import sys
 import json
 import subprocess
@@ -892,6 +893,10 @@ def main():
     print("======================================")
     print("         welcome to cxxbuild          ")
     print("======================================")
+    print(version())
+    print("os: "+os.name+"; platform: "+platform.system())
+    print("linux: "+platform.freedesktop_os_release().get("VERSION_CODENAME"))
+    print("======================================")
 
     # ASSUME '.' as root_path if nothing is passed
     if len(sys.argv) == 1:
@@ -918,7 +923,7 @@ def main():
             usage()
             exit()
 
-    print(version())
+    
     build_options_args = []
     for i in range(len(sys.argv)):
         if (sys.argv[i] == "--src"):
