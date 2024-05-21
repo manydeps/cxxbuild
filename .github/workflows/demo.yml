@@ -102,6 +102,7 @@ jobs:
     - name: demo-project6 (cmake only)
       shell: bash
       run: |
+        (cd demo/project6/ && ./get_optframe.sh)
         python3 cxxbuild/cxxbuild.py demo/project6
 
 

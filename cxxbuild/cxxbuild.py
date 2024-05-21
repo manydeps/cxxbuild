@@ -147,41 +147,78 @@ def get_cmakelists_from_cxxdeps(root_path, cmakelists, INCLUDE_DIRS, src_main, s
                             cmakelists.append("ENDIF()")
                         continue
                     #end-if system
-                    if pkg_manager == 'git' or pkg_manager == 'cmake+git':
+                    elif pkg_manager == 'git' or pkg_manager == 'cmake+git':
                         git_url = fields[k]
                         k=k+1
-                    cmakelists.append("FetchContent_Declare("+project_name+" GIT_REPOSITORY "+git_url+" GIT_TAG "+version_number+")")
-                    cmakelists.append("FetchContent_MakeAvailable("+project_name+")")
-                    # attach it to libraries, binaries and test binaries, if mode is *
-                    if mode == '*':
-                        for i in range(len(INCLUDE_DIRS)):
-                            for l in libs:
-                                cmakelists.append("target_link_libraries(my_headers"+str(i)+" INTERFACE "+l+")")
-                        for filepath, app_name in src_main.items():
-                            for l in libs:
-                                cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+l+")")    
-                        for filepath, app_name in src_test_main.items():
-                            for l in libs:
-                                cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+l+")")    
-                    # attach it to test binaries, if mode is 'test'
-                    if mode == 'test':
-                        for filepath, app_name in src_test_main.items():
-                            for l in libs:
-                                cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+l+")")    
-                    # read special, if exists
-                    print("k=",k)
-                    if k < len(fields):
-                        special = fields[k]
-                        k = k+1
-                        print("special=",special)
-                        # IGNORING THE special part for now... or forever, I hope!!!
-                        if special == '_special_catch_cmake_extras':
-                            cmakelists.append("list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)")    
-                            cmakelists.append("include(CTest)")
-                            cmakelists.append("include(Catch)")
+                        cmakelists.append("FetchContent_Declare("+project_name+" GIT_REPOSITORY "+git_url+" GIT_TAG "+version_number+")")
+                        cmakelists.append("FetchContent_MakeAvailable("+project_name+")")
+                        # attach it to libraries, binaries and test binaries, if mode is *
+                        if mode == '*':
+                            for i in range(len(INCLUDE_DIRS)):
+                                for l in libs:
+                                    cmakelists.append("target_link_libraries(my_headers"+str(i)+" INTERFACE "+l+")")
+                            for filepath, app_name in src_main.items():
+                                for l in libs:
+                                    cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+l+")")    
                             for filepath, app_name in src_test_main.items():
-                                cmakelists.append("catch_discover_tests("+app_name[1]+")")    
-                    # end special
+                                for l in libs:
+                                    cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+l+")")    
+                        # attach it to test binaries, if mode is 'test'
+                        if mode == 'test':
+                            for filepath, app_name in src_test_main.items():
+                                for l in libs:
+                                    cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+l+")")    
+                        # read special, if exists
+                        print("k=",k)
+                        if k < len(fields):
+                            special = fields[k]
+                            k = k+1
+                            print("special=",special)
+                            # IGNORING THE special part for now... or forever, I hope!!!
+                            if special == '_special_catch_cmake_extras':
+                                cmakelists.append("list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)")    
+                                cmakelists.append("include(CTest)")
+                                cmakelists.append("include(Catch)")
+                                for filepath, app_name in src_test_main.items():
+                                    cmakelists.append("catch_discover_tests("+app_name[1]+")")    
+                        # end special
+                        continue
+                    # end if git
+                    elif pkg_manager == 'local' or pkg_manager == 'cmake+local':
+                        # on cmake, this is resolved using find_package module
+                        local_path = fields[k]
+                        # check if local path is empty
+                        if local_path == "_":
+                            local_path = ""
+                        k=k+1
+                        # check if including libraries and special fix/patch
+                        add_inc_lib = True
+                        special = ""
+                        if k < len(fields):
+                            add_inc_lib = fields[k]
+                            if add_inc_lib == "true" or add_inc_lib == "True":
+                                add_inc_lib = True
+                            else:
+                                add_inc_lib = False
+                            k = k+1
+                            if k < len(fields):
+                                special = fields[k]
+                                k = k+1
+                        # begin construction of FindPackage
+                        if local_path != "":
+                            cmakelists.append("set("+project_name+"_DIR \"${CMAKE_SOURCE_DIR}/"+local_path+"\")")
+                        # ignoring 'version_number', for now!
+                        cmakelists.append("find_package("+project_name+" REQUIRED)")
+                        if add_inc_lib:
+                            cmakelists.append("include_directories(\"${"+project_name+"_INCLUDE_DIRS}\")")
+                            # todo: check libraries as well
+                        # todo: attach it to libraries, binaries and test binaries, if mode is *
+                        if special != "":
+                            cmakelists.append(special)
+                        continue
+                    # end if local
+                    print("cxxdeps error: build type '"+pkg_manager+"' unknown or not supported!")
+                    exit(1)
                 # end if not comment
             # end for line
         # end cxxdeps
