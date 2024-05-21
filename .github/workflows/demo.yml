@@ -103,7 +103,7 @@ jobs:
       shell: bash
       run: |
         cd demo/project6/ && ./get_optframe.sh
-        cd .. && python3 cxxbuild/cxxbuild.py demo/project6
+        cd ../../ && python3 cxxbuild/cxxbuild.py demo/project6
 
 
 
