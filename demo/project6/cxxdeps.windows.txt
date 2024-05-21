@@ -9,3 +9,4 @@ optframe == "master" [ OptFrameAll ] git * https://github.com/optframe/optframe.
 !define IS_TEST
 !extrasrc src/demo6.cpp
 !extrasrc src/demo6.cpp
+!ignore thirdparty

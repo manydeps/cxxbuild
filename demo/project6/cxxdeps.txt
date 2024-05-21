@@ -9,3 +9,4 @@ OptFrame == * [ OptFrameAll ] local * ./thirdparty/optframe-master/cmake/
 !define IS_TEST
 !extrasrc src/demo6.cpp
 !extrasrc src/demo6.cpp
+!ignore thirdparty

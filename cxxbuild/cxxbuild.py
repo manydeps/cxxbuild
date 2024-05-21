@@ -996,6 +996,8 @@ def main():
         if (sys.argv[i] == "--include"):
             # force --include to appear
             build_options_args.append("!include \""+str(sys.argv[i + 1])+"\"")
+        if (sys.argv[i] == "--ignore"):
+            build_options_args.append("!ignore "+str(sys.argv[i + 1]))
         if (sys.argv[i] == "--define"):
             # force --define to appear
             build_options_args.append("!define "+str(sys.argv[i + 1]))
@@ -1045,6 +1047,9 @@ def main():
     INCLUDE_DIRS = []
     DEFINITIONS = []
     EXTRA_SOURCES = []
+    IGNORE = []
+    # ignore build/ folder by default
+    IGNORE.append("build/")
     for op in build_options:
         # import shlex
         # oplist = shlex.split(op)
@@ -1064,6 +1069,8 @@ def main():
                 exit(1)
         if oplist[0] == '!include':
             INCLUDE_DIRS.append(oplist[1].strip("\""))
+        if oplist[0] == '!ignore':
+            IGNORE.append(op[len(oplist[0]):].strip())
         if oplist[0] == '!define':
             DEFINITIONS.append(op[len(oplist[0]):].strip())
         if oplist[0] == '!extrasrc':
@@ -1101,9 +1108,9 @@ def main():
         use_bazel = False
 
     #
-    return run_build(root_path, use_cmake, use_bazel, cppstd, search_src, search_tests, search_include, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOURCES)
+    return run_build(root_path, use_cmake, use_bazel, cppstd, search_src, search_tests, search_include, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOURCES, IGNORE)
 
-def run_build(root_path, use_cmake, use_bazel, cppstd, search_src, search_tests, search_include, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOURCES):
+def run_build(root_path, use_cmake, use_bazel, cppstd, search_src, search_tests, search_include, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOURCES, IGNORE):
     #
     print("begin build on root_path=",root_path)
     # find all source files,
@@ -1209,12 +1216,16 @@ def run_build(root_path, use_cmake, use_bazel, cppstd, search_src, search_tests,
         if "include" in subdirs:
             incdir = root+"/"+search_include
             incdir = incdir.removeprefix(root_path).removeprefix("/")
-            # ignore 'build' stuff
-            if incdir[0:6] == 'build/':
-                print("WARNING: 'build/' prefixed folder ignored: ", incdir)
-                pass
-            else:
+            must_ignore=False
+            for ign in IGNORE:
+                # ignore 'build' stuff and others in IGNORE
+                if incdir.startswith(ign):
+                    print("WARNING: '"+ign+"' prefixed folder ignored: ", incdir)
+                    must_ignore=True
+                    break
+            if not must_ignore:
                 INCLUDE_DIRS.append(incdir)
+            # end-for
         # TODO: search in other places too... maybe inside src?
     # keep unique only!
     INCLUDE_DIRS = list(set(INCLUDE_DIRS))
