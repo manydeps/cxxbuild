@@ -99,11 +99,24 @@ jobs:
       shell: bash
       run: |
         python3 cxxbuild/cxxbuild.py demo/project5
-    - name: demo-project6 (cmake only)
+    - name: demo-project6 (cmake only) - ubuntu
+      if: contains(matrix.os, 'ubuntu')
       shell: bash
       run: |
         cd demo/project6/ && ./get_optframe.sh
         cd ../../ && python3 cxxbuild/cxxbuild.py demo/project6
+    - name: demo-project6 (cmake only) - macos
+      if: contains(matrix.os, 'macos')
+      shell: bash
+      run: |
+        cd demo/project6/ && ./get_optframe.sh
+        cd ../../ && python3 cxxbuild/cxxbuild.py demo/project6
+    - name: demo-project6 (cmake only) - windows
+      if: contains(matrix.os, 'windows')
+      shell: bash
+      run: |
+        cp demo/project6/cxxdeps.windows.txt demo/project6/cxxdeps.txt
+        python3 cxxbuild/cxxbuild.py demo/project6
 
 
 
