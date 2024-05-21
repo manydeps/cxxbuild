@@ -214,7 +214,11 @@ def get_cmakelists_from_cxxdeps(root_path, cmakelists, INCLUDE_DIRS, src_main, s
                             # todo: check libraries as well
                         # todo: attach it to libraries, binaries and test binaries, if mode is *
                         if special != "":
-                            cmakelists.append(special)
+                            # load patch file and append it
+                            with open(root_path+'/'+special, 'r') as fdx:
+                                patches=fdx.readlines()
+                                for p_line in patches:
+                                    cmakelists.append(p_line)
                         continue
                     # end if local
                     print("cxxdeps error: build type '"+pkg_manager+"' unknown or not supported!")
@@ -1132,8 +1136,12 @@ def run_build(root_path, use_cmake, use_bazel, cppstd, search_src, search_tests,
                         # If someone has a function "xxxmain(" it can currently break.
                         entrypoint = "main("
                         print("checking entrypoint:", entrypoint)
-                        if entrypoint in fd.read():
-                            src_main[file_path] = (root, file_name)
+                        all_lines=fd.readlines()
+                        for l in all_lines:
+                            # avoid commented lines (small improvement)
+                            l2 = l.strip()
+                            if entrypoint in l2 and l2[0] != "/" and l2[1] != "/":
+                                src_main[file_path] = (root, file_name)
         # end-for src_path
     # end-for src_paths
 

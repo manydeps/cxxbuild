@@ -246,18 +246,15 @@ Hopefully, when this project is fully finished, C++ will be a better place for a
 
 ### Case of Study
 
-In order to check the capabilities of cxxbuild, it was used to build the C/C++ ccbuild tool.
-Unfortunately, few tweaks were necessary in the generated CMakeLists, due to FLEX dependency, 
-but it was quite easy on general. See [Issue 34 on ccbuild project](https://github.com/bneijt/ccbuild/issues/34)
-
-General instructions:
-- Create `cxxdeps.txt` file:
+A very interesting case of study is the use of cxxbuild to build the C/C++ ccbuild tool.
+It is currently very easy to build it, using the following cxxdeps file:
 
 ```
 bobcat
 gnutls
 fl
 png
+FLEX == * [ ] local * _ false patch_flex.txt
 !std c++20
 !tests test
 !include "src"
@@ -271,10 +268,10 @@ png
 # apt install libpng-dev
 ```
 
-- Use the following build script: `cxxbuild . --tests test --include src --include src/sourceScanner --c++20` (or just `cxxbuild`, since build options will come directly from *cxxdeps.txt*)
+- On may also use the following build script: `cxxbuild . --tests test --include src --include src/sourceScanner --c++20` (or just `cxxbuild`, since build options will come directly from *cxxdeps.txt*)
 - This line will be added automatically to CMakeLists: `add_definitions(-DVERSION="v2.0.7-39-gdf7b35c")`
 - This line will be added automatically to SOURCES: `${FLEX_SourceScanner_OUTPUTS}`
-- Add these two lines before the SOURCES:
+- These two lines will be put before the SOURCES:
 
 ```
 find_package(FLEX)
