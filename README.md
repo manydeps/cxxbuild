@@ -159,6 +159,9 @@ This is quite simple and powerful, with few lines describing the following:
 The `git` part could be any package manager, such as conan and vcpkg, although not implemented yet!
 The `git` can be specified for `cmake` or `bazel`, like `cmake+git` or `bazel+git`.
 
+The `local` can be specified for `cmake` or `bazel`, like `cmake+local` or `bazel+local`.
+On `cmake` it represents a `find_package`, while on `bazel` it is a `local_repository` (to implement, yet).
+
 It can also be `bcr`, for the Bazel Central Registry, or more specifically: `bazel+bcr` (not supported for `cmake+bcr`)
 
 ### Ongoing extensions for cxxdeps
