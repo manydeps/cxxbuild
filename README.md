@@ -268,7 +268,13 @@ FLEX == * [ ] local * _ false patch_flex.txt
 # apt install libpng-dev
 ```
 
-- On may also use the following build script: `cxxbuild . --tests test --include src --include src/sourceScanner --c++20` (or just `cxxbuild`, since build options will come directly from *cxxdeps.txt*)
+Also create the following `patch_flex.txt` file:
+
+```
+FLEX_TARGET(SourceScanner "src/sourceScanner/lexer"  "src/sourceScanner/yylex.cc" )
+```
+
+- One may also use the following build script: `cxxbuild . --tests test --include src --include src/sourceScanner --c++20` (or just `cxxbuild`, since build options will come directly from *cxxdeps.txt*)
 - This line will be added automatically to CMakeLists: `add_definitions(-DVERSION="v2.0.7-39-gdf7b35c")`
 - This line will be added automatically to SOURCES: `${FLEX_SourceScanner_OUTPUTS}`
 - These two lines will be put before the SOURCES:
