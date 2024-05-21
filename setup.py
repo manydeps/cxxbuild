@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='cxxbuild',
-    version='1.6.2',
+    version='1.6.3',
     packages=['cxxbuild'],
 #    entry_points={
 #        'console_scripts': [
