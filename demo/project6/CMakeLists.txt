@@ -7,11 +7,8 @@ set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 Include(FetchContent)
 add_definitions(-DMY_HELLO="ola mundo")
 add_definitions(-DIS_TEST)
-set(SOURCES
-src/demo6.cpp
-src/demo6.cpp
-)
-add_executable(demo6 src/demo6.cpp ${SOURCES})
+# add all executables
+add_executable(demo6 src/demo6.cpp )
 add_library(my_headers0 INTERFACE)
 target_include_directories(my_headers0 INTERFACE inc)
 target_link_libraries(demo6 PRIVATE my_headers0)
@@ -34,3 +31,9 @@ FetchContent_Declare(optframe GIT_REPOSITORY https://github.com/optframe/optfram
 FetchContent_MakeAvailable(optframe)
 target_link_libraries(my_headers0 INTERFACE OptFrameAll)
 target_link_libraries(demo6 PRIVATE OptFrameAll)
+# finally, add all sources
+set(SOURCES
+	src/demo6.cpp
+	src/demo6.cpp
+)
+target_sources(demo6 PRIVATE ${SOURCES})

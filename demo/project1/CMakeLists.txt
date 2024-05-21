@@ -5,11 +5,9 @@ set (CMAKE_CXX_STANDARD_REQUIRED ON)
 set (CMAKE_CXX_EXTENSIONS OFF)
 set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 Include(FetchContent)
-set(SOURCES
-	src/something.cpp
-)
-add_executable(demo1 src/demo1.cpp ${SOURCES})
-add_executable(my_test tests/my_test.cpp ${SOURCES})
+# add all executables
+add_executable(demo1 src/demo1.cpp )
+add_executable(my_test tests/my_test.cpp )
 add_library(my_headers0 INTERFACE)
 target_include_directories(my_headers0 INTERFACE include)
 target_link_libraries(demo1 PRIVATE my_headers0)
@@ -41,3 +39,9 @@ target_link_libraries(my_headers0 INTERFACE crypto)
 target_link_libraries(demo1 PRIVATE crypto)
 target_link_libraries(my_test PRIVATE crypto)
 ENDIF()
+# finally, add all sources
+set(SOURCES
+	src/something.cpp
+)
+target_sources(demo1 PRIVATE ${SOURCES})
+target_sources(my_test PRIVATE ${SOURCES})

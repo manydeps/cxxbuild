@@ -491,29 +491,13 @@ def generate_cmakelists(cppstd, root_path, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOUR
     for d in DEFINITIONS:
         # TODO: check definition type! type1: JUST_DEF   type2: DEF="value"
         cmakelists.append("add_definitions(-D"+d+")")
-    # add sources!
-    cmakelists.append("set(SOURCES")
-    # add extra sources!
-    for esrc in EXTRA_SOURCES:
-        cmakelists.append(esrc)
-    # get all sources not in main() list (no duplicates exist)
-    clean_list = []
-    clean_list_main = []
-    for f in src_list:
-        clean_list.append(f.replace("\\", "/"))
-    #clean_list = list(set(clean_list)) # do not do this!
-    for filepath, app_name in src_main.items():
-        clean_list_main.append(filepath.replace("\\", "/"))
-    #clean_list_main = list(set(clean_list_main))  # do not do this!
-    clean_list = [x for x in clean_list if x not in clean_list_main]
-    for f in clean_list:
-        cmakelists.append("\t"+f)
-    cmakelists.append(")")
+    #
+    cmakelists.append("# add all executables")
     COUNT_APP_ID=1
     all_apps = []
     # add_executable for binaries
     for filepath, app_name in src_main.items():
-        cmakelists.append("add_executable("+app_name[1]+" "+filepath.replace("\\", "/")+" ${SOURCES})")
+        cmakelists.append("add_executable("+app_name[1]+" "+filepath.replace("\\", "/")+" )")
     # add_executable for test binaries
     print("finding test executables!")
     # if no main is found, then each test is assumed to be independent!
@@ -521,7 +505,7 @@ def generate_cmakelists(cppstd, root_path, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOUR
         print("WARNING: no main() is found for tests... using main-less strategy!")
         src_test_main = src_test_nomain
     for filepath, app_name in src_test_main.items():
-        cmakelists.append("add_executable("+app_name[1]+" "+filepath.replace("\\", "/")+" ${SOURCES})")
+        cmakelists.append("add_executable("+app_name[1]+" "+filepath.replace("\\", "/")+" )")
 
 
     # INCLUDE_DIRS will act as header-only libraries
@@ -540,6 +524,30 @@ def generate_cmakelists(cppstd, root_path, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOUR
     # cxxdeps.txt
     cmakelists = get_cmakelists_from_cxxdeps(root_path, cmakelists, INCLUDE_DIRS, src_main, src_test_main)
 
+    # ======== begin add sources ========
+    cmakelists.append("# finally, add all sources")
+    cmakelists.append("set(SOURCES")
+    # add extra sources!
+    for esrc in EXTRA_SOURCES:
+        cmakelists.append("\t"+esrc)
+    # get all sources not in main() list (no duplicates exist)
+    clean_list = []
+    clean_list_main = []
+    for f in src_list:
+        clean_list.append(f.replace("\\", "/"))
+    #clean_list = list(set(clean_list)) # do not do this!
+    for filepath, app_name in src_main.items():
+        clean_list_main.append(filepath.replace("\\", "/"))
+    #clean_list_main = list(set(clean_list_main))  # do not do this!
+    clean_list = [x for x in clean_list if x not in clean_list_main]
+    for f in clean_list:
+        cmakelists.append("\t"+f)
+    cmakelists.append(")")
+    # ======== end add sources ========
+    for filepath, app_name in src_main.items():
+        cmakelists.append("target_sources("+app_name[1]+" PRIVATE ${SOURCES})")
+    for filepath, app_name in src_test_main.items():
+        cmakelists.append("target_sources("+app_name[1]+" PRIVATE ${SOURCES})")
 
 
     # Generate CMakeLists.txt (or look for other option, such as 'bazel')

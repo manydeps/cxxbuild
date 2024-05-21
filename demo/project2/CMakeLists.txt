@@ -5,7 +5,10 @@ set (CMAKE_CXX_STANDARD_REQUIRED ON)
 set (CMAKE_CXX_EXTENSIONS OFF)
 set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 Include(FetchContent)
+# add all executables
+add_executable(demo2 src/demo2.cpp )
+# finally, add all sources
 set(SOURCES
 	src/something.cpp
 )
-add_executable(demo2 src/demo2.cpp ${SOURCES})
+target_sources(demo2 PRIVATE ${SOURCES})

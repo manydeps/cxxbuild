@@ -5,11 +5,9 @@ set (CMAKE_CXX_STANDARD_REQUIRED ON)
 set (CMAKE_CXX_EXTENSIONS OFF)
 set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 Include(FetchContent)
-set(SOURCES
-	src/something.cpp
-)
-add_executable(demo4 src/demo4.cpp ${SOURCES})
-add_executable(my_test tests/my_test.cpp ${SOURCES})
+# add all executables
+add_executable(demo4 src/demo4.cpp )
+add_executable(my_test tests/my_test.cpp )
 add_library(my_headers0 INTERFACE)
 target_include_directories(my_headers0 INTERFACE include)
 target_link_libraries(demo4 PRIVATE my_headers0)
@@ -20,3 +18,9 @@ FetchContent_Declare(Catch2 GIT_REPOSITORY https://github.com/catchorg/Catch2.gi
 FetchContent_MakeAvailable(Catch2)
 target_link_libraries(my_test PRIVATE Catch2::Catch2WithMain)
 # cxxdeps dependency catch2
+# finally, add all sources
+set(SOURCES
+	src/something.cpp
+)
+target_sources(demo4 PRIVATE ${SOURCES})
+target_sources(my_test PRIVATE ${SOURCES})
