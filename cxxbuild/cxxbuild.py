@@ -10,7 +10,7 @@ import json
 import subprocess
 
 def version():
-    v = "cxxbuild=1.6.3"
+    v = "cxxbuild=1.6.4"
     return v
 
 def usage():
