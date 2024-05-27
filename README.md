@@ -43,6 +43,8 @@ Then, just run: `cxxbuild help`
 
 From this point, we assume cxxbuild is installed in your system :)
 
+**IMPORTANT:** do not forget to install cmake (or bazel) too: `pip install cmake` (or `pipx install cmake` for newer distributions)
+
 ## Basic commands
 
 `cxxbuild` has four main modes (three unimplemented, yet):
