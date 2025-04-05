@@ -2,6 +2,13 @@
 
 If you want to help or adjust the python cxxbuild library, please follow these instructions.
 
+### Using UV (new!)
+
+- Install UV: https://docs.astral.sh/uv/
+- Sync dependencies: `uv sync`
+- Install dev dependencies: `uv pip install .[dev]`
+
+
 ### Versioning requirements
 
 `pip install bumpver`

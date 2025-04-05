@@ -40,6 +40,7 @@ Usage:
        * --c++17 => use c++17 standard (DEFAULT)
        * --c++20 => use c++20 standard
        * --c++23 => use c++23 standard
+       * --c++26 => use c++26 standard
        * --cmake => use cmake build system (DEFAULT)
        * --bazel => use bazel build system (instead of cmake)
 
@@ -866,8 +867,7 @@ def generate_txt_from_toml(root_path):
     except FileNotFoundError:
         print("File cxxdeps.toml does not exist... ignoring it!")
 
-def run_cmake(root_path):
-        # ============ build with cmake+ninja ===========
+def check_cmake():
     # STEP 1: check that 'cmake' and 'ninja' command exists
     CHECK_CMAKE_CMD="cmake --version"
     print("Please install latest cmake with: python3 -m pip install cmake --upgrade")
@@ -887,6 +887,10 @@ def run_cmake(root_path):
     x=subprocess.call(list(filter(None, CHECK_NINJA_CMD.split(' '))))
     print('check result:', x)
     assert(x == 0)
+
+def run_cmake(root_path):
+    # ============ build with cmake+ninja ===========
+    check_cmake()
     #
     # STEP 1.5: debug only (TODO: create flag --verbose!)
     CMAKE_CMD="cat "+root_path+"/CMakeLists.txt"
@@ -906,8 +910,7 @@ def run_cmake(root_path):
     print('ninja result:', x)
     assert(x == 0)
 
-def run_bazel(root_path):
-    # ============ build with bazel ===========
+def check_bazel():
     # STEP 1: check that 'bazel' command exists
     CHECK_BAZEL_CMD="bazel --version"
     print("Please install latest bazel with NVM: bash -i -c \"npm install -g @bazel/bazelisk\"")
@@ -918,6 +921,10 @@ def run_bazel(root_path):
     x=subprocess.call(list(filter(None, CHECK_BAZEL_CMD.split(' '))))
     print('check result:', x)
     assert(x == 0)
+
+def run_bazel(root_path):
+    # ============ build with bazel ===========
+    check_bazel()
     #
     # STEP 1.5: debug only (TODO: create flag --verbose!)
     BAZEL_CMD="cat "+root_path+"/MODULE.bazel"
@@ -947,7 +954,7 @@ def is_cmd():
 
 def main():
     print("======================================")
-    print("         welcome to cxxbuild          ")
+    print("     welcome to cxxdeps/cxxbuild      ")
     print("======================================")
     print(version())
     # options: 'posix' or 'nt'
@@ -980,7 +987,7 @@ def main():
             root_path = sys.argv[2]
         else:
             usage()
-            exit()
+            exit()  
 
     
     build_options_args = []
@@ -1015,6 +1022,8 @@ def main():
             build_options_args.append("!std c++20")
         if (sys.argv[i] == "--c++23"):
             build_options_args.append("!std c++23")
+        if (sys.argv[i] == "--c++26"):
+            build_options_args.append("!std c++26")
 
     print("build options from args: "+str(build_options_args))
     #
@@ -1030,7 +1039,7 @@ def main():
     except FileNotFoundError:
         print("File cxxdeps.txt does not exist... ignoring it!")
     
-    # merge with argument build options (priority is LAST)
+    # merge with argument build options (priority/override is LAST)
     for op in build_options_args:
         build_options.append(op)
 
@@ -1101,6 +1110,8 @@ def main():
             cppstd="20"
         if oplist[0] == '!std' and oplist[1] == 'c++23':
             cppstd="23"
+        if oplist[0] == '!std' and oplist[1] == 'c++26':
+            cppstd="26"
         
     # build system defaults to cmake
     if use_cmake is None:
@@ -1113,6 +1124,19 @@ def main():
 def run_build(root_path, use_cmake, use_bazel, cppstd, search_src, search_tests, search_include, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOURCES, IGNORE):
     #
     print("begin build on root_path=",root_path)
+    # ===================================
+    # test is cmake or bazel is available
+    # ===================================
+    if use_cmake:
+        print("BUILD WITH CMAKE!")
+        check_cmake()
+    elif use_bazel:
+        print("BUILD WITH BAZEL!")
+        check_bazel()
+    else:
+        print("BUILD ERROR! NOT CMAKE OR BAZEL")
+        assert(False)
+
     # find all source files,
     # find all files with an entry point,
     src_list = []
