@@ -518,11 +518,13 @@ def add_system_triplet_bazel(bzl, triplet, not_triplet, my_system, project_name)
             bzl.cxxopt_linux.append("-l"+project_name)
     return True
 
-def generate_cmakelists(cppstd, root_path, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOURCES, src_main, src_test_main, src_list, src_test_nomain):
+def generate_cmakelists(cppstd, root_path, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOURCES, COMPILER, src_main, src_test_main, src_list, src_test_nomain):
     # READ cxxdeps.txt file, if available...
     # AT THIS POINT, ASSUMING 'cmake' OPTION (NO 'bazel' FOR NOW!)
     cmakelists = []
-    cmakelists.append("cmake_minimum_required(VERSION 3.27)")
+    cmakelists.append("cmake_minimum_required(VERSION 4.0)")
+    if (COMPILER != ""):
+        cmakelists.append("set (CMAKE_CXX_COMPILER "+COMPILER+")")
     cmakelists.append("project(my-project LANGUAGES CXX VERSION 0.0.1)")
     cmakelists.append("set (CMAKE_CXX_STANDARD "+cppstd+")") 
     cmakelists.append("set (CMAKE_CXX_STANDARD_REQUIRED ON)")
@@ -981,7 +983,7 @@ def main():
     root_path = sys.argv[1]
     
     if "build" in sys.argv:
-        # must take path explicitly from third argument!
+        # when in 'build' mode, must take path explicitly from third argument!
         # example: cxxbuild build .
         if len(sys.argv) > 2:
             root_path = sys.argv[2]
@@ -993,21 +995,19 @@ def main():
     build_options_args = []
     for i in range(len(sys.argv)):
         if (sys.argv[i] == "--src"):
-            # change 'src' folder
             build_options_args.append("!src \""+str(sys.argv[i + 1])+"\"")
         if (sys.argv[i] == "--extrasrc"):
-            # add extra source file
             build_options_args.append("!extrasrc "+str(sys.argv[i + 1]))
         if (sys.argv[i] == "--tests"):
             build_options_args.append("!tests \""+str(sys.argv[i + 1])+"\"")
         if (sys.argv[i] == "--include"):
-            # force --include to appear
             build_options_args.append("!include \""+str(sys.argv[i + 1])+"\"")
         if (sys.argv[i] == "--ignore"):
             build_options_args.append("!ignore "+str(sys.argv[i + 1]))
         if (sys.argv[i] == "--define"):
-            # force --define to appear
             build_options_args.append("!define "+str(sys.argv[i + 1]))
+        if (sys.argv[i] == "--compiler"):
+            build_options_args.append("!compiler \""+str(sys.argv[i + 1])+"\"")
         if (sys.argv[i] == "--cmake"):
             build_options_args.append("!build cmake")
         if (sys.argv[i] == "--bazel"):
@@ -1053,6 +1053,7 @@ def main():
     use_cmake=None
     use_bazel=None
     cppstd="17"
+    COMPILER = ""     # cxx compiler path
     INCLUDE_DIRS = []
     DEFINITIONS = []
     EXTRA_SOURCES = []
@@ -1088,6 +1089,8 @@ def main():
             search_src = oplist[1].strip("\"")
         if oplist[0] == '!tests':
             search_tests = oplist[1].strip("\"")
+        if oplist[0] == '!compiler':
+            COMPILER = oplist[1].strip("\"")
         if oplist[0] == '!build' and oplist[1] == 'cmake':
             if use_bazel == True:
                 print("cxxbuild error: cannot redefine build system 'bazel' to 'cmake'")
@@ -1119,9 +1122,9 @@ def main():
         use_bazel = False
 
     #
-    return run_build(root_path, use_cmake, use_bazel, cppstd, search_src, search_tests, search_include, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOURCES, IGNORE)
+    return run_build(root_path, use_cmake, use_bazel, cppstd, search_src, search_tests, search_include, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOURCES, IGNORE, COMPILER)
 
-def run_build(root_path, use_cmake, use_bazel, cppstd, search_src, search_tests, search_include, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOURCES, IGNORE):
+def run_build(root_path, use_cmake, use_bazel, cppstd, search_src, search_tests, search_include, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOURCES, IGNORE, COMPILER):
     #
     print("begin build on root_path=",root_path)
     # ===================================
@@ -1257,7 +1260,7 @@ def run_build(root_path, use_cmake, use_bazel, cppstd, search_src, search_tests,
     print("INCLUDE_DIRS=",INCLUDE_DIRS)
 
     if use_cmake == True:
-        generate_cmakelists(cppstd, root_path, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOURCES, src_main, src_test_main, src_list, src_test_nomain)
+        generate_cmakelists(cppstd, root_path, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOURCES, COMPILER, src_main, src_test_main, src_list, src_test_nomain)
     elif use_bazel == True:
         generate_bazelfiles(cppstd, root_path, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOURCES, src_main, src_test_main, src_list, src_test_nomain)
     else:

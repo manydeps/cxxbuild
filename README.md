@@ -69,6 +69,8 @@ From this point, we assume cxxbuild is installed in your system :)
     * Dependencies (cmake-only): fmt, catch2
 - Demo 6 [README](demo/project6/README.md): `cxxbuild demo/project6`
     * Dependencies (cmake-only): optframe, absl (google abseil)
+- Demo 7 [README](demo/project7/README.md): `cxxbuild demo/project7 --c++23 --compiler "/usr/bin/g++-14"`
+    * Dependencies (cmake-only): boost-ext/ut, `#include <print>`
 
 All of them support both CMake and Bazel build systems,
 for common platforms Linux, Windows and Mac.

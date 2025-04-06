@@ -1,0 +1,6 @@
+[all]
+
+[test]
+ut={ git="https://github.com/boost-ext/ut", tag="v2.3.1", links=[
+    "Boost::ut"
+] }

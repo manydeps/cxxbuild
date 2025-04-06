@@ -15,6 +15,8 @@ run_demo:
 	uv run cxxbuild demo/project5
 	echo "\n\nRUN DEMO 6\n\n"
 	uv run cxxbuild demo/project6
+	echo "\n\nRUN DEMO 7\n\n"
+	uv run cxxbuild demo/project7 --c++23 --compiler "/usr/bin/g++-14"
 
 clean_demo:
 	rm -rf demo/project1/build
