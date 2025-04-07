@@ -6,7 +6,7 @@
 #include <lista01/get_data_cpp23.hpp>
 
 int main() {
-  std::println("{} {}! Curso em C/C++", "Olá", "Mundo");
+  std::println("{} {}! Curso em C/C++", "Ola", "Mundo");
   //
   return 0;
 }

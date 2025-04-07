@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 4.0)
-set (CMAKE_CXX_COMPILER /usr/bin/g++-14)
+set (CMAKE_CXX_COMPILER /usr/bin/g++-15)
 project(my-project LANGUAGES CXX VERSION 0.0.1)
 set (CMAKE_CXX_STANDARD 23)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)

@@ -12,6 +12,10 @@ At least GCC 14 is required, so recommended flag to force compiler may be needed
 
 - `uv run cxxbuild demo/project7 --c++23 --compiler "/usr/bin/g++-14"`
 
+Clang 19 with stdlib libc++ also works:
+
+- `uv run cxxbuild demo/project7 --c++23 --compiler "/usr/bin/clang++-19" --stdlib libc++`
+
 ### How to build
 
 Install cxxbuild with: `pip install cxxbuild`
