@@ -22,7 +22,7 @@ copyright = '2023, Igor Machado Coelho'
 author = 'Igor Machado Coelho'
 
 # The full version, including alpha/beta/rc tags
-release = 'v1.6.4'
+release = 'v1.7.0'
 
 
 # -- General configuration ---------------------------------------------------

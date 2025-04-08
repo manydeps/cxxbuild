@@ -16,7 +16,7 @@ import subprocess
 # process begin on: def main()
 
 def version():
-    v = "cxxbuild=1.6.4"
+    v = "cxxbuild=1.7.0"
     return v
 
 def usage():
