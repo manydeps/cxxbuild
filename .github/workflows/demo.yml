@@ -151,7 +151,7 @@ jobs:
       if: contains(matrix.os, 'ubuntu')
       shell: bash
       run: |
-        python3 cxxbuild/cxxbuild.py demo/project8 --c++23 --compiler "/usr/bin/clang++-19" --stdlib libc++ --import std --cmake-unset BOOST_UT_DISABLE_MODULE
+        python3 cxxbuild/cxxbuild.py demo/project8 --gnu++23 --compiler "/usr/bin/clang++-19" --stdlib libc++ --import std --cmake-unset BOOST_UT_DISABLE_MODULE
 
 
 
