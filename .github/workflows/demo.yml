@@ -29,6 +29,7 @@ jobs:
         curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
         bash -i -c "nvm install --lts"
         bash -i -c "sudo npm install -g @bazel/bazelisk"
+        bash -i -c "sudo apt install clang-19 clang-tools-19 libc++-19-dev"
     - name: Install ninja-build, bazel and local dependencies (macos)
       if: contains(matrix.os, 'macos')
       run: |
