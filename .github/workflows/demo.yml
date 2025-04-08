@@ -120,7 +120,13 @@ jobs:
       run: |
         cp demo/project6/cxxdeps.windows.txt demo/project6/cxxdeps.txt
         python3 cxxbuild/cxxbuild.py demo/project6
-    - name: demo-project7 C++23 (cmake) 
+    - name: demo-project7 C++23 (cmake) - Windows ok, ubuntu broken on gcc 13 
+      if: contains(matrix.os, 'windows')
+      shell: bash
+      run: |
+        python3 cxxbuild/cxxbuild.py demo/project7 --c++23
+    - name: demo-project7 C++23 (cmake) - MacOS ok Clang 15, ubuntu broken on gcc 13 
+      if: contains(matrix.os, 'macos')
       shell: bash
       run: |
         python3 cxxbuild/cxxbuild.py demo/project7 --c++23
