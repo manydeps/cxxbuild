@@ -135,6 +135,21 @@ jobs:
       shell: bash
       run: |
         python3 cxxbuild/cxxbuild.py demo/project7 --c++23 --compiler "/usr/bin/g++-14"
+    - name: demo-project8 C++23 (cmake) - Windows
+      if: contains(matrix.os, 'windows')
+      shell: bash
+      run: |
+        python3 cxxbuild/cxxbuild.py demo/project8 --c++23 --import std --cmake-unset BOOST_UT_DISABLE_MODULE
+    - name: demo-project8 C++23 (cmake) - MacOS
+      if: contains(matrix.os, 'macos')
+      shell: bash
+      run: |
+        python3 cxxbuild/cxxbuild.py demo/project8 --c++23 --import std --cmake-unset BOOST_UT_DISABLE_MODULE
+    - name: demo-project8 C++23 (cmake) - Ubuntu
+      if: contains(matrix.os, 'ubuntu')
+      shell: bash
+      run: |
+        python3 cxxbuild/cxxbuild.py demo/project8 --c++23 --compiler "/usr/bin/clang++-19" --stdlib libc++ --import std --cmake-unset BOOST_UT_DISABLE_MODULE
 
 
 
