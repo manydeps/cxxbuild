@@ -47,7 +47,7 @@ jobs:
     - name: demo-project1 (cmake)
       shell: bash
       run: |
-        python3 cxxbuild/cxxbuild.py demo/project1
+        python3 cxxbuild/cxxbuild.py demo/project1 --verbose
     - name: demo-project1 (bazel ubuntu)
       if: contains(matrix.os, 'ubuntu')
       shell: bash
