@@ -120,7 +120,7 @@ jobs:
       run: |
         cp demo/project6/cxxdeps.windows.txt demo/project6/cxxdeps.txt
         python3 cxxbuild/cxxbuild.py demo/project6
-    - name: demo-project7 C++23 (cmake) - Windows ok, ubuntu broken on gcc 13 
+    - name: demo-project7 C++23 (cmake) - Windows ok MSVC 19.43, ubuntu broken on gcc 13 
       if: contains(matrix.os, 'windows')
       shell: bash
       run: |
@@ -130,6 +130,11 @@ jobs:
       shell: bash
       run: |
         python3 cxxbuild/cxxbuild.py demo/project7 --c++23
+    - name: demo-project7 C++23 (cmake) - Ubuntu trying gcc 14
+      if: contains(matrix.os, 'ubuntu')
+      shell: bash
+      run: |
+        python3 cxxbuild/cxxbuild.py demo/project7 --c++23 --compiler "/usr/bin/g++-14"
 
 
 
