@@ -28,6 +28,7 @@ project1/
         |    | file1.cpp
         |    | file2.c
         |    | file_main.cpp
+        |    | my_module.cppm
         |    | ...
         | cxxdeps.txt
 ```
