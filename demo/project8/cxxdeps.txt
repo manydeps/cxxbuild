@@ -1,0 +1,2 @@
+# DO NOT EDIT! file 'cxxdeps.txt' generated automatically from 'cxxdeps.toml'
+ut == "v2.3.1" [ Boost::ut_module ] git test https://github.com/boost-ext/ut

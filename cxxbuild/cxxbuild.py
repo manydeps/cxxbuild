@@ -40,6 +40,7 @@ Usage:
        * --c++17 => use c++17 standard (DEFAULT)
        * --c++20 => use c++20 standard
        * --c++23 => use c++23 standard
+       * --gnu++23 => use c++23 extensions
        * --c++26 => use c++26 standard
        * --cmake => use cmake build system (DEFAULT)
        * --bazel => use bazel build system (instead of cmake)
@@ -518,7 +519,7 @@ def add_system_triplet_bazel(bzl, triplet, not_triplet, my_system, project_name)
             bzl.cxxopt_linux.append("-l"+project_name)
     return True
 
-def generate_cmakelists(cppstd, root_path, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOURCES, COMPILER, STDLIB, src_main, src_test_main, src_list, src_test_nomain):
+def generate_cmakelists(cppstd, cppgnu, root_path, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOURCES, COMPILER, STDLIB, IMPORTS, CMAKE_SET, CMAKE_UNSET, src_main, src_test_main, src_list, src_test_nomain, src_modules):
     # READ cxxdeps.txt file, if available...
     # AT THIS POINT, ASSUMING 'cmake' OPTION (NO 'bazel' FOR NOW!)
     cmakelists = []
@@ -527,12 +528,23 @@ def generate_cmakelists(cppstd, root_path, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOUR
         cmakelists.append("set (CMAKE_CXX_COMPILER "+COMPILER+")")
     if (STDLIB != ""):
         cmakelists.append("set(CMAKE_CXX_FLAGS \"${CMAKE_CXX_FLAGS} -stdlib="+STDLIB+"\")")
+    if ("std" in IMPORTS):
+        cmakelists.append("set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD \"a9e1cf81-9932-4810-974b-6eccaf14e457\")")
+        cmakelists.append("set(CMAKE_CXX_MODULE_STD 1)")
     cmakelists.append("project(my-project LANGUAGES CXX VERSION 0.0.1)")
     cmakelists.append("set (CMAKE_CXX_STANDARD "+cppstd+")") 
     cmakelists.append("set (CMAKE_CXX_STANDARD_REQUIRED ON)")
-    cmakelists.append("set (CMAKE_CXX_EXTENSIONS OFF)")
+    if cppgnu:
+        cmakelists.append("set (CMAKE_CXX_EXTENSIONS ON)")
+    else:
+        cmakelists.append("set (CMAKE_CXX_EXTENSIONS OFF)")
     cmakelists.append("set (CMAKE_EXPORT_COMPILE_COMMANDS ON)")
     cmakelists.append("Include(FetchContent)")
+    for c in CMAKE_SET:
+        # TODO: check set type! type1: JUST_NAME   type2: DEF="value", only ON and OFF now
+        cmakelists.append("set("+c+" ON)")
+    for c in CMAKE_UNSET:
+        cmakelists.append("set("+c+" OFF)")
     # add definitions!
     for d in DEFINITIONS:
         # TODO: check definition type! type1: JUST_DEF   type2: DEF="value"
@@ -541,9 +553,18 @@ def generate_cmakelists(cppstd, root_path, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOUR
     cmakelists.append("# add all executables")
     COUNT_APP_ID=1
     all_apps = []
+    # add_library for module libraries (.cppm)
+    cxx_module_list = ""
+    for filepath, app_name in src_modules.items():
+        cmakelists.append("add_library("+app_name[1]+" )   # cxx module: "+app_name[1])
+        cmakelists.append("target_sources("+app_name[1]+" PUBLIC  FILE_SET CXX_MODULES FILES "+filepath.replace("\\", "/")+")")
+        cxx_module_list = cxx_module_list + " " + app_name[1]
     # add_executable for binaries
     for filepath, app_name in src_main.items():
-        cmakelists.append("add_executable("+app_name[1]+" "+filepath.replace("\\", "/")+" )")
+        cmakelists.append("add_executable("+app_name[1]+" "+filepath.replace("\\", "/")+" )    # main")
+        if cxx_module_list != "":
+            cmakelists.append("target_link_libraries("+app_name[1]+" "+cxx_module_list+" )")    
+
     # add_executable for test binaries
     print("finding test executables!")
     # if no main is found, then each test is assumed to be independent!
@@ -552,6 +573,8 @@ def generate_cmakelists(cppstd, root_path, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOUR
         src_test_main = src_test_nomain
     for filepath, app_name in src_test_main.items():
         cmakelists.append("add_executable("+app_name[1]+" "+filepath.replace("\\", "/")+" )")
+        if cxx_module_list != "":
+            cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+cxx_module_list+" )")
 
 
     # INCLUDE_DIRS will act as header-only libraries
@@ -1008,10 +1031,17 @@ def main():
             build_options_args.append("!ignore "+str(sys.argv[i + 1]))
         if (sys.argv[i] == "--define"):
             build_options_args.append("!define "+str(sys.argv[i + 1]))
+        if (sys.argv[i] == "--cmake-set"):
+            build_options_args.append("!cmake-set "+str(sys.argv[i + 1]))
+        if (sys.argv[i] == "--cmake-unset"):
+            build_options_args.append("!cmake-unset "+str(sys.argv[i + 1]))
+            # --keep ??? do not re-regenerate CMakeLists... only build! WARN if differences found? DIFF?s
         if (sys.argv[i] == "--compiler"):
             build_options_args.append("!compiler \""+str(sys.argv[i + 1])+"\"")
         if (sys.argv[i] == "--stdlib"):
             build_options_args.append("!stdlib "+str(sys.argv[i + 1]))
+        if (sys.argv[i] == "--import"):
+            build_options_args.append("!import "+str(sys.argv[i + 1]))
         if (sys.argv[i] == "--cmake"):
             build_options_args.append("!build cmake")
         if (sys.argv[i] == "--bazel"):
@@ -1026,6 +1056,8 @@ def main():
             build_options_args.append("!std c++20")
         if (sys.argv[i] == "--c++23"):
             build_options_args.append("!std c++23")
+        if (sys.argv[i] == "--gnu++23"):
+            build_options_args.append("!std gnu++23")
         if (sys.argv[i] == "--c++26"):
             build_options_args.append("!std c++26")
 
@@ -1057,11 +1089,15 @@ def main():
     use_cmake=None
     use_bazel=None
     cppstd="17"
+    cppgnu=False      # disable extensions by default
     COMPILER = ""     # cxx compiler path
     STDLIB = ""       # libc++ ? useful for clang on linux...
     INCLUDE_DIRS = []
     DEFINITIONS = []
     EXTRA_SOURCES = []
+    IMPORTS = []
+    CMAKE_SET = []
+    CMAKE_UNSET = []
     IGNORE = []
     # ignore build/ folder by default
     IGNORE.append("build/")
@@ -1098,6 +1134,16 @@ def main():
             COMPILER = oplist[1].strip("\"")
         if oplist[0] == '!stdlib':
             STDLIB = op[len(oplist[0]):].strip()
+        if oplist[0] == '!import':
+            module_name = op[len(oplist[0]):].strip()
+            if module_name != "std":
+                print("cxxbuild error: can only import module 'std', not '",module_name,"'")
+                exit(1)
+            IMPORTS.append(module_name)
+        if oplist[0] == '!cmake-set':
+            CMAKE_SET.append(op[len(oplist[0]):].strip())
+        if oplist[0] == '!cmake-unset':
+            CMAKE_UNSET.append(op[len(oplist[0]):].strip())
         if oplist[0] == '!build' and oplist[1] == 'cmake':
             if use_bazel == True:
                 print("cxxbuild error: cannot redefine build system 'bazel' to 'cmake'")
@@ -1120,6 +1166,9 @@ def main():
             cppstd="20"
         if oplist[0] == '!std' and oplist[1] == 'c++23':
             cppstd="23"
+        if oplist[0] == '!std' and oplist[1] == 'gnu++23':
+            cppstd="23"
+            cppgnu=True
         if oplist[0] == '!std' and oplist[1] == 'c++26':
             cppstd="26"
         
@@ -1129,9 +1178,9 @@ def main():
         use_bazel = False
 
     #
-    return run_build(root_path, use_cmake, use_bazel, cppstd, search_src, search_tests, search_include, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOURCES, IGNORE, COMPILER, STDLIB)
+    return run_build(root_path, use_cmake, use_bazel, cppstd, cppgnu, search_src, search_tests, search_include, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOURCES, IGNORE, COMPILER, STDLIB, IMPORTS, CMAKE_SET, CMAKE_UNSET)
 
-def run_build(root_path, use_cmake, use_bazel, cppstd, search_src, search_tests, search_include, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOURCES, IGNORE, COMPILER, STDLIB):
+def run_build(root_path, use_cmake, use_bazel, cppstd, cppgnu, search_src, search_tests, search_include, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOURCES, IGNORE, COMPILER, STDLIB, IMPORTS, CMAKE_SET, CMAKE_UNSET):
     #
     print("begin build on root_path=",root_path)
     # ===================================
@@ -1150,6 +1199,7 @@ def run_build(root_path, use_cmake, use_bazel, cppstd, search_src, search_tests,
     # find all source files,
     # find all files with an entry point,
     src_list = []
+    src_modules = {}
     src_main = {}
     # ENFORCING THIS PATH... MUST ADD MULTIPLE PATH OPTION!
     # src_paths = [root_path, root_path+"/src"] 
@@ -1158,13 +1208,14 @@ def run_build(root_path, use_cmake, use_bazel, cppstd, search_src, search_tests,
     entrypoint = "main("  # Pattern to find main(), or main(int argc, ...), etc
     #
     src_ext = ['.c', '.cc', '.cpp', '.cxx', '.c++']
-    print(src_ext)
+    src_module_ext = ['.cppm']
+    print('src_ext:', src_ext)
     for src_path in src_paths:
         for root, subdirs, files in os.walk(src_path):
             root = root.removeprefix(root_path).removeprefix("/")
-            print("root_SRC: ", root)
-            print("subdirs_SRC: ", subdirs)
-            print("files_SRC: ", files)
+            print("checking root_SRC: ", root)
+            print("checking subdirs_SRC: ", subdirs)
+            print("checking files_SRC: ", files)
             for file in files:
                 file_name, ext = os.path.splitext(file)
                 if ext in src_ext:
@@ -1183,11 +1234,15 @@ def run_build(root_path, use_cmake, use_bazel, cppstd, search_src, search_tests,
                             l2 = l.strip()
                             if entrypoint in l2 and l2[0] != "/" and l2[1] != "/":
                                 src_main[file_path] = (root, file_name)
+                if ext in src_module_ext:
+                    file_path = os.path.join(root, file)
+                    src_modules[file_path] = (root, file_name)
         # end-for src_path
     # end-for src_paths
 
     print("src_main:", src_main)
     print("src_list:", src_list)
+    print("src_modules:", src_modules)
 
     # finding tests...
 
@@ -1267,7 +1322,7 @@ def run_build(root_path, use_cmake, use_bazel, cppstd, search_src, search_tests,
     print("INCLUDE_DIRS=",INCLUDE_DIRS)
 
     if use_cmake == True:
-        generate_cmakelists(cppstd, root_path, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOURCES, COMPILER, STDLIB, src_main, src_test_main, src_list, src_test_nomain)
+        generate_cmakelists(cppstd, cppgnu, root_path, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOURCES, COMPILER, STDLIB, IMPORTS, CMAKE_SET, CMAKE_UNSET, src_main, src_test_main, src_list, src_test_nomain, src_modules)
     elif use_bazel == True:
         generate_bazelfiles(cppstd, root_path, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOURCES, src_main, src_test_main, src_list, src_test_nomain)
     else:
