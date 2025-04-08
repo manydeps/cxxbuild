@@ -6,7 +6,7 @@ set (CMAKE_CXX_EXTENSIONS OFF)
 set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 Include(FetchContent)
 # add all executables
-add_executable(demo2 src/demo2.cpp )
+add_executable(demo2 src/demo2.cpp )    # main
 # finally, add all sources
 set(SOURCES
 	src/something.cpp

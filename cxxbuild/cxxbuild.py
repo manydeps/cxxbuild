@@ -519,7 +519,7 @@ def add_system_triplet_bazel(bzl, triplet, not_triplet, my_system, project_name)
             bzl.cxxopt_linux.append("-l"+project_name)
     return True
 
-def generate_cmakelists(cppstd, cppgnu, root_path, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOURCES, COMPILER, STDLIB, IMPORTS, CMAKE_SET, CMAKE_UNSET, src_main, src_test_main, src_list, src_test_nomain, src_modules):
+def generate_cmakelists(cppstd, cppgnu, root_path, INCLUDE_DIRS, INCLUDE_EXT, DEFINITIONS, EXTRA_SOURCES, COMPILER, STDLIB, IMPORTS, CMAKE_SET, CMAKE_UNSET, src_main, src_test_main, src_list, src_test_nomain, src_modules):
     # READ cxxdeps.txt file, if available...
     # AT THIS POINT, ASSUMING 'cmake' OPTION (NO 'bazel' FOR NOW!)
     cmakelists = []
@@ -634,7 +634,7 @@ def generate_cmakelists(cppstd, cppgnu, root_path, INCLUDE_DIRS, DEFINITIONS, EX
     print(" => "+root_path+'/CMakeLists.txt')
     print("-----------------------------------")
 
-def generate_bazelfiles(cppstd, root_path, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOURCES, src_main, src_test_main, src_list, src_test_nomain):
+def generate_bazelfiles(cppstd, root_path, INCLUDE_DIRS, INCLUDE_EXT, DEFINITIONS, EXTRA_SOURCES, src_main, src_test_main, src_list, src_test_nomain):
     # READ cxxdeps.txt file, if available...
     # AT THIS POINT, ASSUMING 'cmake' OPTION (NO 'bazel' FOR NOW!)
     bzl = BazelFiles()
@@ -653,7 +653,7 @@ def generate_bazelfiles(cppstd, root_path, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOUR
     bzl.bazelrc.append("#")
 
     bzl.BUILD_root = []
-    bzl.BUILD_root.append("load(\"@rules_cc//cc:defs.bzl\", \"cc_binary\", \"cc_library\")")
+    bzl.BUILD_root.append("# load(\"@rules_cc//cc:defs.bzl\", \"cc_binary\", \"cc_library\")")
     bzl.BUILD_root.append("#")
     bzl.BUILD_root.append("package(")
     bzl.BUILD_root.append("    default_visibility = [\"//visibility:public\"],")
@@ -723,7 +723,21 @@ def generate_bazelfiles(cppstd, root_path, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOUR
         target_include = []
         target_include.append("\ncc_library(")
         target_include.append("    name = \"my_headers"+str(i)+"\",")
-        target_include.append("    hdrs = glob([\""+incdir+"/**/*.hpp\",\""+incdir+"/**/*.h\"]),")
+        # TODO: cannot add non-existing glob extensions anymore on bazel!
+        # target_include.append("    hdrs = glob([\""+incdir+"/**/*.hpp\",\""+incdir+"/**/*.h\"]),")
+        hdrs_str = "    hdrs = "
+        if len(INCLUDE_EXT)==0:
+            hdrs_str = hdrs_str + "[],"
+        else:
+            hdrs_str = hdrs_str + "glob(["
+            first = True
+            for inc_ext in INCLUDE_EXT:
+                if not first:
+                    hdrs_str = hdrs_str + ","
+                first = False
+                hdrs_str = hdrs_str + "\""+incdir+"/**/*" + inc_ext + "\""
+            hdrs_str = hdrs_str + "]),"
+        target_include.append(hdrs_str)
         target_include.append("    includes = [\""+incdir+"\"],")
         target_include.append("    # no 'dep' attribute in cc_library")
         target_include.append("    # dep = [")
@@ -1320,11 +1334,28 @@ def run_build(root_path, use_cmake, use_bazel, cppstd, cppgnu, search_src, searc
     INCLUDE_DIRS = list(set(INCLUDE_DIRS))
 
     print("INCLUDE_DIRS=",INCLUDE_DIRS)
+    allowed_inc_ext = [".hpp", ".h"]
+    INCLUDE_EXT = []
+    for inc in INCLUDE_DIRS:
+        for root, subdirs, files in os.walk(root_path+"/"+inc):
+            root = root.removeprefix(root_path).removeprefix("/")
+            #print("INC root: ", root)
+            #print("INC subdirs: ", subdirs)
+            #print("INC files: ", files)
+            for file in files:
+                file_name, ext = os.path.splitext(file)
+                if ext in allowed_inc_ext:
+                    if ext in INCLUDE_EXT:
+                        pass
+                    else:
+                        INCLUDE_EXT.append(ext)
+    # for inc
+    print("INCLUDE_EXT=",INCLUDE_EXT)
 
     if use_cmake == True:
-        generate_cmakelists(cppstd, cppgnu, root_path, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOURCES, COMPILER, STDLIB, IMPORTS, CMAKE_SET, CMAKE_UNSET, src_main, src_test_main, src_list, src_test_nomain, src_modules)
+        generate_cmakelists(cppstd, cppgnu, root_path, INCLUDE_DIRS, INCLUDE_EXT, DEFINITIONS, EXTRA_SOURCES, COMPILER, STDLIB, IMPORTS, CMAKE_SET, CMAKE_UNSET, src_main, src_test_main, src_list, src_test_nomain, src_modules)
     elif use_bazel == True:
-        generate_bazelfiles(cppstd, root_path, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOURCES, src_main, src_test_main, src_list, src_test_nomain)
+        generate_bazelfiles(cppstd, root_path, INCLUDE_DIRS, INCLUDE_EXT, DEFINITIONS, EXTRA_SOURCES, src_main, src_test_main, src_list, src_test_nomain)
     else:
         assert(False)
 

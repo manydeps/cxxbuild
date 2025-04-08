@@ -6,7 +6,7 @@ set (CMAKE_CXX_EXTENSIONS OFF)
 set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 Include(FetchContent)
 # add all executables
-add_executable(demo3 src/demo3.cpp )
+add_executable(demo3 src/demo3.cpp )    # main
 add_executable(my_test tests/my_test.cpp )
 add_library(my_headers0 INTERFACE)
 target_include_directories(my_headers0 INTERFACE include)

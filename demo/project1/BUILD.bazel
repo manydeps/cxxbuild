@@ -1,4 +1,4 @@
-load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+# load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 #
 package(
     default_visibility = ["//visibility:public"],
@@ -15,7 +15,7 @@ cc_binary(
 )
 cc_library(
     name = "my_headers0",
-    hdrs = glob(["include/**/*.hpp","include/**/*.h"]),
+    hdrs = glob(["include/**/*.hpp"]),
     includes = ["include"],
     # no 'dep' attribute in cc_library
     # dep = ["@fmt//:fmt",]
