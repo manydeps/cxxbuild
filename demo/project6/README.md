@@ -6,6 +6,9 @@ We test:
 - google abseil library (`absl`)
 - optframe framework (`optframe`)
 
+For linux, run `./get_optframe.sh` to load it locally with `cxxdeps.txt`!
+On Windows, it will follow `cxxdeps.windows.txt` automatically, instead of `cxxdeps.txt`.
+
 These work for both c++17 (default) and c++20
 
 ### How to build

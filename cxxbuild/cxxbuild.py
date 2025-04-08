@@ -55,190 +55,200 @@ Usage:
     print(u)
 
 def get_cmakelists_from_cxxdeps(VERBOSE, root_path, cmakelists, INCLUDE_DIRS, src_main, src_test_main):
-    try:
-        with open(root_path+'/cxxdeps.txt', 'r') as fd:
-            x=fd.readlines()
-            print("cxxbuild: get_cmakelists_from_cxxdeps")
-            #print(x)
-            cmakelists.append("# begin dependencies from cxxdeps.txt")
-            for l in x:
-                if (len(l) >= 1) and (l[0] != '#') and (l[0] != '!'):
-                    # good line!
-                    if VERBOSE:
-                        print(l)
-                    fields = l.split()
-                    if VERBOSE:
-                        print(fields)
-                    # assume all spacing is correct, for now!
-                    if len(fields) == 0:
-                        # IGNORE (EMPTY LINE!)
-                        continue
-                    project_name_full = fields[0]
-                    lproj = project_name_full.split(":")
-                    project_name = project_name_full.split(":")[0]
-                    triplet = ""
-                    not_triplet = False
-                    if len(lproj) > 1:
-                        triplet = project_name_full.split(":")[1]
-                        if triplet.startswith("!"):
-                            not_triplet = True
-                            triplet = triplet[1:]  # remove "!"
-                    #
-                    import platform
-                    my_system = platform.system()
-                    #
-                    print("cxxdeps cmake PROJECT:", project_name, " TRIPLET:", triplet, "SYSTEM:", my_system)
-                    #
-                    cmakelists.append("# cxxdeps dependency "+project_name)
-                    if len(fields) == 1:
-                        # SYSTEM STATIC LIBRARY! example: -lm
-                        # MANUALLY PUSH STANDARD PARAMETERS: m == * [ m ] system *
-                        fields.append('==')
-                        fields.append('*')
-                        fields.append('[')
-                        fields.append(project_name)
-                        fields.append(']')
-                        fields.append('system')
-                        fields.append('*')
-                    # expects '==' now!
-                    assert(fields[1] == "==")
-                    version_number = fields[2].strip('"')
-                    if len(fields) == 3:
-                        # SYSTEM STATIC LIBRARY WITH VERSION! example: -lm=0.0.1
-                        # DON'T DOING THIS NOW...
-                        print("WARNING: ignoring system library WITH VERSION: "+project_name)
-                        assert(False)
-                        continue
-                    # begin reading library list
-                    assert fields[3] == '['
-                    libs = []
-                    k = 4
+    import platform
+    my_system = platform.system()
+    print("cxxbuild: get_cmakelists_from_cxxdeps on platform =", my_system)
+    x = []
+    if my_system == "Windows":
+        try:
+            with open(root_path+'/cxxdeps.windows.txt', 'r') as fd:
+                x=fd.readlines()
+                print("cxxbuild: found 'cxxdeps.windows.txt'...")
+        except FileNotFoundError:
+            if VERBOSE:
+                print("cxxbuild cmake: File cxxdeps.windows.txt does not exist... ignoring it!")
+    else:
+        try:
+            with open(root_path+'/cxxdeps.txt', 'r') as fd:
+                x=fd.readlines()
+                print("cxxbuild: found 'cxxdeps.txt'...")
+        except FileNotFoundError:
+            if VERBOSE:
+                print("cxxbuild cmake: File cxxdeps.txt does not exist... ignoring it!")
+    if len(x) > 0:
+        #print(x)
+        cmakelists.append("# begin dependencies from cxxdeps.txt")
+        for l in x:
+            if (len(l) >= 1) and (l[0] != '#') and (l[0] != '!'):
+                # good line!
+                if VERBOSE:
+                    print(l)
+                fields = l.split()
+                if VERBOSE:
+                    print(fields)
+                # assume all spacing is correct, for now!
+                if len(fields) == 0:
+                    # IGNORE (EMPTY LINE!)
+                    continue
+                project_name_full = fields[0]
+                lproj = project_name_full.split(":")
+                project_name = project_name_full.split(":")[0]
+                triplet = ""
+                not_triplet = False
+                if len(lproj) > 1:
+                    triplet = project_name_full.split(":")[1]
+                    if triplet.startswith("!"):
+                        not_triplet = True
+                        triplet = triplet[1:]  # remove "!"
+                #
+                print("cxxdeps cmake PROJECT:", project_name, " TRIPLET:", triplet, "SYSTEM:", my_system)
+                #
+                cmakelists.append("# cxxdeps dependency "+project_name)
+                if len(fields) == 1:
+                    # SYSTEM STATIC LIBRARY! example: -lm
+                    # MANUALLY PUSH STANDARD PARAMETERS: m == * [ m ] system *
+                    fields.append('==')
+                    fields.append('*')
+                    fields.append('[')
+                    fields.append(project_name)
+                    fields.append(']')
+                    fields.append('system')
+                    fields.append('*')
+                # expects '==' now!
+                assert(fields[1] == "==")
+                version_number = fields[2].strip('"')
+                if len(fields) == 3:
+                    # SYSTEM STATIC LIBRARY WITH VERSION! example: -lm=0.0.1
+                    # DON'T DOING THIS NOW...
+                    print("WARNING: ignoring system library WITH VERSION: "+project_name)
+                    assert(False)
+                    continue
+                # begin reading library list
+                assert fields[3] == '['
+                libs = []
+                k = 4
+                next_lib = fields[k]
+                while next_lib != ']':
+                    libs.append(next_lib)
+                    k = k + 1
                     next_lib = fields[k]
-                    while next_lib != ']':
-                        libs.append(next_lib)
-                        k = k + 1
-                        next_lib = fields[k]
-                    # finished parsing libs list
-                    assert fields[k] == ']'
-                    k = k+1
-                    # MUST HAVE A pkg_manager and mode (simplifying this for now...)
-                    pkg_manager = fields[k]
-                    mode = fields[k+1]
-                    k = k+2
-                    if pkg_manager[0:6] == 'bazel+':
-                        print("WARNING: ignoring 'bazel+' entry for CMAKE: "+project_name)
-                        continue
-                    if pkg_manager == 'system':
-                        # AT THIS POINT, SYSTEM LIBRARY MUST HAVE ITS LIB INSIDE, example: ['m']
-                        cmakelists.append('# system dependency: -l'+project_name)
-                        if triplet != "":
-                            cmakelists.append(make_if_triplet(triplet, not_triplet, my_system))        
-                        if mode == '*':        
-                            for i in range(len(INCLUDE_DIRS)):
-                                for l in libs:
-                                    cmakelists.append("target_link_libraries(my_headers"+str(i)+" INTERFACE "+project_name+")")
-                            for filepath, app_name in src_main.items():
-                                for l in libs:
-                                    cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+project_name+")")
-                            for filepath, app_name in src_test_main.items():
-                                for l in libs:
-                                    cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+project_name+")")    
-                        # end-if *
-                        # attach it to test binaries, if mode is 'test'
-                        if mode == 'test':
-                            for filepath, app_name in src_test_main.items():
-                                for l in libs:
-                                    cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+project_name+")")    
-                        # end-if test
-                        if triplet != "":
-                            cmakelists.append("ENDIF()")
-                        continue
-                    #end-if system
-                    elif pkg_manager == 'git' or pkg_manager == 'cmake+git':
-                        git_url = fields[k]
-                        k=k+1
-                        cmakelists.append("FetchContent_Declare("+project_name+" GIT_REPOSITORY "+git_url+" GIT_TAG "+version_number+")")
-                        cmakelists.append("FetchContent_MakeAvailable("+project_name+")")
-                        # attach it to libraries, binaries and test binaries, if mode is *
-                        if mode == '*':
-                            for i in range(len(INCLUDE_DIRS)):
-                                for l in libs:
-                                    cmakelists.append("target_link_libraries(my_headers"+str(i)+" INTERFACE "+l+")")
-                            for filepath, app_name in src_main.items():
-                                for l in libs:
-                                    cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+l+")")    
-                            for filepath, app_name in src_test_main.items():
-                                for l in libs:
-                                    cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+l+")")    
-                        # attach it to test binaries, if mode is 'test'
-                        if mode == 'test':
-                            for filepath, app_name in src_test_main.items():
-                                for l in libs:
-                                    cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+l+")")    
-                        # read special, if exists
+                # finished parsing libs list
+                assert fields[k] == ']'
+                k = k+1
+                # MUST HAVE A pkg_manager and mode (simplifying this for now...)
+                pkg_manager = fields[k]
+                mode = fields[k+1]
+                k = k+2
+                if pkg_manager[0:6] == 'bazel+':
+                    print("WARNING: ignoring 'bazel+' entry for CMAKE: "+project_name)
+                    continue
+                if pkg_manager == 'system':
+                    # AT THIS POINT, SYSTEM LIBRARY MUST HAVE ITS LIB INSIDE, example: ['m']
+                    cmakelists.append('# system dependency: -l'+project_name)
+                    if triplet != "":
+                        cmakelists.append(make_if_triplet(triplet, not_triplet, my_system))        
+                    if mode == '*':        
+                        for i in range(len(INCLUDE_DIRS)):
+                            for l in libs:
+                                cmakelists.append("target_link_libraries(my_headers"+str(i)+" INTERFACE "+project_name+")")
+                        for filepath, app_name in src_main.items():
+                            for l in libs:
+                                cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+project_name+")")
+                        for filepath, app_name in src_test_main.items():
+                            for l in libs:
+                                cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+project_name+")")    
+                    # end-if *
+                    # attach it to test binaries, if mode is 'test'
+                    if mode == 'test':
+                        for filepath, app_name in src_test_main.items():
+                            for l in libs:
+                                cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+project_name+")")    
+                    # end-if test
+                    if triplet != "":
+                        cmakelists.append("ENDIF()")
+                    continue
+                #end-if system
+                elif pkg_manager == 'git' or pkg_manager == 'cmake+git':
+                    git_url = fields[k]
+                    k=k+1
+                    cmakelists.append("FetchContent_Declare("+project_name+" GIT_REPOSITORY "+git_url+" GIT_TAG "+version_number+")")
+                    cmakelists.append("FetchContent_MakeAvailable("+project_name+")")
+                    # attach it to libraries, binaries and test binaries, if mode is *
+                    if mode == '*':
+                        for i in range(len(INCLUDE_DIRS)):
+                            for l in libs:
+                                cmakelists.append("target_link_libraries(my_headers"+str(i)+" INTERFACE "+l+")")
+                        for filepath, app_name in src_main.items():
+                            for l in libs:
+                                cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+l+")")    
+                        for filepath, app_name in src_test_main.items():
+                            for l in libs:
+                                cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+l+")")    
+                    # attach it to test binaries, if mode is 'test'
+                    if mode == 'test':
+                        for filepath, app_name in src_test_main.items():
+                            for l in libs:
+                                cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+l+")")    
+                    # read special, if exists
+                    if VERBOSE:
+                        print("k=",k)
+                    if k < len(fields):
+                        special = fields[k]
+                        k = k+1
                         if VERBOSE:
-                            print("k=",k)
+                            print("special=",special)
+                        # IGNORING THE special part for now... or forever, I hope!!!
+                        if special == '_special_catch_cmake_extras':
+                            cmakelists.append("list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)")    
+                            cmakelists.append("include(CTest)")
+                            cmakelists.append("include(Catch)")
+                            for filepath, app_name in src_test_main.items():
+                                cmakelists.append("catch_discover_tests("+app_name[1]+")")    
+                    # end special
+                    continue
+                # end if git
+                elif pkg_manager == 'local' or pkg_manager == 'cmake+local':
+                    # on cmake, this is resolved using find_package module
+                    local_path = fields[k]
+                    # check if local path is empty
+                    if local_path == "_":
+                        local_path = ""
+                    k=k+1
+                    # check if including libraries and special fix/patch
+                    add_inc_lib = True
+                    special = ""
+                    if k < len(fields):
+                        add_inc_lib = fields[k]
+                        if add_inc_lib == "true" or add_inc_lib == "True":
+                            add_inc_lib = True
+                        else:
+                            add_inc_lib = False
+                        k = k+1
                         if k < len(fields):
                             special = fields[k]
                             k = k+1
-                            if VERBOSE:
-                                print("special=",special)
-                            # IGNORING THE special part for now... or forever, I hope!!!
-                            if special == '_special_catch_cmake_extras':
-                                cmakelists.append("list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)")    
-                                cmakelists.append("include(CTest)")
-                                cmakelists.append("include(Catch)")
-                                for filepath, app_name in src_test_main.items():
-                                    cmakelists.append("catch_discover_tests("+app_name[1]+")")    
-                        # end special
-                        continue
-                    # end if git
-                    elif pkg_manager == 'local' or pkg_manager == 'cmake+local':
-                        # on cmake, this is resolved using find_package module
-                        local_path = fields[k]
-                        # check if local path is empty
-                        if local_path == "_":
-                            local_path = ""
-                        k=k+1
-                        # check if including libraries and special fix/patch
-                        add_inc_lib = True
-                        special = ""
-                        if k < len(fields):
-                            add_inc_lib = fields[k]
-                            if add_inc_lib == "true" or add_inc_lib == "True":
-                                add_inc_lib = True
-                            else:
-                                add_inc_lib = False
-                            k = k+1
-                            if k < len(fields):
-                                special = fields[k]
-                                k = k+1
-                        # begin construction of FindPackage
-                        if local_path != "":
-                            cmakelists.append("set("+project_name+"_DIR \"${CMAKE_SOURCE_DIR}/"+local_path+"\")")
-                        # ignoring 'version_number', for now!
-                        cmakelists.append("find_package("+project_name+" REQUIRED)")
-                        if add_inc_lib:
-                            cmakelists.append("include_directories(\"${"+project_name+"_INCLUDE_DIRS}\")")
-                            # todo: check libraries as well
-                        # todo: attach it to libraries, binaries and test binaries, if mode is *
-                        if special != "":
-                            # load patch file and append it
-                            with open(root_path+'/'+special, 'r') as fdx:
-                                patches=fdx.readlines()
-                                for p_line in patches:
-                                    cmakelists.append(p_line)
-                        continue
-                    # end if local
-                    print("cxxdeps error: build type '"+pkg_manager+"' unknown or not supported!")
-                    exit(1)
-                # end if not comment
-            # end for line
-        # end cxxdeps
-
-    except FileNotFoundError:
-        if VERBOSE:
-            print("cxxbuild cmake: File cxxdeps.txt does not exist... ignoring it!")
+                    # begin construction of FindPackage
+                    if local_path != "":
+                        cmakelists.append("set("+project_name+"_DIR \"${CMAKE_SOURCE_DIR}/"+local_path+"\")")
+                    # ignoring 'version_number', for now!
+                    cmakelists.append("find_package("+project_name+" REQUIRED)")
+                    if add_inc_lib:
+                        cmakelists.append("include_directories(\"${"+project_name+"_INCLUDE_DIRS}\")")
+                        # todo: check libraries as well
+                    # todo: attach it to libraries, binaries and test binaries, if mode is *
+                    if special != "":
+                        # load patch file and append it
+                        with open(root_path+'/'+special, 'r') as fdx:
+                            patches=fdx.readlines()
+                            for p_line in patches:
+                                cmakelists.append(p_line)
+                    continue
+                # end if local
+                print("cxxdeps error: build type '"+pkg_manager+"' unknown or not supported!")
+                exit(1)
+            # end if not comment
+        # end for line
+    # end cxxdeps
 
     return cmakelists
 

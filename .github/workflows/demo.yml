@@ -119,7 +119,6 @@ jobs:
       if: contains(matrix.os, 'windows')
       shell: bash
       run: |
-        cp demo/project6/cxxdeps.windows.txt demo/project6/cxxdeps.txt
         python3 cxxbuild/cxxbuild.py demo/project6
     - name: demo-project7 C++23 (cmake) - Windows ok MSVC 19.43, ubuntu broken on gcc 13 
       if: contains(matrix.os, 'windows')
