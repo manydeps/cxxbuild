@@ -9,6 +9,8 @@ import sys
 import json
 import subprocess
 
+# process begin on: def main()
+
 def version():
     v = "cxxbuild=1.6.4"
     return v
@@ -52,18 +54,21 @@ Usage:
     """
     print(u)
 
-def get_cmakelists_from_cxxdeps(root_path, cmakelists, INCLUDE_DIRS, src_main, src_test_main):
+def get_cmakelists_from_cxxdeps(VERBOSE, root_path, cmakelists, INCLUDE_DIRS, src_main, src_test_main):
     try:
         with open(root_path+'/cxxdeps.txt', 'r') as fd:
             x=fd.readlines()
+            print("cxxbuild: get_cmakelists_from_cxxdeps")
             #print(x)
             cmakelists.append("# begin dependencies from cxxdeps.txt")
             for l in x:
                 if (len(l) >= 1) and (l[0] != '#') and (l[0] != '!'):
                     # good line!
-                    print(l)
+                    if VERBOSE:
+                        print(l)
                     fields = l.split()
-                    print(fields)
+                    if VERBOSE:
+                        print(fields)
                     # assume all spacing is correct, for now!
                     if len(fields) == 0:
                         # IGNORE (EMPTY LINE!)
@@ -82,7 +87,7 @@ def get_cmakelists_from_cxxdeps(root_path, cmakelists, INCLUDE_DIRS, src_main, s
                     import platform
                     my_system = platform.system()
                     #
-                    print("PROJECT:", project_name, " TRIPLET:", triplet, "SYSTEM:", my_system)
+                    print("cxxdeps cmake PROJECT:", project_name, " TRIPLET:", triplet, "SYSTEM:", my_system)
                     #
                     cmakelists.append("# cxxdeps dependency "+project_name)
                     if len(fields) == 1:
@@ -171,11 +176,13 @@ def get_cmakelists_from_cxxdeps(root_path, cmakelists, INCLUDE_DIRS, src_main, s
                                 for l in libs:
                                     cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE "+l+")")    
                         # read special, if exists
-                        print("k=",k)
+                        if VERBOSE:
+                            print("k=",k)
                         if k < len(fields):
                             special = fields[k]
                             k = k+1
-                            print("special=",special)
+                            if VERBOSE:
+                                print("special=",special)
                             # IGNORING THE special part for now... or forever, I hope!!!
                             if special == '_special_catch_cmake_extras':
                                 cmakelists.append("list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)")    
@@ -230,7 +237,8 @@ def get_cmakelists_from_cxxdeps(root_path, cmakelists, INCLUDE_DIRS, src_main, s
         # end cxxdeps
 
     except FileNotFoundError:
-        print("File cxxdeps.txt does not exist... ignoring it!")
+        if VERBOSE:
+            print("cxxbuild cmake: File cxxdeps.txt does not exist... ignoring it!")
 
     return cmakelists
 
@@ -248,18 +256,21 @@ class BazelFiles:
         self.cxxopt_linux = []
         self.cxxopt_macos = []
 
-def get_bazelfiles_from_cxxdeps(root_path, bzl, INCLUDE_DIRS, src_main, src_test_main):
+def get_bazelfiles_from_cxxdeps(VERBOSE, root_path, bzl, INCLUDE_DIRS, src_main, src_test_main):
     try:
         with open(root_path+'/cxxdeps.txt', 'r') as fd:
             x=fd.readlines()
+            print("cxxbuild: get_bazelfiles_from_cxxdeps")
             #print(x)
             # cmakelists.append("# begin dependencies from cxxdeps.txt")
             for l in x:
                 if (len(l) >= 1) and (l[0] != '#') and (l[0] != '!'):
                     # good line!
-                    print(l)
+                    if VERBOSE:
+                        print(l)
                     fields = l.split()
-                    print(fields)
+                    if VERBOSE:
+                        print(fields)
                     # assume all spacing is correct, for now!
                     if len(fields) == 0:
                         # IGNORE (EMPTY LINE!)
@@ -278,7 +289,7 @@ def get_bazelfiles_from_cxxdeps(root_path, bzl, INCLUDE_DIRS, src_main, src_test
                     import platform
                     my_system = platform.system()
                     #
-                    print("PROJECT:", project_name, " TRIPLET:", triplet, "SYSTEM:", my_system)
+                    print("cxxdeps bazel PROJECT:", project_name, " TRIPLET:", triplet, "SYSTEM:", my_system)
                     #
                     # cmakelists.append("# cxxdeps dependency "+project_name)
                     if len(fields) == 1:
@@ -334,7 +345,7 @@ def get_bazelfiles_from_cxxdeps(root_path, bzl, INCLUDE_DIRS, src_main, src_test
                             git_commit = fields[k]
                             k=k+1
                         if git_commit == "":
-                            print("bazel+git requires Commit field!")
+                            print("ERROR: bazel+git requires Commit field!")
                             assert(False)
                         # attach it to bazel dev_dependency, if mode is 'test'
                         if mode == 'test':
@@ -386,12 +397,14 @@ def get_bazelfiles_from_cxxdeps(root_path, bzl, INCLUDE_DIRS, src_main, src_test
         # end cxxdeps
 
     except FileNotFoundError:
-        print("File cxxdeps.txt does not exist... ignoring it!")
+        if VERBOSE:
+            print("cxxbuild bazel: File cxxdeps.txt does not exist... ignoring it!")
 
     return bzl
 
-def get_toml_dep(dep_name, section_name, dep_object):
-    print("get_toml_dep(...) dep_name: ", dep_name, " section:", section_name, " dep_object:", dep_object)
+def get_toml_dep(VERBOSE, dep_name, section_name, dep_object):
+    if VERBOSE:
+        print("get_toml_dep(...) dep_name: ", dep_name, " section:", section_name, " dep_object:", dep_object)
     local_dep = []
     # check real name (or alias)
     for x1, y1 in dep_object.items():
@@ -440,11 +453,11 @@ def get_toml_dep(dep_name, section_name, dep_object):
                         complement = complement + " " + y2
                         has_commit = True
                 if has_tag and has_commit:
-                    print("WARNING: git has both TAG and COMMIT!")
+                    print("WARNING: get_toml_dep() git has both TAG and COMMIT!")
         for x1, y1 in dep_object.items():
             if x1 == "bcr":
                 dep_type = build+x1   # some "git" type
-                print("INFO: bazel 'bcr' package must be the same as dep_name or alias!")
+                print("WARNING: get_toml_dep() bazel 'bcr' package must be the same as dep_name or alias!")
                 assert(dep_name == y1)
                 for x2, y2 in dep_object.items():
                     if x2 == "version":
@@ -519,7 +532,7 @@ def add_system_triplet_bazel(bzl, triplet, not_triplet, my_system, project_name)
             bzl.cxxopt_linux.append("-l"+project_name)
     return True
 
-def generate_cmakelists(cppstd, cppgnu, root_path, INCLUDE_DIRS, INCLUDE_EXT, DEFINITIONS, EXTRA_SOURCES, COMPILER, STDLIB, IMPORTS, CMAKE_SET, CMAKE_UNSET, src_main, src_test_main, src_list, src_test_nomain, src_modules):
+def generate_cmakelists(VERBOSE, cppstd, cppgnu, root_path, INCLUDE_DIRS, INCLUDE_EXT, DEFINITIONS, EXTRA_SOURCES, COMPILER, STDLIB, IMPORTS, CMAKE_SET, CMAKE_UNSET, src_main, src_test_main, src_list, src_test_nomain, src_modules):
     # READ cxxdeps.txt file, if available...
     # AT THIS POINT, ASSUMING 'cmake' OPTION (NO 'bazel' FOR NOW!)
     cmakelists = []
@@ -566,7 +579,7 @@ def generate_cmakelists(cppstd, cppgnu, root_path, INCLUDE_DIRS, INCLUDE_EXT, DE
             cmakelists.append("target_link_libraries("+app_name[1]+" "+cxx_module_list+" )")    
 
     # add_executable for test binaries
-    print("finding test executables!")
+    print("cxxbuild cmake: finding test executables!")
     # if no main is found, then each test is assumed to be independent!
     if len(src_test_main.items()) == 0:
         print("WARNING: no main() is found for tests... using main-less strategy!")
@@ -588,10 +601,10 @@ def generate_cmakelists(cppstd, cppgnu, root_path, INCLUDE_DIRS, INCLUDE_EXT, DE
             cmakelists.append("target_link_libraries("+app_name[1]+" PRIVATE my_headers"+str(i)+")")    
     #
     #print(cmakelists)
-    generate_txt_from_toml(root_path)
+    generate_txt_from_toml(VERBOSE, root_path)
 
     # cxxdeps.txt
-    cmakelists = get_cmakelists_from_cxxdeps(root_path, cmakelists, INCLUDE_DIRS, src_main, src_test_main)
+    cmakelists = get_cmakelists_from_cxxdeps(VERBOSE, root_path, cmakelists, INCLUDE_DIRS, src_main, src_test_main)
 
     # ======== begin add sources ========
     cmakelists.append("# finally, add all sources")
@@ -634,7 +647,7 @@ def generate_cmakelists(cppstd, cppgnu, root_path, INCLUDE_DIRS, INCLUDE_EXT, DE
     print(" => "+root_path+'/CMakeLists.txt')
     print("-----------------------------------")
 
-def generate_bazelfiles(cppstd, root_path, INCLUDE_DIRS, INCLUDE_EXT, DEFINITIONS, EXTRA_SOURCES, src_main, src_test_main, src_list, src_test_nomain):
+def generate_bazelfiles(VERBOSE, cppstd, root_path, INCLUDE_DIRS, INCLUDE_EXT, DEFINITIONS, EXTRA_SOURCES, src_main, src_test_main, src_list, src_test_nomain):
     # READ cxxdeps.txt file, if available...
     # AT THIS POINT, ASSUMING 'cmake' OPTION (NO 'bazel' FOR NOW!)
     bzl = BazelFiles()
@@ -699,7 +712,7 @@ def generate_bazelfiles(cppstd, root_path, INCLUDE_DIRS, INCLUDE_EXT, DEFINITION
     #
 
     # add_executable for test binaries
-    print("finding test executables!")
+    print("cxxbuild: generate_bazelfiles() finding test executables!")
     # if no main is found, then each test is assumed to be independent!
     if len(src_test_main.items()) == 0:
         print("WARNING: no main() is found for tests... using main-less strategy!")
@@ -715,7 +728,8 @@ def generate_bazelfiles(cppstd, root_path, INCLUDE_DIRS, INCLUDE_EXT, DEFINITION
 
     # INCLUDE_DIRS will act as header-only libraries
     #  => DO NOT ADD SOURCE FILES INTO include FOLDERS!!!
-    print("INCLUDE_DIRS:", INCLUDE_DIRS)
+    if VERBOSE:
+        print("generate_bazelfiles() INCLUDE_DIRS:", INCLUDE_DIRS)
     # FOR NOW: make sure at most a single include exists, for bazel sake!
     assert(len(INCLUDE_DIRS) <= 1) 
     for i in range(len(INCLUDE_DIRS)):
@@ -753,14 +767,15 @@ def generate_bazelfiles(cppstd, root_path, INCLUDE_DIRS, INCLUDE_EXT, DEFINITION
             ttest.append("\tdeps = [")
 
     # finish basic part, begin dependencies
-    print("bzl.targets_main:    COUNT =", len(bzl.targets_main))
-    print("bzl.targets_tests:   COUNT =", len(bzl.targets_tests))
-    print("bzl.targets_include: COUNT =", len(bzl.targets_include))
+    if VERBOSE:
+        print("bzl.targets_main:    COUNT =", len(bzl.targets_main))
+        print("bzl.targets_tests:   COUNT =", len(bzl.targets_tests))
+        print("bzl.targets_include: COUNT =", len(bzl.targets_include))
     #
-    generate_txt_from_toml(root_path)
+    generate_txt_from_toml(VERBOSE, root_path)
 
     # cxxdeps.txt
-    bzl = get_bazelfiles_from_cxxdeps(root_path, bzl, INCLUDE_DIRS, src_main, src_test_main)
+    bzl = get_bazelfiles_from_cxxdeps(VERBOSE, root_path, bzl, INCLUDE_DIRS, src_main, src_test_main)
 
     # finalize all files
 
@@ -846,36 +861,34 @@ def generate_bazelfiles(cppstd, root_path, INCLUDE_DIRS, INCLUDE_EXT, DEFINITION
 
     print("FINISHED BAZEL GENERATION!")
 
-def generate_txt_from_toml(root_path):
+def generate_txt_from_toml(VERBOSE, root_path):
     try:
         cxxdeps_all = []
         cxxdeps_test = []
         cxxdeps_dev = []
         with open(root_path+'/cxxdeps.toml', 'r') as toml_file:
+            print("Loading cxxdeps.toml file...")
             import toml
             data = toml.load(toml_file)
             #
             for section_name, section_data in data.items():
-                print(f"SECTION=[{section_name}]")
+                if VERBOSE:
+                    print(f"SECTION=[{section_name}]")
                 # Iterate over dependencies within each section
                 for dependency_name, dependency_info in section_data.items():
-                    print("processing dependency: ", dependency_name)
-                    #print(f"BEGIN {dependency_name}={dependency_info} END")
+                    if VERBOSE:
+                        print("processing dependency: ", dependency_name)
                     if isinstance(dependency_info, list):
-                        #print("Dependency LIST... checking triplets!")
                         for d in dependency_info:
-                            #print("d:",d)
-                            x = get_toml_dep(dependency_name, section_name, d)
+                            x = get_toml_dep(VERBOSE, dependency_name, section_name, d)
                             if section_name == "test":
                                 cxxdeps_test.append(x)
                             elif section_name == "dev":
                                 cxxdeps_dev.append(x)
                             else:
                                 cxxdeps_all.append(x)
-                        #print("END Dependency LIST")
                     elif isinstance(dependency_info, dict):
-                        #print("Dependency DICT")
-                        x = get_toml_dep(dependency_name, section_name, dependency_info)
+                        x = get_toml_dep(VERBOSE, dependency_name, section_name, dependency_info)
                         if section_name == "test":
                             cxxdeps_test.append(x)
                         elif section_name == "dev":
@@ -885,12 +898,14 @@ def generate_txt_from_toml(root_path):
                     else:
                         print("Dependency info is neither a list nor an object.")
                         assert(False)
-                print("\n")
+                if VERBOSE:
+                    print("\n")
         # end with
         # finishing .toml file
-        print("cxxdeps_all:", cxxdeps_all)
-        print("cxxdeps_test:", cxxdeps_test)
-        print("cxxdeps_dev:", cxxdeps_dev)
+        if VERBOSE:
+            print("cxxdeps_all:", cxxdeps_all)
+            print("cxxdeps_test:", cxxdeps_test)
+            print("cxxdeps_dev:", cxxdeps_dev)
         # writing cxxdeps.txt and cxxdeps.dev.txt
         if len(cxxdeps_dev) > 0:
             with open(root_path+"/cxxdeps.dev.txt", "w") as output_file:
@@ -906,7 +921,8 @@ def generate_txt_from_toml(root_path):
                     output_file.write(" ".join(dep) + "\n")
             
     except FileNotFoundError:
-        print("File cxxdeps.toml does not exist... ignoring it!")
+        if VERBOSE:
+            print("cxxdeps: File cxxdeps.toml does not exist... ignoring it!")
 
 def check_cmake():
     # STEP 1: check that 'cmake' and 'ninja' command exists
@@ -929,16 +945,17 @@ def check_cmake():
     print('check result:', x)
     assert(x == 0)
 
-def run_cmake(root_path):
+def run_cmake(VERBOSE, root_path):
     # ============ build with cmake+ninja ===========
-    check_cmake()
+    # check_cmake() # already checked!
     #
-    # STEP 1.5: debug only (TODO: create flag --verbose!)
-    CMAKE_CMD="cat "+root_path+"/CMakeLists.txt"
-    print("showing CMakeLists.txt... "+CMAKE_CMD)
-    x=subprocess.call(list(filter(None, CMAKE_CMD.split(' '))))
-    print('cmake result:', x)
-    assert(x == 0)
+    # STEP 1.5: debug only
+    if VERBOSE:
+        CMAKE_CMD="cat "+root_path+"/CMakeLists.txt"
+        print("showing CMakeLists.txt... "+CMAKE_CMD)
+        x=subprocess.call(list(filter(None, CMAKE_CMD.split(' '))))
+        print('cat result:', x)
+        assert(x == 0)
     #
     # STEP 2: build with cmake+ninja
     CMAKE_CMD="cmake -B"+root_path+"/build -S"+root_path+" -GNinja"
@@ -963,22 +980,24 @@ def check_bazel():
     print('check result:', x)
     assert(x == 0)
 
-def run_bazel(root_path):
+def run_bazel(VERBOSE, root_path):
     # ============ build with bazel ===========
-    check_bazel()
+    # check_bazel() # already checked!
     #
-    # STEP 1.5: debug only (TODO: create flag --verbose!)
-    BAZEL_CMD="cat "+root_path+"/MODULE.bazel"
-    print("showing MODULE.bazel... "+BAZEL_CMD)
-    x=subprocess.call(list(filter(None, BAZEL_CMD.split(' '))))
-    print('\nbazel result:', x)
-    assert(x == 0)
+    # STEP 1.5: debug only
+    if VERBOSE:
+        BAZEL_CMD="cat "+root_path+"/MODULE.bazel"
+        print("showing MODULE.bazel... "+BAZEL_CMD)
+        x=subprocess.call(list(filter(None, BAZEL_CMD.split(' '))))
+        print('\nbazel result:', x)
+        assert(x == 0)
     #
-    BAZEL_CMD="cat "+root_path+"/BUILD.bazel"
-    print("showing BUILD.bazel... "+BAZEL_CMD)
-    x=subprocess.call(list(filter(None, BAZEL_CMD.split(' '))))
-    print('\nbazel result:', x)
-    assert(x == 0)
+    if VERBOSE:
+        BAZEL_CMD="cat "+root_path+"/BUILD.bazel"
+        print("showing BUILD.bazel... "+BAZEL_CMD)
+        x=subprocess.call(list(filter(None, BAZEL_CMD.split(' '))))
+        print('\nbazel result:', x)
+        assert(x == 0)
     #
     # STEP 2: build with bazel
     BAZEL_CMD="bazel build ..."
@@ -1030,6 +1049,7 @@ def main():
             usage()
             exit()  
 
+    verbose=False
     
     build_options_args = []
     for i in range(len(sys.argv)):
@@ -1056,6 +1076,10 @@ def main():
             build_options_args.append("!stdlib "+str(sys.argv[i + 1]))
         if (sys.argv[i] == "--import"):
             build_options_args.append("!import "+str(sys.argv[i + 1]))
+        if (sys.argv[i] == "--verbose"):
+            build_options_args.append("!verbose")
+            verbose=True  # needed to advance this special option!
+            print("cxxbuild VERBOSE mode is enabled: ", verbose)
         if (sys.argv[i] == "--cmake"):
             build_options_args.append("!build cmake")
         if (sys.argv[i] == "--bazel"):
@@ -1075,7 +1099,8 @@ def main():
         if (sys.argv[i] == "--c++26"):
             build_options_args.append("!std c++26")
 
-    print("build options from args: "+str(build_options_args))
+    if verbose:
+        print("build options from args: "+str(build_options_args))
     #
     build_options = []
     # TODO: convert .toml to .txt here, if necessary!
@@ -1087,13 +1112,15 @@ def main():
                 if (len(l) >= 1) and (l[0] == '!'):
                     build_options.append(l)
     except FileNotFoundError:
-        print("File cxxdeps.txt does not exist... ignoring it!")
+        if verbose:
+            print("File cxxdeps.txt does not exist... ignoring it!")
     
     # merge with argument build options (priority/override is LAST)
     for op in build_options_args:
         build_options.append(op)
 
-    print("build options (including cxxdeps): "+str(build_options))
+    if verbose:
+        print("build options (including cxxdeps): "+str(build_options))
 
     # begin processing build options
     search_src="src"
@@ -1119,7 +1146,8 @@ def main():
         # import shlex
         # oplist = shlex.split(op)
         oplist = op.split()
-        print(op.split())
+        if verbose:
+            print(op.split())
         if oplist[0] == '!version':
             MIN_CXXBUILD_VERSION=oplist[1]
             current_version = version().split("=")[1]
@@ -1158,6 +1186,8 @@ def main():
             CMAKE_SET.append(op[len(oplist[0]):].strip())
         if oplist[0] == '!cmake-unset':
             CMAKE_UNSET.append(op[len(oplist[0]):].strip())
+        if oplist[0] == '!verbose':
+            verbose = True
         if oplist[0] == '!build' and oplist[1] == 'cmake':
             if use_bazel == True:
                 print("cxxbuild error: cannot redefine build system 'bazel' to 'cmake'")
@@ -1192,23 +1222,25 @@ def main():
         use_bazel = False
 
     #
-    return run_build(root_path, use_cmake, use_bazel, cppstd, cppgnu, search_src, search_tests, search_include, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOURCES, IGNORE, COMPILER, STDLIB, IMPORTS, CMAKE_SET, CMAKE_UNSET)
+    return run_build(verbose, root_path, use_cmake, use_bazel, cppstd, cppgnu, search_src, search_tests, search_include, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOURCES, IGNORE, COMPILER, STDLIB, IMPORTS, CMAKE_SET, CMAKE_UNSET)
 
-def run_build(root_path, use_cmake, use_bazel, cppstd, cppgnu, search_src, search_tests, search_include, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOURCES, IGNORE, COMPILER, STDLIB, IMPORTS, CMAKE_SET, CMAKE_UNSET):
+def run_build(VERBOSE, root_path, use_cmake, use_bazel, cppstd, cppgnu, search_src, search_tests, search_include, INCLUDE_DIRS, DEFINITIONS, EXTRA_SOURCES, IGNORE, COMPILER, STDLIB, IMPORTS, CMAKE_SET, CMAKE_UNSET):
     #
-    print("begin build on root_path=",root_path)
+    #if VERBOSE:
+    print("cxxbuild: begin build on root_path =",root_path)
     # ===================================
     # test is cmake or bazel is available
     # ===================================
     if use_cmake:
-        print("BUILD WITH CMAKE!")
+        print("BUILD WITH CMAKE! Checking...")
         check_cmake()
     elif use_bazel:
-        print("BUILD WITH BAZEL!")
+        print("BUILD WITH BAZEL! Checking...")
         check_bazel()
     else:
         print("BUILD ERROR! NOT CMAKE OR BAZEL")
         assert(False)
+    print("Check passed!\n")
 
     # find all source files,
     # find all files with an entry point,
@@ -1218,18 +1250,22 @@ def run_build(root_path, use_cmake, use_bazel, cppstd, cppgnu, search_src, searc
     # ENFORCING THIS PATH... MUST ADD MULTIPLE PATH OPTION!
     # src_paths = [root_path, root_path+"/src"] 
     src_paths = [root_path+"/"+search_src] 
-    print("src_paths=", src_paths)
+    if VERBOSE:
+        print("src_paths=", src_paths)
     entrypoint = "main("  # Pattern to find main(), or main(int argc, ...), etc
     #
     src_ext = ['.c', '.cc', '.cpp', '.cxx', '.c++']
     src_module_ext = ['.cppm']
-    print('src_ext:', src_ext)
+    if VERBOSE:
+        print('src_ext:', src_ext)
+    print("cxxbuild: loading source files...")
     for src_path in src_paths:
         for root, subdirs, files in os.walk(src_path):
             root = root.removeprefix(root_path).removeprefix("/")
-            print("checking root_SRC: ", root)
-            print("checking subdirs_SRC: ", subdirs)
-            print("checking files_SRC: ", files)
+            if VERBOSE:
+                print("checking root_SRC: ", root)
+                print("checking subdirs_SRC: ", subdirs)
+                print("checking files_SRC: ", files)
             for file in files:
                 file_name, ext = os.path.splitext(file)
                 if ext in src_ext:
@@ -1241,7 +1277,8 @@ def run_build(root_path, use_cmake, use_bazel, cppstd, cppgnu, search_src, searc
                         # other options are: " main(" and "\nmain("
                         # If someone has a function "xxxmain(" it can currently break.
                         entrypoint = "main("
-                        print("checking entrypoint:", entrypoint)
+                        if VERBOSE:
+                            print("checking entrypoint:", entrypoint)
                         all_lines=fd.readlines()
                         for l in all_lines:
                             # avoid commented lines (small improvement)
@@ -1254,9 +1291,10 @@ def run_build(root_path, use_cmake, use_bazel, cppstd, cppgnu, search_src, searc
         # end-for src_path
     # end-for src_paths
 
-    print("src_main:", src_main)
-    print("src_list:", src_list)
-    print("src_modules:", src_modules)
+    if VERBOSE:
+        print("src_main:", src_main)
+        print("src_list:", src_list)
+        print("src_modules:", src_modules)
 
     # finding tests...
 
@@ -1264,12 +1302,15 @@ def run_build(root_path, use_cmake, use_bazel, cppstd, cppgnu, search_src, searc
     src_test_main = {}
     src_test_nomain = {}
     #
-    print(src_ext)
+    if VERBOSE:
+        print(src_ext)
+    print("cxxbuild: loading source test files...")
     for root, subdirs, files in os.walk(root_path+"/"+search_tests):
         root = root.removeprefix(root_path).removeprefix("/")
-        print("TEST root: ", root)
-        print("TEST subdirs: ", subdirs)
-        print("TEST files: ", files)
+        if VERBOSE:
+            print("TEST root: ", root)
+            print("TEST subdirs: ", subdirs)
+            print("TEST files: ", files)
         for file in files:
             file_name, ext = os.path.splitext(file)
             if ext in src_ext:
@@ -1282,13 +1323,15 @@ def run_build(root_path, use_cmake, use_bazel, cppstd, cppgnu, search_src, searc
                     # other options are: " main(" and "\nmain("
                     # If someone has a function "xxxmain(" it can currently break.
                     entrypoint = "main("
-                    print("checking entrypoint:", entrypoint)
+                    if VERBOSE:
+                        print("checking entrypoint:", entrypoint)
                     if entrypoint in fd.read():
                         src_test_main[file_path] = (root, file_name+"_test")
 
-    print("src_test_main:", src_test_main)
-    print("src_test_nomain:", src_test_nomain)
-    print("src_test_list:", src_test_list)
+    if VERBOSE:
+        print("src_test_main:", src_test_main)
+        print("src_test_nomain:", src_test_nomain)
+        print("src_test_list:", src_test_list)
 
     # ---------------------------------
     # FIX app names (avoid duplicates!)
@@ -1305,12 +1348,11 @@ def run_build(root_path, use_cmake, use_bazel, cppstd, cppgnu, search_src, searc
         src_main[filepath] = tuple(app_name_list) 
     # ---------------------------------
 
-    print("fixed src_main: ", src_main)
+    if VERBOSE:
+        print("fixed src_main: ", src_main)
     
-
     # SO... TIME TO FIND INCLUDE FOLDERS
-
-    #INCLUDE_DIRS = []
+    print("cxxbuild: loading include folders...")
     for root, subdirs, files in os.walk(root_path):
         root = root.removeprefix(root_path).removeprefix("/")
         #print("root: ", root)
@@ -1323,6 +1365,7 @@ def run_build(root_path, use_cmake, use_bazel, cppstd, cppgnu, search_src, searc
             for ign in IGNORE:
                 # ignore 'build' stuff and others in IGNORE
                 if incdir.startswith(ign):
+                    #if VERBOSE:  # Warning?
                     print("WARNING: '"+ign+"' prefixed folder ignored: ", incdir)
                     must_ignore=True
                     break
@@ -1333,7 +1376,8 @@ def run_build(root_path, use_cmake, use_bazel, cppstd, cppgnu, search_src, searc
     # keep unique only!
     INCLUDE_DIRS = list(set(INCLUDE_DIRS))
 
-    print("INCLUDE_DIRS=",INCLUDE_DIRS)
+    if VERBOSE:
+        print("INCLUDE_DIRS=",INCLUDE_DIRS)
     allowed_inc_ext = [".hpp", ".h"]
     INCLUDE_EXT = []
     for inc in INCLUDE_DIRS:
@@ -1350,19 +1394,20 @@ def run_build(root_path, use_cmake, use_bazel, cppstd, cppgnu, search_src, searc
                     else:
                         INCLUDE_EXT.append(ext)
     # for inc
-    print("INCLUDE_EXT=",INCLUDE_EXT)
+    if VERBOSE:
+        print("INCLUDE_EXT=",INCLUDE_EXT)
 
     if use_cmake == True:
-        generate_cmakelists(cppstd, cppgnu, root_path, INCLUDE_DIRS, INCLUDE_EXT, DEFINITIONS, EXTRA_SOURCES, COMPILER, STDLIB, IMPORTS, CMAKE_SET, CMAKE_UNSET, src_main, src_test_main, src_list, src_test_nomain, src_modules)
+        generate_cmakelists(VERBOSE, cppstd, cppgnu, root_path, INCLUDE_DIRS, INCLUDE_EXT, DEFINITIONS, EXTRA_SOURCES, COMPILER, STDLIB, IMPORTS, CMAKE_SET, CMAKE_UNSET, src_main, src_test_main, src_list, src_test_nomain, src_modules)
     elif use_bazel == True:
-        generate_bazelfiles(cppstd, root_path, INCLUDE_DIRS, INCLUDE_EXT, DEFINITIONS, EXTRA_SOURCES, src_main, src_test_main, src_list, src_test_nomain)
+        generate_bazelfiles(VERBOSE, cppstd, root_path, INCLUDE_DIRS, INCLUDE_EXT, DEFINITIONS, EXTRA_SOURCES, src_main, src_test_main, src_list, src_test_nomain)
     else:
         assert(False)
 
     if use_cmake == True:
-        run_cmake(root_path)
+        run_cmake(VERBOSE, root_path)
     elif use_bazel == True:
-        run_bazel(root_path)
+        run_bazel(VERBOSE, root_path)
     else:
         print("UNKNOWN BUILDER! cxxbuild ERROR...")
         assert(False)

@@ -8,7 +8,7 @@ Include(FetchContent)
 add_definitions(-DMY_HELLO="ola mundo")
 add_definitions(-DIS_TEST)
 # add all executables
-add_executable(demo6 src/demo6.cpp )
+add_executable(demo6 src/demo6.cpp )    # main
 add_library(my_headers0 INTERFACE)
 target_include_directories(my_headers0 INTERFACE inc)
 target_link_libraries(demo6 PRIVATE my_headers0)
