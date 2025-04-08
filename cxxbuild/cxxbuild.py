@@ -59,15 +59,17 @@ def get_cmakelists_from_cxxdeps(VERBOSE, root_path, cmakelists, INCLUDE_DIRS, sr
     my_system = platform.system()
     print("cxxbuild: get_cmakelists_from_cxxdeps on platform =", my_system)
     x = []
+    found = False
     if my_system == "Windows":
         try:
             with open(root_path+'/cxxdeps.windows.txt', 'r') as fd:
                 x=fd.readlines()
                 print("cxxbuild: found 'cxxdeps.windows.txt'...")
+                found = True
         except FileNotFoundError:
             if VERBOSE:
                 print("cxxbuild cmake: File cxxdeps.windows.txt does not exist... ignoring it!")
-    else:
+    if not found:
         try:
             with open(root_path+'/cxxdeps.txt', 'r') as fd:
                 x=fd.readlines()
