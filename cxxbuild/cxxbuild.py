@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 
 # MIT License
-# Copyleft 2023 Igor Machado Coelho
+# Copyleft 2025 Igor Machado Coelho
+
+# /// script
+# requires-python = ">=3.9"
+# dependencies = ["toml", "packaging"]
+# ///
 
 import os
 import platform
 import sys
-import json
 import subprocess
 
 # process begin on: def main()
