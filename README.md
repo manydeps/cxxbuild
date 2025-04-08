@@ -69,7 +69,7 @@ From this point, we assume cxxbuild is installed in your system :)
     * Dependencies (cmake-only): fmt, catch2
 - Demo 6 [README](demo/project6/README.md): `cxxbuild demo/project6`
     * Dependencies (cmake-only): optframe, absl (google abseil)
-    * Windows dependencies are on `cxxdeps.windows.txt` file
+    * Windows dependencies are loaded automatically from `cxxdeps.windows.txt` file
 - Demo 7 [README](demo/project7/README.md): `cxxbuild demo/project7 --c++23 --compiler "/usr/bin/g++-14"`
     * Dependencies (cmake-only): boost-ext/ut, `#include <print>`
 - Demo 8 [README](demo/project8/README.md): `cxxbuild demo/project8 --c++23 --compiler "/usr/bin/g++-15" --import std --cmake-unset BOOST_UT_DISABLE_MODULE`

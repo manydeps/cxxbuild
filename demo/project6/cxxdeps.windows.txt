@@ -1,6 +1,5 @@
 absl == "20240116.1" [ absl::base  absl::synchronization  absl::strings  absl::log   absl::log_initialize ]  git *  https://github.com/abseil/abseil-cpp.git
-optframe == "master" [ OptFrameAll ] git * https://github.com/optframe/optframe.git 
-# OptFrame == * [ OptFrameAll ] local * ./thirdparty/optframe-master/cmake/
+optframe:windows == "master" [ OptFrameAll ] git * https://github.com/optframe/optframe.git 
 !include "inc"
 !std c++20
 !build cmake
